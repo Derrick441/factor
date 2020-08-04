@@ -1,0 +1,91 @@
+import pandas as pd
+import numpy as np
+import time
+
+INDEX = 'all'
+indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
+
+#股价数据导入
+t=time.time()
+price=pd.read_pickle(indir+INDEX+'/'+INDEX+'_band_dates_stocks_closep.pkl')
+print(time.time()-t)
+
+#股价数据pivot展开
+t=time.time()
+price_pivot=price.pivot('trade_dt','s_info_windcode','s_dq_close')
+print(time.time()-t)
+
+#根据250个交易日涨跌幅滚动计算相关系数矩阵，从矩阵中找到距离每个股票最近的股票构成组合，计算组合平均价作为股票参考价
+t=time.time()
+ref_price_pivot=[]
+#change_pivot.shape[1]
+for i in range(250, 350):
+    print(price_pivot.index[i-1])
+    #提取250个交易日股价数据
+    temp_price = price_pivot.iloc[i - 250:i, :]
+    #剔除全部为nan的股票,填补部分为nan的数据
+    temp_price_na = temp_price.dropna(axis=1,how='all').copy().fillna(0)
+    #取当前期股价数据
+    temp_price_now=temp_price_na.iloc[-1,:]
+
+    #股价转涨幅
+    temp_change=temp_price_na.pct_change()*100
+    #去除第一列空值,填充剩余空值
+    temp_change_na = temp_change.dropna(axis=0, how='all').copy().fillna(0)
+    #计算相关系数矩阵，并将其转化为距离
+    temp_dist=1-temp_change_na.corr()
+    #取每行1%分位的距离
+    temp_quantile_dist=temp_dist.quantile(0.01,1)
+    #标记距离小于1%分位的股票
+    temp_nearst=((temp_dist.values-temp_quantile_dist.values)<0)+0
+    #统计相似股票数（距离最近的1%），并减去本身1
+    temp_num=temp_nearst.sum(axis=1)-1
+    #统计相似股票价格总和，并减去本身价格
+    temp_sum=(temp_nearst*temp_price_now.values).sum(axis=1)-temp_price_now.values
+    #价格总和除股票数，得到平均价格（股票参考价格）
+    temp_mean=temp_sum/temp_num
+
+    #转dataframe格式
+    temp_result=pd.DataFrame(temp_mean, index=temp_price_now.index, columns=[price_pivot.index[i-1]]).T
+    temp_result=temp_result.reindex(columns=price_pivot.columns)
+
+    #存放
+    ref_price_pivot.append(temp_result)
+
+print(time.time()-t)
+
+#合并
+t=time.time()
+ref_price=pd.concat(ref_price_pivot)
+print(time.time()-t)
+
+#数据格式调整
+t=time.time()
+ref_price_new=ref_price.unstack().reset_index().rename(columns={'level_1':'trade_dt', 0:'ref_price'})
+print(time.time()-t)
+
+#合并参考价格、股价数据
+t=time.time()
+data_sum=pd.merge(ref_price_new,price,how='left')
+data_sum.ref_price=data_sum.ref_price.replace(0,None)
+print(time.time()-t)
+
+#计算对数价差
+t=time.time()
+data_sum['pricespread']=np.log(data_sum['s_dq_close'])-np.log(data_sum['ref_price'])
+print(time.time()-t)
+
+#计算对数价差60日均值和标准差
+t=time.time()
+data_sum['pricespread_60_mean']=data_sum.groupby(['s_info_windcode'])['pricespread'].rolling(60).mean().values
+print(time.time()-t)
+
+t=time.time()
+data_sum['pricespread_60_std']= data_sum.groupby(['s_info_windcode'])['pricespread'].rolling(60).std().values
+print(time.time()-t)
+
+# 计算价差偏离度
+time.time()
+data_sum['spreadbias']=(data_sum['pricespread']-data_sum['pricespread_60_mean'])/data_sum['pricespread_60_std']
+print(time.time()-t)
+
