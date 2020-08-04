@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import sqlconn
 import itertools
-from decorators import decorators_runtime
+# from decorators import decorators_runtime
 
 class dataflow_pricelist(object):
     def __init__(self,INDEX,indir,startdate,enddate):
@@ -30,7 +30,7 @@ class dataflow_pricelist(object):
         endtime = time.time()
         print('sql running time:%10.4fs' % (endtime-starttime))
 
-    @decorators_runtime
+    # @decorators_runtime
     def data_fillna(self):
         factor = ['s_dq_close','s_dq_open','s_dq_high','s_dq_low','s_dq_adjfactor']
         self.data.sort_values(by=['s_info_windcode','trade_dt'],inplace=True)
@@ -38,7 +38,7 @@ class dataflow_pricelist(object):
         self.data[factor] = grouped[factor].ffill()[factor]
         self.data.loc[:,['s_dq_volume','s_dq_amount']].fillna(0,inplace=True)
 
-    @decorators_runtime
+    # @decorators_runtime
     def data_fillna_pivot(self):
         factor = ['s_dq_open','s_dq_high','s_dq_low','s_dq_adjfactor']
         self.data.sort_values(by=['s_info_windcode','trade_dt'],inplace=True)
@@ -59,7 +59,7 @@ class dataflow_pricelist(object):
         # self.data[factor] = grouped[factor].ffill()[factor]
         # self.data.loc[:,['s_dq_volume','s_dq_amount']].fillna(0,inplace=True)
 
-    @decorators_runtime
+    # @decorators_runtime
     def fileout(self):
         #----------------------- to csv as a band ---------------------
         # self.mergedata.to_pickle(self.indir+self.INDEX+'\\'+self.INDEX+'_band_price.pkl')
@@ -76,9 +76,10 @@ class dataflow_pricelist(object):
         self.fileout()
         return self
 
-# INDEX = 'all'
-# indir = 'D:\\develop\\python\\data\\developflow\\'
-# startdate = '20050408'
-# enddate = '20180125'
-# pricelist = dataflow_pricelist(INDEX,indir,startdate,enddate)
-# pricelist.runflow()
+if __name__ == '__main__':
+    INDEX = 'all'
+    indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
+    startdate = '20050408'
+    enddate = '20200801'
+    pricelist = dataflow_pricelist(INDEX,indir,startdate,enddate)
+    pricelist.runflow()

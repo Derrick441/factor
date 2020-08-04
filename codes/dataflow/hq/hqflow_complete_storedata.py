@@ -3,8 +3,8 @@
 import pandas as pd
 import time
 from sqlconn import sqlconnJYDB
-from reduce_mem_usage_df import reduce_mem_usage
-from decorators import decorators_runtime
+# from reduce_mem_usage_df import reduce_mem_usage
+# from decorators import decorators_runtime
 
 class HqflowCompleteStoredata(object):
 
@@ -70,10 +70,10 @@ class HqflowCompleteStoredata(object):
 
 if __name__=='__main__':
 
-    indir = '../../../data/investflow/'
+    indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
     INDEX = 'all'
     startdate = '20120102'
-    enddate = '20200723'
+    enddate = '20200801'
     hcs = HqflowCompleteStoredata(indir,INDEX,startdate,enddate,'M1')
     hcs.runFlow()
 
