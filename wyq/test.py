@@ -18,7 +18,7 @@ print(time.time()-t)
 #根据250个交易日涨跌幅滚动计算相关系数矩阵，从矩阵中找到距离每个股票最近的股票构成组合，计算组合平均价作为股票参考价
 t=time.time()
 ref_price_pivot=[]
-#change_pivot.shape[1]
+#price_pivot.shape[1]
 for i in range(250, 350):
     print(price_pivot.index[i-1])
     #提取250个交易日股价数据
@@ -34,20 +34,18 @@ for i in range(250, 350):
     temp_change_na = temp_change.dropna(axis=0, how='all').copy().fillna(0)
     #计算相关系数矩阵，并将其转化为距离
     temp_dist=1-temp_change_na.corr()
-    #取每行1%分位的距离
-    temp_quantile_dist=temp_dist.quantile(0.01,1)
-    #标记距离小于1%分位的股票
-    temp_nearst=((temp_dist.values-temp_quantile_dist.values)<0)+0
-    #统计相似股票数（距离最近的1%），并减去本身1
-    temp_num=temp_nearst.sum(axis=1)-1
-    #统计相似股票价格总和，并减去本身价格
-    temp_sum=(temp_nearst*temp_price_now.values).sum(axis=1)-temp_price_now.values
-    #价格总和除股票数，得到平均价格（股票参考价格）
-    temp_mean=temp_sum/temp_num
 
-    #转dataframe格式
-    temp_result=pd.DataFrame(temp_mean, index=temp_price_now.index, columns=[price_pivot.index[i-1]]).T
-    temp_result=temp_result.reindex(columns=price_pivot.columns)
+    #取每列1%分位的距离
+    temp_quantile_dist=temp_dist.quantile(q=0.01, axis=0, numeric_only=True, interpolation='higher')
+    #标记每列距离小于1%分位的股票
+    temp_nearst=((temp_dist.values-temp_quantile_dist.values)<=0)+0
+    #统计近似股票数（距离最近的1%），并减去本身1
+    temp_num=temp_nearst.sum(axis=0)-1
+    #计算股票参考价格
+    temp_mean=(np.dot(temp_price_now.values, temp_nearst)-temp_price_now.values)/temp_num
+
+    #np.array格式转dataframe格式，并补充之前剔除的股票（自动填充为NaN）
+    temp_result=pd.DataFrame(temp_mean, index=temp_price_now.index, columns=[price_pivot.index[i-1]]).T.reindex(columns=price_pivot.columns)
 
     #存放
     ref_price_pivot.append(temp_result)
@@ -67,8 +65,9 @@ print(time.time()-t)
 #合并参考价格、股价数据
 t=time.time()
 data_sum=pd.merge(ref_price_new,price,how='left')
-data_sum.ref_price=data_sum.ref_price.replace(0,None)
 print(time.time()-t)
+
+
 
 #计算对数价差
 t=time.time()
