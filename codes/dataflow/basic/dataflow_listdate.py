@@ -4,7 +4,8 @@ import sqlconn
 # from decorators import decorators_runtime
 
 class dataflow_listdate(object):
-    def __init__(self,indir,INDEX):
+
+    def __init__(self, INDEX, indir):
         self.INDEX = INDEX
         self.indir = indir
 
@@ -56,5 +57,5 @@ class dataflow_listdate(object):
 if __name__=='__main__':
     indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
     INDEX = 'all'
-    listdate = dataflow_listdate(indir,INDEX)
+    listdate = dataflow_listdate(INDEX, indir)
     listdate.run_flow()

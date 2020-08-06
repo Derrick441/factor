@@ -9,6 +9,7 @@ import itertools
 # from decorators import decorators_runtime
 
 class dataflow_pricelist(object):
+
     def __init__(self, INDEX, indir, startdate, enddate):
         self.INDEX = INDEX
         self.indir = indir

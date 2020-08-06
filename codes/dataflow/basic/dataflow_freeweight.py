@@ -11,7 +11,8 @@ import itertools
 from sqlconn import sqlGetIp
 
 class dataflow_freeweight(object):
-    def __init__(self,INDEX,indir,startdate,enddate):
+
+    def __init__(self, INDEX, indir, startdate, enddate):
         self.INDEX = INDEX
         self.indir = indir
         self.startdate = startdate
@@ -41,21 +42,21 @@ class dataflow_freeweight(object):
                        "and A.ENDDATE <= TO_DATE('" + self.enddate + "', 'yyyy/MM/DD HH24:MI:SS') and A.INDEXCODE = " + indexcode + \
                        " order by A.ENDDATE"
             # " and A.DATATYPE = 2 order by A.ENDDATE"
-        self.data = pd.read_sql(sqlquery,conn)
+        self.data = pd.read_sql(sqlquery, conn)
         endtime = time.time()
         print('sql running time:%10.4fs' % (endtime-starttime))
 
-    def stocks_str_format(self,secucode):
+    def stocks_str_format(self, secucode):
         stocknum = int(secucode)
         return ('%06d'%stocknum)+'.SH' if stocknum>=600000 else ('%06d'%stocknum)+'.SZ'
 
     def data_formatchange(self):
-        self.data.rename(columns=lambda x:x.lower(),inplace=True)
+        self.data.rename(columns=lambda x:x.lower(), inplace=True)
         self.data['trade_dt']=self.data['trade_dt'].apply(lambda x: x.strftime('%Y%m%d'))
         self.data['s_info_windcode']=self.data['s_info_windcode'].apply(lambda x: self.stocks_str_format(x))
-        self.data.set_index(['trade_dt','s_info_windcode'],inplace=True)
-        self.wcur = self.data[self.data['datatype']==1].copy()
-        self.wnext = self.data[self.data['datatype']==2].copy()
+        self.data.set_index(['trade_dt', 's_info_windcode'], inplace=True)
+        self.wcur = self.data[self.data['datatype'] == 1].copy()
+        self.wnext = self.data[self.data['datatype'] == 2].copy()
         self.wcur.drop(['indexcode', 'datatype'], axis=1, inplace=True)
         self.wnext.drop(['indexcode', 'datatype'], axis=1, inplace=True)
 
