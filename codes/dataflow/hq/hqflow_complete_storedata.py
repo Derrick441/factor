@@ -8,7 +8,7 @@ from sqlconn import sqlconnJYDB
 
 class HqflowCompleteStoredata(object):
 
-    def __init__(self,indir,INDEX,startdate,enddate,hqtype):
+    def __init__(self, indir, INDEX, startdate, enddate, hqtype):
         self.indir = indir
         self.INDEX = INDEX
         self.startdate = startdate
@@ -23,7 +23,7 @@ class HqflowCompleteStoredata(object):
                                     (self.dates<=self.enddate)]
         self.dates = self.dates.to_frame('trade_dt')
 
-    def hqflowJYDBSql(self,curday):
+    def hqflowJYDBSql(self, curday):
         # -------------------- Oracel Data Fetch Part -------------------
         # print('getting sql data ...')
         conn = sqlconnJYDB()
@@ -35,11 +35,11 @@ class HqflowCompleteStoredata(object):
                'order by stockcode,bargaindate,bargaintime'
 
         try:
-            sqldata = pd.read_sql(sqlq,conn)
+            sqldata = pd.read_sql(sqlq, conn)
 
-            sqldata.rename(columns=lambda x:x.lower(),inplace=True)
-            sqldata.rename(columns={'stockcode':'s_info_windcode','bargaindate':'trade_dt',
-                                    'turover':'amount'},inplace=True)
+            sqldata.rename(columns=lambda x:x.lower(), inplace=True)
+            sqldata.rename(columns={'stockcode':'s_info_windcode', 'bargaindate':'trade_dt',
+                                    'turover':'amount'}, inplace=True)
             sqldata['bargaintime'] = ('0'+sqldata['bargaintime']).str[-6:]
         except:
             sqldata = pd.DataFrame()
@@ -59,7 +59,7 @@ class HqflowCompleteStoredata(object):
                 datehq = self.hqflowJYDBSql(item)
                 if not datehq.empty:
                     print('running hqDataDateFetch : '+item)
-                    yearhq = pd.concat([yearhq,datehq],axis=0)
+                    yearhq = pd.concat([yearhq, datehq], axis=0)
 
             if not yearhq.empty:
                 yearhq.to_pickle(self.indir+self.INDEX+'/'+self.INDEX+'_store_hqdata_'+str(year)+'.pkl')
@@ -74,7 +74,7 @@ if __name__=='__main__':
     INDEX = 'all'
     startdate = '20120102'
     enddate = '20200801'
-    hcs = HqflowCompleteStoredata(indir,INDEX,startdate,enddate,'M1')
+    hcs = HqflowCompleteStoredata(indir, INDEX, startdate, enddate, 'M1')
     hcs.runFlow()
 
 
