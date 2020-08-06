@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import time
+np.seterr(invalid='ignore')
 
 class Spreadbias(object):
 
@@ -20,23 +21,22 @@ class Spreadbias(object):
 
         t = time.time()
         self.ref_price_pivot = []
-        for i in range(250, self.price_pivot.shape[1]):
-            print(self.price_pivot.index[i])
-            # 提取250个交易日股价数据（剔除股价全部为nan的股票,填补部分股价为nan的股票数据（填充为0））
-            temp_pivot_na = self.price_pivot.iloc[i - 250:i, :].dropna(axis=1, how='all').fillna(0).copy()
-            # 取当期股价数据
-            temp_pivot_now = temp_pivot_na.iloc[-1, :]
-
-            # 股价转涨幅，并去除第一列空值,填充剩余空值
-            temp_change_na = (temp_pivot_na.pct_change() * 100).dropna(axis=0, how='all').fillna(0).copy()
-            # 计算相关系数矩阵，并将其转化为距离
-            temp_dist = 1 - temp_change_na.corr()
+        for i in range(250, self.price_pivot.shape[0]):
+            print(self.price_pivot.index[i-1])
+            # 提取250个交易日股价数据（剔除有nan的股票）
+            temp_pivot_na = self.price_pivot.iloc[i - 250:i, :].dropna(axis=1, how='any')
+            # 股价数据转涨幅数据(剔除nan)
+            temp_change_na = (temp_pivot_na.pct_change() * 100).dropna(axis=0, how='any')
+            # 计算相关系数矩阵，并将其转化为距离矩阵
+            temp_dist = pd.DataFrame(1 - np.corrcoef(temp_change_na.T))
 
             # 取距离矩阵每列1%分位的距离值
             temp_1_quantile_dist = temp_dist.quantile(q=0.01, axis=0, numeric_only=True, interpolation='higher')
             # 标记距离矩阵每列距离值小于1%分位值的股票
             temp_nearst = ((temp_dist.values - temp_1_quantile_dist.values) <= 0) + 0
-            # 计算股票参考价格（相似股票价格合计-自身股票价格，除相似股票数（距离最近的1%股票，剔除本身-1），得到平均价格，即参考价格）
+            # 取当期股价数据
+            temp_pivot_now = temp_pivot_na.iloc[-1, :]
+            # 计算股票参考价格（相似股票价格合计-自身股票价格，除相似股票数（距离最近的1%股票数-本身），得到平均价格，即参考价格）
             temp_mean = (np.dot(temp_pivot_now.values, temp_nearst)-temp_pivot_now.values) / (temp_nearst.sum(axis=0)-1)
 
             # np.array格式转dataframe格式，并补充之前剔除的股票（自动填充为NaN）
@@ -68,7 +68,7 @@ class Spreadbias(object):
         self.data_sum['pricespread'] = np.log(self.data_sum['s_dq_close']) - np.log(self.data_sum['ref_price'])
         print('log_pricespread running time:%10.4fs' % (time.time()-t))
 
-        # 计算每个股票对数价差60日均值和标准差
+        # 计算每个股票对数价差的60日均值和60日标准差
         t = time.time()
         self.data_sum['pricespread_60_mean'] = self.data_sum.groupby(['s_info_windcode'])['pricespread'].rolling(60).mean().values
         self.data_sum['pricespread_60_std'] = self.data_sum.groupby(['s_info_windcode'])['pricespread'].rolling(60).std().values
@@ -92,8 +92,7 @@ class Spreadbias(object):
         self.data_manage()
         self.compute_spreadbias()
         self.fileOut()
-        print('compute finish')
-        print('all running time:%10.4fs' % (time.time() - t))
+        print('compute finish, all running time:%10.4fs' % (time.time() - t))
         return self
 
 if __name__ == '__main__':
