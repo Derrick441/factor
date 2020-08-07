@@ -4,7 +4,8 @@ import pandas as pd
 import numpy as np
 from sqlconn import sqlconn
 class dataflow_indexprice(object):
-    def __init__(self,INDEX,indir,startdate,enddate):
+
+    def __init__(self, INDEX, indir, startdate, enddate):
         self.INDEX = INDEX
         self.indir = indir
         self.startdate = startdate
@@ -28,9 +29,9 @@ class dataflow_indexprice(object):
         # s_info_windcode<='699999.SH' and ann_dt<='"+self.enddate+"' order by report_period"
         sqlq = "select trade_dt,s_info_windcode,s_dq_preclose,s_dq_close,s_dq_change from wind.Aindexeodprices "+ \
                 "where S_INFO_WINDCODE = '"+indexcode+"' and trade_dt>='"+self.startdate+"' and trade_dt<='"+self.enddate+"' order by trade_dt"
-        self.data = pd.read_sql(sqlq,conn)
-        self.data.rename(columns=lambda x:x.lower(),inplace=True)
-        self.data.set_index(['trade_dt'],inplace=True)
+        self.data = pd.read_sql(sqlq, conn)
+        self.data.rename(columns=lambda x:x.lower(), inplace=True)
+        self.data.set_index(['trade_dt'], inplace=True)
         conn.close()
 
     def fileout(self):
@@ -41,15 +42,15 @@ class dataflow_indexprice(object):
         self.fileout()
 
 if __name__ == '__main__':
-    indir = '../../data/developflow/'
+    indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
     startdate = '20050408'
-    enddate = '20200106'
+    enddate = '20200801'
     # INDEX = 'hs300'
     # indexprice = dataflow_indexprice(INDEX,indir,startdate,enddate)
     # indexprice.run_flow()
-    # INDEX = 'zz500'
+    INDEX = 'zz500'
+    indexprice = dataflow_indexprice(INDEX, indir, startdate, enddate)
+    indexprice.run_flow()
+    # INDEX = 'zz800'
     # indexprice = dataflow_indexprice(INDEX,indir,startdate,enddate)
     # indexprice.run_flow()
-    INDEX = 'zz800'
-    indexprice = dataflow_indexprice(INDEX,indir,startdate,enddate)
-    indexprice.run_flow()

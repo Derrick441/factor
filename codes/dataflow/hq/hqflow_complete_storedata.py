@@ -1,10 +1,8 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 import pandas as pd
 import time
 from sqlconn import sqlconnJYDB
-from reduce_mem_usage_df import reduce_mem_usage
-from decorators import decorators_runtime
+# from reduce_mem_usage_df import reduce_mem_usage
+# from decorators import decorators_runtime
 
 class HqflowCompleteStoredata(object):
 
@@ -28,7 +26,7 @@ class HqflowCompleteStoredata(object):
         # print('getting sql data ...')
         conn = sqlconnJYDB()
         sqlq = 'select stockcode,type,bargaindate,bargaintime,openprice,highprice,lowprice,closeprice,volume,turover ' \
-               'from JYHQNEW.M_'+curday+ \
+               'from JYHQ.M_'+curday+ \
                ' where type=\''+self.hqtype+'\' and (' \
                '((substr(stockcode,1,2) in (\'00\',\'30\')) and substr(stockcode,8,2)=\'SZ\') or ' \
                '((substr(stockcode,1,2) in (\'60\',\'68\')) and substr(stockcode,8,2)=\'SH\') ) ' \
@@ -70,12 +68,9 @@ class HqflowCompleteStoredata(object):
 
 if __name__=='__main__':
 
-    indir = '../../../data/investflow/'
+    indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
     INDEX = 'all'
     startdate = '20120102'
-    enddate = '20200723'
+    enddate = '20200801'
     hcs = HqflowCompleteStoredata(indir,INDEX,startdate,enddate,'M1')
     hcs.runFlow()
-
-
-

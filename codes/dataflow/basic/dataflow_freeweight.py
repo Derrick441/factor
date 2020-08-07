@@ -7,15 +7,16 @@ import numpy as np
 import sqlconn
 import cx_Oracle
 import itertools
-from decorators import decorators_runtime
+# from decorators import decorators_runtime
 from sqlconn import sqlGetIp
 
 class dataflow_freeweight(object):
-    # 从聚源数据库取指数权重数据
-    indir = '../../data/developflow/'
-    INDEX = ''
-    startdate = ''
-    enddate = ''
+
+    def __init__(self, INDEX, indir, startdate, enddate):
+        self.INDEX = INDEX
+        self.indir = indir
+        self.startdate = startdate
+        self.enddate = enddate
 
     def sqlin(self):
         #-------------------- sql get -------------------------------
@@ -30,32 +31,32 @@ class dataflow_freeweight(object):
         # 取 次日 权重和调整市值
         if sqlGetIp()=='10.17.12.8':
             sqlquery = "select A.INDEXCODE,A.ENDDATE as trade_dt,A.ADJUSTEDMV,A.WEIGHTEDRATIO,B.Secucode as s_info_windcode," \
-                   "A.DataType from JYHQ.Sa_Tradableshare A join JYHQ.Secumain B on A.Innercode = B.Innercode " \
-                   "where A.ENDDATE >= TO_DATE('"+self.startdate+"', 'yyyy/MM/DD HH24:MI:SS') " \
-                   "and A.ENDDATE <= TO_DATE('"+self.enddate+"', 'yyyy/MM/DD HH24:MI:SS') and A.INDEXCODE = "+indexcode+\
-                   " order by A.ENDDATE"
+                       "A.DataType from JYHQ.Sa_Tradableshare A join JYHQ.Secumain B on A.Innercode = B.Innercode " \
+                       "where A.ENDDATE >= TO_DATE('"+self.startdate+"', 'yyyy/MM/DD HH24:MI:SS') " \
+                       "and A.ENDDATE <= TO_DATE('"+self.enddate+"', 'yyyy/MM/DD HH24:MI:SS') and A.INDEXCODE = "+indexcode+\
+                       " order by A.ENDDATE"
         else:
             sqlquery = "select A.INDEXCODE,A.ENDDATE as trade_dt,A.ADJUSTEDMV,A.WEIGHTEDRATIO,B.Secucode as s_info_windcode," \
                        "A.DataType from JYDB.Sa_Tradableshare A join JYDB.Secumain B on A.Innercode = B.Innercode " \
                        "where A.ENDDATE >= TO_DATE('" + self.startdate + "', 'yyyy/MM/DD HH24:MI:SS') " \
-                                                                         "and A.ENDDATE <= TO_DATE('" + self.enddate + "', 'yyyy/MM/DD HH24:MI:SS') and A.INDEXCODE = " + indexcode + \
+                       "and A.ENDDATE <= TO_DATE('" + self.enddate + "', 'yyyy/MM/DD HH24:MI:SS') and A.INDEXCODE = " + indexcode + \
                        " order by A.ENDDATE"
             # " and A.DATATYPE = 2 order by A.ENDDATE"
-        self.data = pd.read_sql(sqlquery,conn)
+        self.data = pd.read_sql(sqlquery, conn)
         endtime = time.time()
         print('sql running time:%10.4fs' % (endtime-starttime))
 
-    def stocks_str_format(self,secucode):
+    def stocks_str_format(self, secucode):
         stocknum = int(secucode)
         return ('%06d'%stocknum)+'.SH' if stocknum>=600000 else ('%06d'%stocknum)+'.SZ'
 
     def data_formatchange(self):
-        self.data.rename(columns=lambda x:x.lower(),inplace=True)
+        self.data.rename(columns=lambda x:x.lower(), inplace=True)
         self.data['trade_dt']=self.data['trade_dt'].apply(lambda x: x.strftime('%Y%m%d'))
         self.data['s_info_windcode']=self.data['s_info_windcode'].apply(lambda x: self.stocks_str_format(x))
-        self.data.set_index(['trade_dt','s_info_windcode'],inplace=True)
-        self.wcur = self.data[self.data['datatype']==1].copy()
-        self.wnext = self.data[self.data['datatype']==2].copy()
+        self.data.set_index(['trade_dt', 's_info_windcode'], inplace=True)
+        self.wcur = self.data[self.data['datatype'] == 1].copy()
+        self.wnext = self.data[self.data['datatype'] == 2].copy()
         self.wcur.drop(['indexcode', 'datatype'], axis=1, inplace=True)
         self.wnext.drop(['indexcode', 'datatype'], axis=1, inplace=True)
 
@@ -69,12 +70,11 @@ class dataflow_freeweight(object):
         self.fileout()
 
 if __name__ == '__main__':
-    # freew = dataflow_freeweight(INDEX,indir,startdate,enddate)
-    freew = dataflow_freeweight()
-    freew.indir = '../../data/developflow/'
-    freew.startdate = '20050428'
-    freew.enddate = '20200106'
+    indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
+    startdate = '20050408'
+    enddate = '20200801'
     # freew.INDEX = 'hs300'
     # freew.run_flow()
-    freew.INDEX = 'zz500'
+    INDEX = 'zz500'
+    freew = dataflow_freeweight(INDEX, indir, startdate, enddate)
     freew.run_flow()

@@ -1,10 +1,11 @@
 import pandas as pd
 import numpy as np
 import sqlconn
-from decorators import decorators_runtime
+# from decorators import decorators_runtime
 
 class dataflow_listdate(object):
-    def __init__(self,indir,INDEX):
+
+    def __init__(self, INDEX, indir):
         self.INDEX = INDEX
         self.indir = indir
 
@@ -14,7 +15,7 @@ class dataflow_listdate(object):
         self.stflag = pd.DataFrame(index=self.band_date_stock.index)
         self.stflag['stflag'] = 1
 
-    @decorators_runtime
+    # @decorators_runtime
     def sqlin(self):
         conn = sqlconn.sqlconn()
         # 上市表
@@ -54,7 +55,7 @@ class dataflow_listdate(object):
         self.listdate_gen()
 
 if __name__=='__main__':
-    indir = '../../data/developflow/'
+    indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
     INDEX = 'all'
-    listdate = dataflow_listdate(indir,INDEX)
+    listdate = dataflow_listdate(INDEX, indir)
     listdate.run_flow()
