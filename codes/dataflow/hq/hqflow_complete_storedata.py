@@ -22,6 +22,7 @@ class HqflowCompleteStoredata(object):
         self.dates = self.dates.loc[(self.dates>=self.startdate) &
                                     (self.dates<=self.enddate)]
         self.dates = self.dates.to_frame('trade_dt')
+        print(self.dates.shape)
 
     def hqflowJYDBSql(self, curday):
         # -------------------- Oracel Data Fetch Part -------------------
