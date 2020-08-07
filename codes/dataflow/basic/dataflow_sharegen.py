@@ -41,6 +41,11 @@ class DataflowShareGen(object):
         mpd = mpd.groupby(level=1).fillna(method='ffill')
         self.mdata[mpd.columns.to_list()] = mpd
 
+    def mvGen(self):
+        self.mdata['tot_mv'] = self.mdata['tot_shr'] * self.band_date_stock['s_dq_close']
+        self.mdata['float_mv'] = self.mdata['float_shr'] * self.band_date_stock['s_dq_close']
+        self.mdata['float_a_mv'] = self.mdata['float_a_shr'] * self.band_date_stock['s_dq_close']
+
     def outData(self):
         # self.mdata['year'] = self.mdata.index.get_level_values(level=0).str[0:4]
         # for item in self.mdata['year'].unique():
@@ -55,11 +60,19 @@ class DataflowShareGen(object):
         self.mdata['float_a_shr'].to_pickle(
             self.indir+self.INDEX+'/'+self.INDEX+'_float_a_shr.pkl')
 
+        self.mdata['tot_mv'].to_pickle(
+            self.indir+self.INDEX+'/'+self.INDEX+'_tot_mv.pkl')
+        self.mdata['float_mv'].to_pickle(
+            self.indir+self.INDEX+'/'+self.INDEX+'_float_mv.pkl')
+        self.mdata['float_a_mv'].to_pickle(
+            self.indir+self.INDEX+'/'+self.INDEX+'_float_a_mv.pkl')
+
     def runflow(self):
         self.filein()
         self.sqlIn()
         self.dataPreHandle()
         self.dataMap()
+        self.mvGen()
         self.outData()
 
 if __name__=='__main__':
