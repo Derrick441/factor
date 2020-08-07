@@ -112,5 +112,5 @@ data_sum['spreadbias']=(data_sum['pricespread']-data_sum['pricespread_60_mean'])
 print(time.time()-t)
 
 # 查看最终输出
-x1=pd.read_pickle(indir+INDEX+'/'+INDEX+'_spreadbias.pkl')
+x1=pd.read_pickle(indir+'factor'+'/'+INDEX+'_spreadbias.pkl')
 x1[x1.s_info_windcode=='000001.SZ']

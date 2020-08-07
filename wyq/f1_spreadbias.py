@@ -82,7 +82,7 @@ class Spreadbias(object):
 
     def fileOut(self):
         t = time.time()
-        self.data_sum[['trade_dt','s_info_windcode','spreadbias']].to_pickle(self.indir + self.INDEX + '/' + self.INDEX + '_spreadbias.pkl')
+        self.data_sum[['trade_dt','s_info_windcode','spreadbias']].to_pickle(self.indir + 'factor' + '/' + self.INDEX + '_spreadbias.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):

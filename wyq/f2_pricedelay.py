@@ -61,7 +61,7 @@ class Pricedelay(object):
 
     def fileOut(self):
         t = time.time()
-        self.result[['trade_dt','s_info_windcode','pricedelay']].to_pickle(self.indir + self.INDEX + '/' + self.INDEX + '_pricedelay.pkl')
+        self.result[['trade_dt','s_info_windcode','pricedelay']].to_pickle(self.indir + 'factor' + '/' + self.INDEX + '_pricedelay.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):

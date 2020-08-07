@@ -1,5 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 import pandas as pd
 import time
 from sqlconn import sqlconnJYDB
@@ -8,7 +6,7 @@ from sqlconn import sqlconnJYDB
 
 class HqflowCompleteStoredata(object):
 
-    def __init__(self, indir, INDEX, startdate, enddate, hqtype):
+    def __init__(self,indir,INDEX,startdate,enddate,hqtype):
         self.indir = indir
         self.INDEX = INDEX
         self.startdate = startdate
@@ -22,25 +20,24 @@ class HqflowCompleteStoredata(object):
         self.dates = self.dates.loc[(self.dates>=self.startdate) &
                                     (self.dates<=self.enddate)]
         self.dates = self.dates.to_frame('trade_dt')
-        print(self.dates.shape)
 
-    def hqflowJYDBSql(self, curday):
+    def hqflowJYDBSql(self,curday):
         # -------------------- Oracel Data Fetch Part -------------------
         # print('getting sql data ...')
         conn = sqlconnJYDB()
         sqlq = 'select stockcode,type,bargaindate,bargaintime,openprice,highprice,lowprice,closeprice,volume,turover ' \
-               'from JYHQNEW.M_'+curday+ \
+               'from JYHQ.M_'+curday+ \
                ' where type=\''+self.hqtype+'\' and (' \
                '((substr(stockcode,1,2) in (\'00\',\'30\')) and substr(stockcode,8,2)=\'SZ\') or ' \
                '((substr(stockcode,1,2) in (\'60\',\'68\')) and substr(stockcode,8,2)=\'SH\') ) ' \
                'order by stockcode,bargaindate,bargaintime'
 
         try:
-            sqldata = pd.read_sql(sqlq, conn)
+            sqldata = pd.read_sql(sqlq,conn)
 
-            sqldata.rename(columns=lambda x:x.lower(), inplace=True)
-            sqldata.rename(columns={'stockcode':'s_info_windcode', 'bargaindate':'trade_dt',
-                                    'turover':'amount'}, inplace=True)
+            sqldata.rename(columns=lambda x:x.lower(),inplace=True)
+            sqldata.rename(columns={'stockcode':'s_info_windcode','bargaindate':'trade_dt',
+                                    'turover':'amount'},inplace=True)
             sqldata['bargaintime'] = ('0'+sqldata['bargaintime']).str[-6:]
         except:
             sqldata = pd.DataFrame()
@@ -60,7 +57,7 @@ class HqflowCompleteStoredata(object):
                 datehq = self.hqflowJYDBSql(item)
                 if not datehq.empty:
                     print('running hqDataDateFetch : '+item)
-                    yearhq = pd.concat([yearhq, datehq], axis=0)
+                    yearhq = pd.concat([yearhq,datehq],axis=0)
 
             if not yearhq.empty:
                 yearhq.to_pickle(self.indir+self.INDEX+'/'+self.INDEX+'_store_hqdata_'+str(year)+'.pkl')
@@ -75,8 +72,5 @@ if __name__=='__main__':
     INDEX = 'all'
     startdate = '20120102'
     enddate = '20200801'
-    hcs = HqflowCompleteStoredata(indir, INDEX, startdate, enddate, 'M1')
+    hcs = HqflowCompleteStoredata(indir,INDEX,startdate,enddate,'M1')
     hcs.runFlow()
-
-
-

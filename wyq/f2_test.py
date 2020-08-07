@@ -47,5 +47,5 @@ R_squared['pricedelay']=1-(R_squared.R_1/R_squared.R_3)
 result = pd.merge(sum_data, R_squared, how='left')
 
 
-x2=pd.read_pickle(indir+INDEX2+'/'+INDEX2+'_pricedelay.pkl')
+x2=pd.read_pickle(indir+'factor'+'/'+INDEX2+'_pricedelay.pkl')
 x2[x2.s_info_windcode=='000001.SZ']
