@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 import sqlconn
-from decorators import decorators_runtime
+# from decorators import decorators_runtime
 class DataflowShareGen(object):
+
     def __init__(self,INDEX,indir,startdate,enddate):
         self.INDEX = INDEX
         self.indir = indir
@@ -18,7 +19,7 @@ class DataflowShareGen(object):
         self.band_date_stock = self.band_date_stock.loc[self.startdate:]
         # self.band_date_stock = self.band_date_stock.loc[self.band_date_stock['trade_dt']>=self.startdate]
 
-    @decorators_runtime
+    # @decorators_runtime
     def sqlIn(self):
         conn = sqlconn.sqlconn()
         # 中国股本表
@@ -77,8 +78,8 @@ class DataflowShareGen(object):
 
 if __name__=='__main__':
     INDEX = 'all'
-    indir = 'D:\\lirx\\data\\developflow\\'
+    indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
     startdate = '20050408'
-    enddate = '20191231'
+    enddate = '20200801'
     indugen = DataflowShareGen(INDEX,indir,startdate,enddate)
     indugen.runflow()
