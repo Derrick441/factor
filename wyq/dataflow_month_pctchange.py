@@ -2,7 +2,7 @@ import pandas as pd
 import sqlconn
 import time
 
-class DataflowDayindex(object):
+class DataflowMonthpct(object):
 
     def __init__(self, INDEX, indir, startdate, enddate):
         self.INDEX = INDEX
@@ -11,12 +11,12 @@ class DataflowDayindex(object):
         self.enddate = enddate
 
     def sqlin(self):
-        # wind日行情估值指标数据：当日流通市值、TTM市盈率、市净率、换手率（自由流通股票）、收盘价
+        # wind月收益率数据：月收益率，月换手率，月成交金额
         conn = sqlconn.sqlconn()
         t = time.time()
-        sqlquery = 'select s_info_windcode,trade_dt,s_dq_mv,s_val_pe_ttm,s_val_pb_new,s_dq_freeturnover,s_dq_close_today' \
-                   ' from wind.AShareEODDerivativeIndicator where trade_dt>= ' + startdate + ' and trade_dt<= ' + enddate
-        self.data = pd.read_sql(sqlquery,conn)
+        sqlquery = 'select s_info_windcode, trade_dt, s_mq_pctchange, s_mq_turn, s_mq_amount'\
+                   ' from wind.AShareMonthlyYield where trade_dt>= ' + startdate + ' and trade_dt<= ' + enddate
+        self.data = pd.read_sql(sqlquery, conn)
         print('sqlin running time: %10.4fs' %(time.time() - t))
         conn.close()
 
@@ -29,7 +29,7 @@ class DataflowDayindex(object):
 
     def fileOut(self):
         t = time.time()
-        self.data.to_pickle(self.indir+self.INDEX+'/'+self.INDEX+'_day_mv_pe_pb_turn_close.pkl')
+        self.data.to_pickle(self.indir+self.INDEX+'/'+self.INDEX+'_month_pct.pkl')
         print('fileout running time: %10.4fs' %(time.time() - t))
 
     def runflow(self):
@@ -42,5 +42,5 @@ if __name__=='__main__':
     indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
     startdate = '20050408'
     enddate = '20200801'
-    dayindex = DataflowDayindex(INDEX,indir,startdate,enddate)
-    dayindex.runflow()
+    monthpct = DataflowMonthpct(INDEX, indir, startdate, enddate)
+    monthpct.runflow()

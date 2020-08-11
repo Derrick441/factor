@@ -3,13 +3,15 @@ import numpy as np
 import time
 import statsmodels.api as sm
 
+# 市值调整换手率：剔除换手率中市值影响
+# 回归换手率和市值，取残差作为市值调整换手率
 class Turnover_adjusted(object):
 
     def __init__(self, indir, INDEX):
         self.indir = indir
         self.INDEX = INDEX
 
-    def fileIn(self):
+    def filein(self):
         t = time.time()
         self.all_band_price = pd.read_pickle(self.indir + self.INDEX + '/' + self.INDEX + '_band_price.pkl')
         self.all_fashre = pd.read_pickle(self.indir + self.INDEX + '/' + self.INDEX + '_float_a_shr.pkl')
@@ -53,9 +55,10 @@ class Turnover_adjusted(object):
 
         t = time.time()
         # 按月度数据对每股进行回归，计算回归残差，并将其作为调整后的换手率
-        temp = self.temp_data_sum.groupby(['year_month', 's_info_windcode'])\
-                                 .apply(self.regress, 'ln_turnover', ['ln_mv'])\
-                                 .reset_index().rename(columns={0: 'turnover_adjusted'})
+        temp = self.temp_data_sum.copy()
+        temp.loc[:, 'turnover_adjusted'] = self.temp_data_sum.groupby(['year_month', 's_info_windcode'])\
+                                                             .apply(self.regress, 'ln_turnover', ['ln_mv'])\
+                                                             .values
         print(time.time()-t)
 
         t = time.time()
@@ -64,18 +67,18 @@ class Turnover_adjusted(object):
 
         print('compute_turnover_adjusted running time:%10.4fs' % (time.time() - t0))
 
-    def fileOut(self):
+    def fileout(self):
         t = time.time()
-        self.result[['trade_dt','s_info_windcode','turnover_adjusted']].to_pickle(self.indir + 'factor' + '/' + self.INDEX + '_turnover_adjusted.pkl')
+        self.result[['trade_dt','s_info_windcode','turnover_adjusted']].to_pickle(self.indir + 'factor' + '/f3_' + self.INDEX + '_turnover_adjusted.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
         t = time.time()
         print('compute start')
-        self.fileIn()
+        self.filein()
         self.data_manage()
         self.compute_turnover_adjusted()
-        self.fileOut()
+        self.fileout()
         print('compute finish, all running time:%10.4fs' % (time.time() - t))
         return self
 

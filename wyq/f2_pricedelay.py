@@ -3,6 +3,10 @@ import numpy as np
 import time
 import statsmodels.api as sm
 
+# 价格时滞：股价对市场信息的反应存在时滞，计算过去市场收益率对股票收益率的解释程度
+# 取一个月收益率数据，回归t0股票收益率与t0市场收益率，得到R_squared解释系数R1
+# 取一个月收益率数据，回归t0股票收益率与t0、t-1、t-2和t-3市场收益率，得到R_squared解释系数R3
+# 1-(R1/R3)
 class Pricedelay(object):
 
     def __init__(self, indir, INDEX, INDEX_mkt):
@@ -10,7 +14,7 @@ class Pricedelay(object):
         self.INDEX = INDEX
         self.INDEX_mkt = INDEX_mkt
 
-    def fileIn(self):
+    def filein(self):
         t = time.time()
         self.price = pd.read_pickle(self.indir + self.INDEX + '/' + self.INDEX + '_band_dates_stocks_closep.pkl')
         self.mkt_indexprice = pd.read_pickle(indir + self.INDEX_mkt + '/' + self.INDEX_mkt + '_indexprice.pkl')
@@ -59,18 +63,18 @@ class Pricedelay(object):
         self.result = pd.merge(self.sum_data, R_squared, how='left')
         print('compute_pricedelay running time:%10.4fs' % (time.time() - t))
 
-    def fileOut(self):
+    def fileout(self):
         t = time.time()
-        self.result[['trade_dt','s_info_windcode','pricedelay']].to_pickle(self.indir + 'factor' + '/' + self.INDEX + '_pricedelay.pkl')
+        self.result[['trade_dt','s_info_windcode','pricedelay']].to_pickle(self.indir + 'factor' + '/f2_' + self.INDEX + '_pricedelay.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
         t = time.time()
         print('compute start')
-        self.fileIn()
+        self.filein()
         self.data_manage()
         self.compute_pricedelay()
-        self.fileOut()
+        self.fileout()
         print('compute finish, all running time:%10.4fs' % (time.time() - t))
         return self
 

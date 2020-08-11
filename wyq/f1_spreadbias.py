@@ -3,13 +3,16 @@ import numpy as np
 import time
 np.seterr(invalid='ignore')
 
+# 价差偏离度：股价与参考价格的对数价差的偏离度（60均值和标准差做偏离度标准化），考察组合价格上涨或下跌偏离度
+# 参考价格：根据个股与所有股票的相似度（250交易日涨跌幅相似度），选取1%的股票作为参考组合，取组合平均价作为参考价格
+# ln_price_spread=ln(p)-ln(ref_p)   [ln_price_spread-mean(ln_price_spread,60)]/std(ln_price_spread,60)
 class Spreadbias(object):
 
     def __init__(self,indir,INDEX):
         self.indir = indir
         self.INDEX = INDEX
 
-    def fileIn(self):
+    def filein(self):
         t = time.time()
         self.price = pd.read_pickle(self.indir + self.INDEX + '/' + self.INDEX + '_band_dates_stocks_closep.pkl')
         print('filein running time:%10.4fs' % (time.time()-t))
@@ -80,18 +83,18 @@ class Spreadbias(object):
                                       / self.data_sum['pricespread_60_std']
         print('spreadbias running time:%10.4fs' % (time.time()-t))
 
-    def fileOut(self):
+    def fileout(self):
         t = time.time()
-        self.data_sum[['trade_dt','s_info_windcode','spreadbias']].to_pickle(self.indir + 'factor' + '/' + self.INDEX + '_spreadbias.pkl')
+        self.data_sum[['trade_dt','s_info_windcode','spreadbias']].to_pickle(self.indir + 'factor' + '/f1_' + self.INDEX + '_spreadbias.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
         t = time.time()
         print('compute start')
-        self.fileIn()
+        self.filein()
         self.data_manage()
         self.compute_spreadbias()
-        self.fileOut()
+        self.fileout()
         print('compute finish, all running time:%10.4fs' % (time.time() - t))
         return self
 

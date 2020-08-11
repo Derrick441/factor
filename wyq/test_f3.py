@@ -93,9 +93,7 @@ print(time.time()-t)
 #                                                                    .apply(regress1, 'ln_turnover', ['ln_mv']) \
 #                                                                    .reset_index().rename(columns={0: 'turnover_adjusted'})
 
-# result = pd.merge(data_sum, temp, how='left')
-#
-#
+
 #
 #
 #
@@ -114,12 +112,6 @@ print(time.time()-t)
 #                     .apply(regress2, 'ln_turnover', ['ln_mv'])\
 #                     .reset_index().rename(columns={0: 'turnover_adjusted'})
 # print(time.time()-t)
-#
-#
-#
-#
-#
-#
 #
 #
 #
@@ -145,16 +137,22 @@ print(time.time()-t)
 
 
 
-
-
-
 temp_data_sum.trade_dt = temp_data_sum.trade_dt.astype(int)
-temp_data_06=temp_data_sum[temp_data_sum.trade_dt <= 20100408]
+temp_data_05 = temp_data_sum[temp_data_sum.trade_dt <= 20050808]
+temp = temp_data_05.copy()
 
 t=time.time()
-temp2 = temp_data_sum.groupby(['year_month', 's_info_windcode'])\
-                    .apply(regress, 'ln_turnover', ['ln_mv'])\
-                    .reset_index().rename(columns={0: 'turnover_adjusted'})
+temp.loc[:, 'turnover_adjusted'] = temp_data_05.groupby(['year_month', 's_info_windcode'])\
+                                               .apply(regress, 'ln_turnover', ['ln_mv'])\
+                                               .values
 print(time.time()-t)
+
+
+temp.trade_dt = temp.trade_dt.astype(str)
+t=time.time()
+result = pd.merge(data_sum, temp[['trade_dt', 's_info_windcode', 'turnover_adjusted']], how='left')
+print(time.time()-t)
+
+
 
 
