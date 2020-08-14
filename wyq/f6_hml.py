@@ -1,7 +1,9 @@
 import pandas as pd
 import time
 
-# 估值因子
+# 日频率
+
+# 估值因子：根据月底估值，将估值前1/3股票划分为低估值股票，后1/3股票划分为高估值股票，两组股票日收益率之差即为估值因子
 class Hml(object):
 
     def __init__(self, indir, INDEX):

@@ -3,6 +3,8 @@ import numpy as np
 import time
 import statsmodels.api as sm
 
+# 日频率
+
 # 市值调整换手率：剔除换手率中市值影响
 # 回归换手率和市值，取残差作为市值调整换手率
 class Turnover_adjusted(object):

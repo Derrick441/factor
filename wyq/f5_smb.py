@@ -1,7 +1,9 @@
 import pandas as pd
 import time
 
-# 市值因子
+# 日频率
+
+# 市值因子：根据月底市值，将市值前1/3股票划分为低市值股票，后1/3股票划分为高市值股票，两组股票日收益率之差即为市值因子
 class Smb(object):
 
     def __init__(self, indir, INDEX):

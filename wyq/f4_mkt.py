@@ -1,6 +1,9 @@
 import pandas as pd
 import time
 
+# 日频率
+
+# 中证500的日收益率，作为市场因子
 class Mkt(object):
 
     def __init__(self, indir, INDEX):
