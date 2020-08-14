@@ -43,8 +43,8 @@ class dataflow_indexprice(object):
 
 if __name__ == '__main__':
     indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
-    startdate = '20050408'
-    enddate = '20200801'
+    startdate = '20050701'
+    enddate = '20200630'
     # INDEX = 'hs300'
     # indexprice = dataflow_indexprice(INDEX,indir,startdate,enddate)
     # indexprice.run_flow()

@@ -87,6 +87,6 @@ class dataflow_indugen(object):
 if __name__=='__main__':
     INDEX = 'all'
     indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
-    enddate = '20200801'
+    enddate = '20200630'
     indugen = dataflow_indugen(INDEX, indir, enddate)
     indugen.runflow()

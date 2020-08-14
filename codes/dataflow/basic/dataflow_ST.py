@@ -60,6 +60,6 @@ class dataflow_ST(object):
 if __name__=='__main__':
     indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
     INDEX = 'all'
-    enddate = '20200801'
+    enddate = '20200630'
     ST = dataflow_ST(indir, INDEX, enddate)
     ST.run_flow()

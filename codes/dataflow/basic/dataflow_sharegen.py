@@ -79,7 +79,7 @@ class DataflowShareGen(object):
 if __name__=='__main__':
     INDEX = 'all'
     indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
-    startdate = '20050408'
-    enddate = '20200801'
+    startdate = '20050701'
+    enddate = '20200630'
     indugen = DataflowShareGen(INDEX,indir,startdate,enddate)
     indugen.runflow()

@@ -71,8 +71,8 @@ class dataflow_freeweight(object):
 
 if __name__ == '__main__':
     indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
-    startdate = '20050408'
-    enddate = '20200801'
+    startdate = '20050701'
+    enddate = '20200630'
     # freew.INDEX = 'hs300'
     # freew.run_flow()
     INDEX = 'zz500'

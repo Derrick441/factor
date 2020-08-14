@@ -36,7 +36,7 @@ class Spreadbias(object):
             temp_dist = pd.DataFrame(1 - np.corrcoef(temp_change_na.T))
 
             # 取距离矩阵每列1%分位的距离值
-            temp_1_quantile_dist = temp_dist.quantile(q=0.01, axis=0, numeric_only=True, interpolation='higher')
+            temp_1_quantile_dist = temp_dist.quantile(q=0.01, axis=0, interpolation='higher')
             # 标记距离矩阵每列距离值小于1%分位值的股票
             temp_nearst = ((temp_dist.values - temp_1_quantile_dist.values) <= 0) + 0
             # 取当期股价数据
@@ -54,12 +54,9 @@ class Spreadbias(object):
         # 合并全部日期的参考价格数据
         t = time.time()
         self.ref_price = pd.concat(self.ref_price_pivot)
-        print('concat running time:%10.4fs' % (time.time()-t))
-
         # 数据格式调整
-        t = time.time()
         self.ref_price_new = self.ref_price.unstack().reset_index()\
-                             .rename(columns={'level_1': 'trade_dt', 0: 'ref_price'})
+                                           .rename(columns={'level_1': 'trade_dt', 0: 'ref_price'})
         print('form_adjust running time:%10.4fs' % (time.time()-t))
 
         # 合并参考价格、股价数据
@@ -68,21 +65,17 @@ class Spreadbias(object):
         print('merge running time:%10.4fs' % (time.time()-t))
 
     def compute_spreadbias(self):
-        # 计算对数价差
         t = time.time()
-        self.data_sum['pricespread'] = np.log(self.data_sum['s_dq_close']) - np.log(self.data_sum['ref_price'])
-        print('log_pricespread running time:%10.4fs' % (time.time()-t))
 
+        # 计算对数价差
+        self.data_sum['pricespread'] = np.log(self.data_sum['s_dq_close']) - np.log(self.data_sum['ref_price'])
         # 计算每个股票对数价差的60日均值和60日标准差
-        t = time.time()
         self.data_sum['pricespread_60_mean'] = self.data_sum.groupby(['s_info_windcode'])['pricespread'].rolling(60).mean().values
         self.data_sum['pricespread_60_std'] = self.data_sum.groupby(['s_info_windcode'])['pricespread'].rolling(60).std().values
-        print('60_mean_and_std running time:%10.4fs' % (time.time()-t))
-
         # 计算价差偏离度
-        t = time.time()
         self.data_sum['spreadbias'] = (self.data_sum['pricespread'] - self.data_sum['pricespread_60_mean']) / self.data_sum['pricespread_60_std']
-        print('spreadbias running time:%10.4fs' % (time.time()-t))
+
+        print('compute_spreadbias running time:%10.4fs' % (time.time()-t))
 
     def fileout(self):
         t = time.time()

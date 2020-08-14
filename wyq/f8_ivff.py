@@ -14,7 +14,7 @@ class Ivff(object):
 
     def filein(self):
         t = time.time()
-        self.all_data = pd.read_pickle(self.indir + self.INDEX + '/' + self.INDEX + '_day_mv_pe_pb_turn_close.pkl')
+        self.all_data = pd.read_pickle(self.indir + self.INDEX + '/' + self.INDEX + '_dayindex.pkl')
         self.all_mkt = pd.read_pickle(self.indir + 'factor' + '/f4_' + 'zz500' + '_mkt.pkl')
         self.all_smb = pd.read_pickle(self.indir + 'factor' + '/f5_' + self.INDEX + '_smb.pkl')
         self.all_hml = pd.read_pickle(self.indir + 'factor' + '/f6_' + self.INDEX + '_hml.pkl')
@@ -22,11 +22,7 @@ class Ivff(object):
 
     def data_manage(self):
         t = time.time()
-        self.all_data_price = self.all_data.s_dq_close_today.to_frame().reset_index()
-        self.all_data_change_pivot = self.all_data_price.pivot('trade_dt','s_info_windcode','s_dq_close_today').pct_change()
-        self.all_data_change = self.all_data_change_pivot.stack().reset_index().rename(columns={0:'change'})
-
-        self.data_sum = pd.merge(self.all_data_change, self.all_mkt, how='left')
+        self.data_sum = pd.merge(self.all_data, self.all_mkt, how='left')
         self.data_sum = pd.merge(self.data_sum, self.all_smb, how='left')
         self.data_sum = pd.merge(self.data_sum, self.all_hml, how='left')
         print('data_manage running time:%10.4fs' % (time.time() - t))
@@ -38,32 +34,22 @@ class Ivff(object):
         result = sm.OLS(Y, X).fit()
         return result.resid.std()
 
-    def compute_ivff(self):
-        t0 = time.time()
+    def rolling_regress(self, data):
         t = time.time()
-        # 提取年月标志
-        self.data_sum['year_month'] = self.data_sum['trade_dt'].apply(lambda x: x[:6])
-        print(time.time() - t)
-
-        t = time.time()
-        # 按月度数据对每股进行回归，计算特质波动率
-        temp = self.data_sum.copy().dropna()
-        ivff = temp.groupby(['year_month', 's_info_windcode'])\
-                   .apply(self.regress, 'change', ['index_rate', 'smb', 'hml'])\
-                   .reset_index().rename(columns={0: 'ivff'})
+        temp = data.rolling(20).apply(self.regress, 'change', ['mkt', 'smb', 'hml'])
         print(time.time()-t)
+        return temp
 
+    def compute_ivff(self):
         t = time.time()
-        self.result = pd.merge(self.data_sum, ivff, how='left')
-        self.result.ivff = self.result.ivff * pow(243, 0.5)
-        print(time.time() - t)
-
-        print('compute_turnover_adjusted running time:%10.4fs' % (time.time() - t0))
+        self.result = self.data_sum.groupby('s_info_windcode').apply(self.rolling_regress)
+        print('compute_turnover_adjusted running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
-        t = time.time()
-        self.result[['trade_dt', 's_info_windcode', 'ivff']].to_pickle(self.indir + 'factor' + '/f8_' + self.INDEX + '_ivff.pkl')
-        print('fileout running time:%10.4fs' % (time.time()-t))
+        pass
+        # t = time.time()
+        # self.result[['trade_dt', 's_info_windcode', 'ivff']].to_pickle(self.indir + 'factor' + '/f8_' + self.INDEX + '_ivff.pkl')
+        # print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
         t = time.time()
@@ -80,3 +66,8 @@ if __name__ == '__main__':
     INDEX = 'all'
     ivff = Ivff(indir, INDEX)
     ivff.runflow()
+
+
+ivff.filein()
+ivff.data_manage()
+ivff.compute_ivff()
