@@ -1,24 +1,24 @@
 import pandas as pd
+import numpy as np
 import time
 import statsmodels.api as sm
 
 # 月频率
+
 # 价格时滞：股价对市场信息的反应存在时滞，计算过去市场收益率对股票收益率的解释程度
-# 取一个月收益率数据，回归t0股票收益率与t0市场收益率，得到r_squared解释系数R1
-# 取一个月收益率数据，回归t0股票收益率与t0、t-1、t-2和t-3市场收益率，得到r_squared解释系数R3
+# 取一个月收益率数据，回归t0股票收益率与t0市场收益率，得到R_squared解释系数R1
+# 取一个月收益率数据，回归t0股票收益率与t0、t-1、t-2和t-3市场收益率，得到R_squared解释系数R3
 # 1-(R1/R3)
+class Pricedelay(object):
 
-
-class PriceDelay(object):
-
-    def __init__(self, indir, index, index_mkt):
+    def __init__(self, indir, INDEX, INDEX_mkt):
         self.indir = indir
-        self.index = index
-        self.index_mkt = index_mkt
+        self.INDEX = INDEX
+        self.INDEX_mkt = INDEX_mkt
 
     def filein(self):
         t = time.time()
-        self.price = pd.read_pickle(self.indir + self.index + '/' + self.index + '_band_dates_stocks_closep.pkl')
+        self.price = pd.read_pickle(self.indir + self.INDEX + '/' + self.INDEX + '_band_dates_stocks_closep.pkl')
         self.mkt = pd.read_pickle(self.indir + 'factor' + '/f4_' + 'zz500' + '_mkt.pkl')
         print('filein running time:%10.4fs' % (time.time()-t))
 
@@ -52,23 +52,21 @@ class PriceDelay(object):
         # 去除na进行回归
         temp_sum_data = self.sum_data.copy().dropna()
         # 按月度数据对每股进行回归，计算rsquared
-        r_squared = temp_sum_data.groupby(['year_month', 's_info_windcode'])\
+        R_squared = temp_sum_data.groupby(['year_month', 's_info_windcode'])\
                                  .apply(self.regress, 'stocks_rate', ['index_rate'])\
                                  .reset_index().rename(columns={0: 'R_1'})
-        r_squared['R_3'] = temp_sum_data.groupby(['year_month', 's_info_windcode'])\
-                                        .apply(self.regress, 'stocks_rate', ['index_rate', 'index_rate1',
-                                                                             'index_rate2', 'index_rate3'])\
+        R_squared['R_3'] = temp_sum_data.groupby(['year_month', 's_info_windcode'])\
+                                        .apply(self.regress, 'stocks_rate', ['index_rate', 'index_rate1', 'index_rate2', 'index_rate3'])\
                                         .values
         # 根据rsquared，计算价格时滞
-        r_squared['pricedelay'] = 1 - (r_squared.R_1 / r_squared.R_3)
+        R_squared['pricedelay'] = 1 - (R_squared.R_1 / R_squared.R_3)
         # 数据合并
-        self.result = pd.merge(self.sum_data, r_squared, how='left')
+        self.result = pd.merge(self.sum_data, R_squared, how='left')
         print('compute_pricedelay running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
-        item = ['trade_dt', 's_info_windcode', 'pricedelay']
-        self.result[item].to_pickle(self.indir + 'factor' + '/f2_' + self.index + '_pricedelay.pkl')
+        self.result[['trade_dt','s_info_windcode','pricedelay']].to_pickle(self.indir + 'factor' + '/f2_' + self.INDEX + '_pricedelay.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
@@ -81,10 +79,12 @@ class PriceDelay(object):
         print('compute finish, all running time:%10.4fs' % (time.time() - t))
         return self
 
-
 if __name__ == '__main__':
-    file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
-    file_index = 'all'
-    file_index_mkt = 'zz500'
-    pricedelay = PriceDelay(file_indir, file_index, file_index_mkt)
+    indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
+    INDEX = 'all'
+    INDEX_mkt = 'zz500'
+    pricedelay = Pricedelay(indir, INDEX, INDEX_mkt)
     pricedelay.runflow()
+
+    pricedelay.filein()
+    pricedelay.data_manage()
