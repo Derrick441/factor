@@ -3,15 +3,17 @@ import time
 
 # 日频率
 # 估值因子：每日，根据股票估值，取估值前1/3股票作低估值组合，取估值后1/3股票作高估值组合，两组股票收益率均值之差作估值因子
+
+
 class Hml(object):
 
-    def __init__(self, indir, INDEX):
+    def __init__(self, indir, index):
         self.indir = indir
-        self.INDEX = INDEX
+        self.index = index
 
     def filein(self):
         t = time.time()
-        self.all_data = pd.read_pickle(self.indir + self.INDEX + '/' + self.INDEX + '_dayindex.pkl')
+        self.all_data = pd.read_pickle(self.indir + self.index + '/' + self.index + '_dayindex.pkl')
         print('filein running time:%10.4fs' % (time.time() - t))
 
     def datamanage(self):
@@ -29,12 +31,12 @@ class Hml(object):
     def compute_hml(self):
         t = time.time()
         # 计算每日估值因子
-        self.result = self.all_data.groupby('trade_dt').apply(self.dayhml).reset_index().rename(columns={0:'hml'})
+        self.result = self.all_data.groupby('trade_dt').apply(self.dayhml).reset_index().rename(columns={0: 'hml'})
         print('fileout running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
-        self.result.to_pickle(self.indir + 'factor' + '/f6_' + self.INDEX + '_hml.pkl')
+        self.result.to_pickle(self.indir + 'factor' + '/f6_' + self.index + '_hml.pkl')
         print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
@@ -44,11 +46,12 @@ class Hml(object):
         self.datamanage()
         self.compute_hml()
         self.fileout()
-        print('compute end, running time:%10.4f' %(time.time()-t))
+        print('compute end, running time:%10.4f' % (time.time()-t))
         return self
+
 
 if __name__ == '__main__':
     indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
-    INDEX = 'all'
-    hml = Hml(indir, INDEX)
+    index = 'all'
+    hml = Hml(indir, index)
     hml.runflow()

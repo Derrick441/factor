@@ -3,21 +3,22 @@ import numpy as np
 import time
 import statsmodels.api as sm
 
-# 日频率
-
+# 月度的日频率
 # 市值调整换手率：剔除换手率中市值影响
 # 回归换手率和市值，取残差作为市值调整换手率
-class Turnover_adjusted(object):
 
-    def __init__(self, indir, INDEX):
+
+class TurnoverAdjusted(object):
+
+    def __init__(self, indir, index):
         self.indir = indir
-        self.INDEX = INDEX
+        self.index = index
 
     def filein(self):
         t = time.time()
-        self.all_band_price = pd.read_pickle(self.indir + self.INDEX + '/' + self.INDEX + '_band_price.pkl')
-        self.all_fashre = pd.read_pickle(self.indir + self.INDEX + '/' + self.INDEX + '_float_a_shr.pkl')
-        self.all_famv = pd.read_pickle(self.indir + self.INDEX + '/' + self.INDEX + '_float_a_mv.pkl')
+        self.all_band_price = pd.read_pickle(self.indir + self.index + '/' + self.index + '_band_price.pkl')
+        self.all_fashre = pd.read_pickle(self.indir + self.index + '/' + self.index + '_float_a_shr.pkl')
+        self.all_famv = pd.read_pickle(self.indir + self.index + '/' + self.index + '_float_a_mv.pkl')
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def data_manage(self):
@@ -71,7 +72,8 @@ class Turnover_adjusted(object):
 
     def fileout(self):
         t = time.time()
-        self.result[['trade_dt','s_info_windcode','turnover_adjusted']].to_pickle(self.indir + 'factor' + '/f3_' + self.INDEX + '_turnover_adjusted.pkl')
+        item = ['trade_dt', 's_info_windcode', 'turnover_adjusted']
+        self.result[item].to_pickle(self.indir + 'factor' + '/f3_' + self.index + '_turnover_adjusted.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
@@ -84,9 +86,9 @@ class Turnover_adjusted(object):
         print('compute finish, all running time:%10.4fs' % (time.time() - t))
         return self
 
-if __name__ == '__main__':
-    indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
-    INDEX = 'all'
-    turnover_adjusted = Turnover_adjusted(indir, INDEX)
-    turnover_adjusted.runflow()
 
+if __name__ == '__main__':
+    file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
+    file_index = 'all'
+    turnover_adjusted = TurnoverAdjusted(file_indir, file_index)
+    turnover_adjusted.runflow()
