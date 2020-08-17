@@ -1,4 +1,4 @@
-def perf_evaluation_IC_raw(ret, alpha, method):
+def perf_evaluation_ic_raw(ret, alpha, method):
     """
     calculate IC or rank IC with raw data, and the data need Groupby
     :param ret: return of stocks
@@ -12,18 +12,18 @@ def perf_evaluation_IC_raw(ret, alpha, method):
     return ic
 
 
-def perf_evaluation_IC(f, method):
+def perf_evaluation_ic(f, method):
     """
     calculate IC or rank IC with concat data, and the data need Groupby
     :param f: column1 is return of stocks, column2 is alpha
     :param method: pearson for IC and spearman for rankIC
     :return:
     """
-    ic = f.groupby(level=[0, 1]).apply(perf_single_IC, method=method)
+    ic = f.groupby(level=[0, 1]).apply(perf_single_ic, method=method)
     return ic
 
 
-def perf_single_IC(f, method):
+def perf_single_ic(f, method):
     """
     calculate IC or rank IC with concat data
     :param f: column1 is return of stocks, column2 is alpha
