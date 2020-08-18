@@ -2,10 +2,10 @@ import pandas as pd
 import time
 
 # 日频率
-# 估值因子：每日，根据股票估值，取估值前1/3股票作低估值组合，取估值后1/3股票作高估值组合，两组股票收益率均值之差作估值因子
+# 动量因子：每日，根据股票收益率，取收益率前1/3股票作低收益组合，取收益率后1/3股票作高收益组合，两组股票收益率均值之差作动量因子
 
 
-class Hml(object):
+class Mom(object):
 
     def __init__(self, indir, index):
         self.indir = indir
@@ -19,24 +19,24 @@ class Hml(object):
     def datamanage(self):
         pass
 
-    def dayhml(self, data):
+    def daymom(self, data):
         len_3 = int(len(data) / 3)
-        # 取当日流通估值最小1/3股票的收益率均值
-        low = data.sort_values(by='s_val_pe_ttm').iloc[:len_3, :].change.mean()
-        # 取当日流通估值最大1/3股票的收益率均值
-        high = data.sort_values(by='s_val_pe_ttm').iloc[-len_3:, :].change.mean()
-        # 当日估值因子
+        # 取当日收益率最小1/3股票的收益率均值
+        low = data.sort_values(by='change').iloc[:len_3, :].change.mean()
+        # 取当日收益率最大1/3股票的收益率均值
+        high = data.sort_values(by='change').iloc[-len_3:, :].change.mean()
+        # 当日动量因子
         return low - high
 
-    def compute_hml(self):
+    def compute_mom(self):
         t = time.time()
-        # 计算每日估值因子
-        self.result = self.all_data.groupby('trade_dt').apply(self.dayhml).reset_index().rename(columns={0: 'hml'})
+        # 计算每日动量因子
+        self.result = self.all_data.groupby('trade_dt').apply(self.daymom).reset_index().rename(columns={0: 'mom'})
         print('fileout running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
-        self.result.to_pickle(self.indir + 'factor' + '/f6_' + self.index + '_hml.pkl')
+        self.result.to_pickle(self.indir + 'factor' + '/factor_price_' + self.index + '_mom.pkl')
         print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
@@ -44,7 +44,7 @@ class Hml(object):
         t = time.time()
         self.filein()
         self.datamanage()
-        self.compute_hml()
+        self.compute_mom()
         self.fileout()
         print('compute end, running time:%10.4f' % (time.time()-t))
         return self
@@ -53,5 +53,5 @@ class Hml(object):
 if __name__ == '__main__':
     indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
     index = 'all'
-    hml = Hml(indir, index)
-    hml.runflow()
+    mom = Mom(indir, index)
+    mom.runflow()

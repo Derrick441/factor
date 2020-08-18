@@ -20,7 +20,7 @@ class Mkt(object):
         self.mkt_reset['mkt'] = self.mkt_reset.s_dq_change / self.mkt_reset.s_dq_preclose * 100
 
     def fileout(self):
-        self.mkt_reset[['trade_dt', 'mkt']].to_pickle(self.indir + 'factor' + '/f4_' + self.index + '_mkt.pkl')
+        self.mkt_reset[['trade_dt', 'mkt']].to_pickle(self.indir + 'factor' + '/factor_price_' + self.index + '_mkt.pkl')
 
     def runflow(self):
         print('compute start')

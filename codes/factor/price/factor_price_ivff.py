@@ -1,8 +1,9 @@
 import pandas as pd
+import numpy as np
 import time
-import statsmodels.api as sm
+import statsmodels.regression.rolling as regroll
 
-# 月频率
+# 日频率
 # 特质波动率
 
 
@@ -15,9 +16,9 @@ class Ivff(object):
     def filein(self):
         t = time.time()
         self.all_data = pd.read_pickle(self.indir + self.index + '/' + self.index + '_dayindex.pkl')
-        self.all_mkt = pd.read_pickle(self.indir + 'factor' + '/f4_' + 'zz500' + '_mkt.pkl')
-        self.all_smb = pd.read_pickle(self.indir + 'factor' + '/f5_' + self.index + '_smb.pkl')
-        self.all_hml = pd.read_pickle(self.indir + 'factor' + '/f6_' + self.index + '_hml.pkl')
+        self.all_mkt = pd.read_pickle(self.indir + 'factor' + '/factor_price_' + 'zz500' + '_mkt.pkl')
+        self.all_smb = pd.read_pickle(self.indir + 'factor' + '/factor_fundamental_' + self.index + '_smb.pkl')
+        self.all_hml = pd.read_pickle(self.indir + 'factor' + '/factor_fundamental_' + self.index + '_hml.pkl')
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def data_manage(self):
@@ -27,29 +28,34 @@ class Ivff(object):
         self.data_sum = pd.merge(self.data_sum, self.all_hml, how='left')
         print('data_manage running time:%10.4fs' % (time.time() - t))
 
-    def regress(self, data, y, x):
-        Y = data[y]
-        X = data[x]
-        X['intercept'] = 1
-        result = sm.OLS(Y, X).fit()
-        return result.resid.std()
-
     def rolling_regress(self, data):
         t = time.time()
-        temp = data.rolling(20).apply(lambda x: self.regress(x, 'change', ['mkt', 'smb', 'hml']))
-        print(time.time()-t)
-        return temp
+        if len(data) >= 20:
+            temp_data = data[data.change != 0]
+            temp_data['intercept'] = 1
+            item = ['intercept', 'mkt', 'smb', 'hml']
+            model = regroll.RollingOLS(temp_data['change'], temp_data[item], window=20).fit()
+            temp = np.sqrt(model.mse_resid)*np.sqrt(243)
+            result = pd.DataFrame({'trade_dt': temp_data.trade_dt.values, 'ivff': temp.values})
+            print(time.time() - t)
+            return result
+        else:
+            result = pd.DataFrame({'trade_dt': data.trade_dt.values, 'ivff': [None for i in range(len(data))]})
+            return result
 
     def compute_ivff(self):
         t = time.time()
         self.result = self.data_sum.groupby('s_info_windcode').apply(self.rolling_regress)
+        # 格式整理
+        self.result.reset_index(inplace=True)
+        self.result.drop('level_1', axis=1, inplace=True)
         print('compute_ivff running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
-        pass
-        # t = time.time()
-        # self.result[['trade_dt', 's_info_windcode', 'ivff']].to_pickle(self.indir + 'factor' + '/f8_' + self.index + '_ivff.pkl')
-        # print('fileout running time:%10.4fs' % (time.time()-t))
+        t = time.time()
+        item = ['trade_dt', 's_info_windcode', 'ivff']
+        self.result[item].to_pickle(self.indir + 'factor' + '/factor_price' + self.index + '_ivff.pkl')
+        print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
         t = time.time()
@@ -67,7 +73,3 @@ if __name__ == '__main__':
     index = 'all'
     ivff = Ivff(indir, index)
     ivff.runflow()
-
-ivff.filein()
-ivff.data_manage()
-ivff.compute_ivff()

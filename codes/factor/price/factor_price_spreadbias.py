@@ -79,12 +79,14 @@ class Spreadbias(object):
         temp = self.data_sum['pricespread'] - self.data_sum['pricespread_60_mean']
         self.data_sum['spreadbias'] = temp / self.data_sum['pricespread_60_std']
 
+        # 去除nan值
+        self.data_sum.dropna(inplace=True)
         print('compute_spreadbias running time:%10.4fs' % (time.time()-t))
 
     def fileout(self):
         t = time.time()
         item = ['trade_dt', 's_info_windcode', 'spreadbias']
-        self.data_sum[item].to_pickle(self.indir + 'factor' + '/f1_' + self.index + '_spreadbias.pkl')
+        self.data_sum[item].to_pickle(self.indir + 'factor' + '/factor_price_' + self.index + '_spreadbias.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
@@ -103,3 +105,7 @@ if __name__ == '__main__':
     file_index = 'all'
     spreadbias = Spreadbias(file_indir, file_index)
     spreadbias.runflow()
+
+spreadbias.filein()
+spreadbias.data_manage()
+spreadbias.compute_spreadbias()

@@ -36,7 +36,7 @@ class Smb(object):
 
     def fileout(self):
         t = time.time()
-        self.result.to_pickle(self.indir + 'factor' + '/f5_' + self.index + '_smb.pkl')
+        self.result.to_pickle(self.indir + 'factor' + '/factor_fundamental_' + self.index + '_smb.pkl')
         print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
