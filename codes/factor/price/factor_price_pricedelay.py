@@ -2,13 +2,12 @@ import pandas as pd
 import time
 import statsmodels.regression.rolling as regroll
 
+
 # 日频率
 # 价格时滞：股价对市场信息的反应存在时滞，计算过去市场收益率对股票收益率的解释程度
 # 每日取20日收益率数据，回归t0股票收益率与t0市场收益率，得到r_squared解释系数R1
 # 每日取20日收益率数据，回归t0股票收益率与t0、t-1、t-2和t-3市场收益率，得到r_squared解释系数R3
 # 1-(R1/R3)
-
-
 class PriceDelay(object):
 
     def __init__(self, indir, index):
@@ -17,6 +16,7 @@ class PriceDelay(object):
 
     def filein(self):
         t = time.time()
+        # 从dataflow文件夹中取量价数据
         self.all_data = pd.read_pickle(self.indir + self.index + '/' + self.index + '_dayindex.pkl')
         # 从factor文件夹中取因子数据
         indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\basicfactor\\'

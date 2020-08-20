@@ -1,12 +1,11 @@
 import pandas as pd
-import numpy as np
 import time
 import statsmodels.regression.rolling as regroll
 
 
 # 日频率
-# 特质波动率
-class Ivff(object):
+# 特异度
+class Ivr(object):
 
     def __init__(self, indir, index):
         self.indir = indir
@@ -37,28 +36,28 @@ class Ivff(object):
             temp_data['intercept'] = 1
             item = ['intercept', 'mkt', 'smb', 'hml']
             model = regroll.RollingOLS(temp_data['change'], temp_data[item], window=20).fit()
-            temp = np.sqrt(model.mse_resid)*np.sqrt(243)
-            result = pd.DataFrame({'trade_dt': temp_data.trade_dt.values, 'ivff': temp.values})
+            temp = 1 - model.rsquared
+            result = pd.DataFrame({'trade_dt': temp_data.trade_dt.values, 'ivr': temp.values})
             print(time.time() - t)
             return result
         else:
-            result = pd.DataFrame({'trade_dt': data.trade_dt.values, 'ivff': [None for i in range(len(data))]})
+            result = pd.DataFrame({'trade_dt': data.trade_dt.values, 'ivr': [None for i in range(len(data))]})
             return result
 
-    def compute_ivff(self):
+    def compute_ivr(self):
         t = time.time()
         self.result = self.data_sum.groupby('s_info_windcode').apply(self.rolling_regress)
         # 格式整理
         self.result.reset_index(inplace=True)
         self.result.drop('level_1', axis=1, inplace=True)
-        print('compute_ivff running time:%10.4fs' % (time.time() - t))
+        print('compute_ivr running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
         # 存在factor文件夹的stockfactor中
-        item = ['trade_dt', 's_info_windcode', 'ivff']
+        item = ['trade_dt', 's_info_windcode', 'ivr']
         indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-        self.result[item].to_pickle(indir_factor + 'factor_price_ivff.pkl')
+        self.result[item].to_pickle(indir_factor + 'factor_price_ivr.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
@@ -66,7 +65,7 @@ class Ivff(object):
         print('compute start')
         self.filein()
         self.data_manage()
-        self.compute_ivff()
+        self.compute_ivr()
         self.fileout()
         print('compute finish, all running time:%10.4fs' % (time.time() - t))
         return self
@@ -75,5 +74,5 @@ class Ivff(object):
 if __name__ == '__main__':
     indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
     index = 'all'
-    ivff = Ivff(indir, index)
-    ivff.runflow()
+    ivr = Ivr(indir, index)
+    ivr.runflow()
