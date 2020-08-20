@@ -16,9 +16,11 @@ class Ivff(object):
     def filein(self):
         t = time.time()
         self.all_data = pd.read_pickle(self.indir + self.index + '/' + self.index + '_dayindex.pkl')
-        self.all_mkt = pd.read_pickle(self.indir + 'factor' + '/factor_price_' + 'zz500' + '_mkt.pkl')
-        self.all_smb = pd.read_pickle(self.indir + 'factor' + '/factor_fundamental_' + self.index + '_smb.pkl')
-        self.all_hml = pd.read_pickle(self.indir + 'factor' + '/factor_fundamental_' + self.index + '_hml.pkl')
+        # 从factor文件夹中取因子数据
+        indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\basicfactor\\'
+        self.all_mkt = pd.read_pickle(indir_factor + 'factor_mkt.pkl')
+        self.all_smb = pd.read_pickle(indir_factor + 'factor_smb.pkl')
+        self.all_hml = pd.read_pickle(indir_factor + 'factor_hml.pkl')
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def data_manage(self):
@@ -53,8 +55,10 @@ class Ivff(object):
 
     def fileout(self):
         t = time.time()
+        # 存在factor文件夹的stockfactor中
         item = ['trade_dt', 's_info_windcode', 'ivff']
-        self.result[item].to_pickle(self.indir + 'factor' + '/factor_price' + self.index + '_ivff.pkl')
+        indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+        self.result[item].to_pickle(indir_factor + 'factor_price_ivff.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):

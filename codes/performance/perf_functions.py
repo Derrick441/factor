@@ -1,3 +1,18 @@
+def perf_single_ic(f, method):
+    """
+    calculate IC or rank IC with concat data
+    :param f: column1 is return of stocks, column2 is alpha
+    :param method: pearson for IC and spearman for rankIC
+    :return:
+    """
+    if method == 'IC':
+        ic = f.corr(method='pearson', mini_periods=1)
+    # for rank IC
+    else:
+        ic = f.corr(method='spearman', mini_periods=1)
+    return ic
+
+
 def perf_evaluation_ic_raw(ret, alpha, method):
     """
     calculate IC or rank IC with raw data, and the data need Groupby
@@ -8,7 +23,7 @@ def perf_evaluation_ic_raw(ret, alpha, method):
     """
     f = alpha.to_frame('alpha')
     f['ret'] = ret
-    ic = f.groupby(level=[0, 1]).apply(perf_single_IC, method=method)
+    ic = f.groupby(level=[0, 1]).apply(perf_single_ic, method=method)
     return ic
 
 
@@ -20,18 +35,4 @@ def perf_evaluation_ic(f, method):
     :return:
     """
     ic = f.groupby(level=[0, 1]).apply(perf_single_ic, method=method)
-    return ic
-
-
-def perf_single_ic(f, method):
-    """
-    calculate IC or rank IC with concat data
-    :param f: column1 is return of stocks, column2 is alpha
-    :param method: pearson for IC and spearman for rankIC
-    :return:
-    """
-    if method == 'IC':
-        ic = f.corr(method='pearson', mini_periods=1)
-    else:  # for rankIC
-        ic = f.corr(method='spearman', mini_periods=1)
     return ic

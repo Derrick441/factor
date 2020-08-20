@@ -11,15 +11,16 @@ import statsmodels.regression.rolling as regroll
 
 class PriceDelay(object):
 
-    def __init__(self, indir, index, index_mkt):
+    def __init__(self, indir, index):
         self.indir = indir
         self.index = index
-        self.index_mkt = index_mkt
 
     def filein(self):
         t = time.time()
         self.all_data = pd.read_pickle(self.indir + self.index + '/' + self.index + '_dayindex.pkl')
-        self.mkt = pd.read_pickle(self.indir + 'factor' + '/factor_price_' + 'zz500' + '_mkt.pkl')
+        # 从factor文件夹中取因子数据
+        indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\basicfactor\\'
+        self.mkt = pd.read_pickle(indir_factor + 'factor_mkt.pkl')
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def data_manage(self):
@@ -65,8 +66,10 @@ class PriceDelay(object):
 
     def fileout(self):
         t = time.time()
+        # 存在factor文件夹的stockfactor中
         item = ['trade_dt', 's_info_windcode', 'pricedelay']
-        self.result[item].to_pickle(self.indir + 'factor' + '/factor_price_' + self.index + '_pricedelay.pkl')
+        indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+        self.result[item].to_pickle(indir_factor + 'factor_price_pricedelay.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
@@ -83,6 +86,5 @@ class PriceDelay(object):
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
     file_index = 'all'
-    file_index_mkt = 'zz500'
-    pricedelay = PriceDelay(file_indir, file_index, file_index_mkt)
+    pricedelay = PriceDelay(file_indir, file_index)
     pricedelay.runflow()

@@ -85,8 +85,10 @@ class Spreadbias(object):
 
     def fileout(self):
         t = time.time()
+        # 存在factor文件夹的stockfactor中
         item = ['trade_dt', 's_info_windcode', 'spreadbias']
-        self.data_sum[item].to_pickle(self.indir + 'factor' + '/factor_price_' + self.index + '_spreadbias.pkl')
+        indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+        self.data_sum[item].to_pickle(indir_factor + 'factor_price_spreadbias.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
@@ -105,7 +107,3 @@ if __name__ == '__main__':
     file_index = 'all'
     spreadbias = Spreadbias(file_indir, file_index)
     spreadbias.runflow()
-
-spreadbias.filein()
-spreadbias.data_manage()
-spreadbias.compute_spreadbias()

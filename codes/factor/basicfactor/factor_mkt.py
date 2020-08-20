@@ -18,9 +18,16 @@ class Mkt(object):
         self.mkt_reset = self.mkt_price.reset_index()
         # 指数点位 转 指数涨跌幅
         self.mkt_reset['mkt'] = self.mkt_reset.s_dq_change / self.mkt_reset.s_dq_preclose * 100
+        # 结果
+        item = ['trade_dt', 'mkt']
+        self.result = self.mkt_reset[item]
 
     def fileout(self):
-        self.mkt_reset[['trade_dt', 'mkt']].to_pickle(self.indir + 'factor' + '/factor_price_' + self.index + '_mkt.pkl')
+        t = time.time()
+        # 存在factor文件夹的basicfactor中
+        indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\basicfactor\\'
+        self.result.to_pickle(indir_factor + 'factor_mkt.pkl')
+        print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
         print('compute start')

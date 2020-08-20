@@ -59,21 +59,23 @@ class TurnoverAdjusted(object):
         t = time.time()
         # 按月度数据对每股进行回归，计算回归残差，并将其作为调整后的换手率
         temp = self.temp_data_sum.copy()
-        temp.loc[:, 'turnover_adjusted'] = self.temp_data_sum.groupby(['year_month', 's_info_windcode'])\
+        temp.loc[:, 'turnoveradj'] = self.temp_data_sum.groupby(['year_month', 's_info_windcode'])\
                                                              .apply(self.regress, 'ln_turnover', ['ln_mv'])\
                                                              .values
         print(time.time()-t)
 
         t = time.time()
-        self.result = pd.merge(self.data_sum, temp[['trade_dt', 's_info_windcode', 'turnover_adjusted']], how='left')
+        self.result = pd.merge(self.data_sum, temp[['trade_dt', 's_info_windcode', 'turnoveradj']], how='left')
         print(time.time() - t)
 
         print('compute_turnover_adjusted running time:%10.4fs' % (time.time() - t0))
 
     def fileout(self):
         t = time.time()
-        item = ['trade_dt', 's_info_windcode', 'turnover_adjusted']
-        self.result[item].to_pickle(self.indir + 'factor' + '/f3_' + self.index + '_turnover_adjusted.pkl')
+        # 存在factor文件夹的stockfactor中
+        item = ['trade_dt', 's_info_windcode', 'turnoveradj']
+        indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+        self.result[item].to_pickle(indir_factor + 'factor_price_turnoveradj.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):

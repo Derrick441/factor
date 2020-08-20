@@ -1,11 +1,9 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 import pandas as pd
-import numpy as np
-from sqlconn import sqlconn
-class perf_return2perf(object):
-    def __init__(self,INDEX,indir,info,iprice,balanced_pct):
-        self.INDEX = INDEX
+
+
+class PerfReturn2Perf(object):
+    def __init__(self, index, indir, info, iprice, balanced_pct):
+        self.index = index
         self.indir = indir
         self.balanced_pct = balanced_pct
         self.info = info
@@ -21,7 +19,7 @@ class perf_return2perf(object):
         self.info['iprice_pct'] = self.info['iprice_pct'].fillna(value=0)
         # 策略日收益率
         self.info['total_pct'] = self.info['total'].pct_change(1)
-        self.info['total_pct'].fillna(value=0,inplace=True)
+        self.info['total_pct'].fillna(value=0, inplace=True)
         # 策略超额收益
         self.info['Alpha'] = self.info['total_pct']-self.info['iprice_pct']
 
@@ -37,31 +35,31 @@ class perf_return2perf(object):
 
         # 再平衡超额收益，超额超过balanced_pct后再平衡
         for item in dates:
-            self.balanced_return_singleday(item,self.balanced_pct)
+            self.balanced_return_singleday(item, self.balanced_pct)
 
         # 收益最大回撤
         retmax = self.info['total'].cummax()
         minusmax = self.info['total']-retmax
-        minusmax[minusmax>0] = 0
+        minusmax[minusmax > 0] = 0
         self.info['MDD(total)'] = minusmax/retmax
 
         # 超额收益最大回撤
         extretmax = self.info['Alpha(balanced)'].cummax()
         minusmax = self.info['Alpha(balanced)']-extretmax
-        minusmax[minusmax>0] = 0
+        minusmax[minusmax > 0] = 0
         self.info['MDD(alpha)'] = minusmax/extretmax
 
-    def balanced_return_singleday(self,item,balanced_pct):
+    def balanced_return_singleday(self, item, balanced_pct):
         # 超额收益超过balanced_pct就再平衡
-        if abs(self.lastret)>balanced_pct:
-            self.curret = self.info.loc[item,'Alpha']
+        if abs(self.lastret) > balanced_pct:
+            self.curret = self.info.loc[item, 'Alpha']
         else:
-            self.curret = self.lastret+self.info.loc[item,'Alpha']
+            self.curret = self.lastret+self.info.loc[item, 'Alpha']
         self.lastret = self.curret
 
-        self.info.loc[item,'Alpha(balanced)'] = self.lastcalret*(1+self.curret)
-        if abs(self.curret)>balanced_pct:
-            self.lastcalret = self.info.loc[item,'Alpha(balanced)']
+        self.info.loc[item, 'Alpha(balanced)'] = self.lastcalret*(1+self.curret)
+        if abs(self.curret) > balanced_pct:
+            self.lastcalret = self.info.loc[item, 'Alpha(balanced)']
 
     def info_stats(self):
         # 获取年份
@@ -73,12 +71,12 @@ class perf_return2perf(object):
 
         # 历年超额收益
         stats = grouped['Alpha(balanced)'].last().to_frame()
-        stats['Alpha_shift'] = stats['Alpha(balanced)'].shift(periods=1,axis=0,fill_value=1)
+        stats['Alpha_shift'] = stats['Alpha(balanced)'].shift(periods=1, axis=0, fill_value=1)
         stats['Alpha(year)'] = (stats['Alpha(balanced)']/stats['Alpha_shift']-1)
-        stats.drop(['Alpha(balanced)','Alpha_shift'],axis=1,inplace=True)
+        stats.drop(['Alpha(balanced)', 'Alpha_shift'], axis=1, inplace=True)
 
         stats['MDD(alpha)'] = grouped['MDD(alpha)'].min()
-        stats['MDD(total)']= grouped['MDD(total)'].min()
+        stats['MDD(total)'] = grouped['MDD(total)'].min()
         stats['Vol(Alpha)'] = (252 ** (1/2))*grouped['Alpha'].std()
         stats['Vol(total)'] = (252 ** (1/2))*grouped['total_pct'].std()
         stats['TurnOver'] = grouped['turnover'].sum()
@@ -94,24 +92,23 @@ class perf_return2perf(object):
         volalpha = (252 ** (1/2)) * self.info['Alpha'].std()
         voltotal = (252 ** (1/2)) * self.info['total_pct'].std()
         turnover = (self.info['turnover'].sum())/yearnum
-        stats.loc['All annual'] = [annalpha,mddalpha,mddtotal,volalpha,voltotal,turnover,ir,sharp]
+        stats.loc['All annual'] = [annalpha, mddalpha, mddtotal, volalpha, voltotal, turnover, ir, sharp]
         self.stats = stats.round(4)
-        self.stats[['IR','Sharp']] = self.stats[['IR','Sharp']].round(2)
+        self.stats[['IR', 'Sharp']] = self.stats[['IR', 'Sharp']].round(2)
 
-    def run_flow(self):
+    def runflow(self):
         self.return2perf()
         self.cal_return()
         self.info_stats()
-        return self.info,self.stats
+        return self.info, self.stats
 
-if __name__=='__main__':
-    INDEX = 'zz500'
-    indir = '../../data/'
-    balanced_pct = 0.03
+
+if __name__ == '__main__':
+    file_index = 'zz500'
+    file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
     filename = 'aifactor1_feature0123_rollN1_cost0.0_scale0.1'
-    info = pd.read_pickle(indir+INDEX+'/'+INDEX+'_'+filename+'.pkl')
-    iprice = pd.read_pickle(indir+INDEX+'/'+INDEX+'_indexprice.pkl')
-    perf = perf_return2perf(INDEX,indir,balanced_pct,info,iprice)
-    # def __init__(self,INDEX,indir,balanced_pct,info,iprice):
-    perf.run_flow()
-
+    balanced_pct = 0.03
+    info = pd.read_pickle(file_indir+file_index+'/'+file_index+'_'+filename+'.pkl')
+    iprice = pd.read_pickle(file_indir+file_index+'/'+file_index+'_indexprice.pkl')
+    perf = PerfReturn2Perf(file_index, file_indir, balanced_pct, info, iprice)
+    perf.runflow()
