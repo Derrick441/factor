@@ -1,88 +1,84 @@
-from perf_ic import PerformanceIc
-from perf_ic1 import PerformanceIc1
-from perf_ic2 import PerformanceIc2
 import pandas as pd
 import os
 
 
-# 全部因子计算ic--------------------------------------------------------------------------------------------------------
-def ic_compute_save(flag, name_save, method):
-    # dataflow数据地址
-    indir_dataflow = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    # data数据的文件名
-    name_dataflow_1 = 'all_ret_sum.pkl'
-    name_dataflow_3 = ['all_ret_sum.pkl', 'all_dayindex.pkl', 'all_indu.pkl']
-    # factor数据地址
-    indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    # 所有因子的文件名
-    factors = os.listdir(indir_factor)
-    # performance数据存放地址
+# method:IC or rank_IC
+def table5(method):
+    # ic数据地址和factor文件名
     indir_perf = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
+    indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+    factors = os.listdir(indir_factor)
+    # 输入、输出地址
+    indir = [indir_perf + method + '_' + i for i in factors] + [indir_perf + method + '_neutral_' + i for i in factors]
+    indir_out = [indir_perf + method + '_both_table' + i + '.pkl' for i in ['1', '5', '10', '20', '60']]
 
-    mean = []
-    coln = []
-    for i in factors:
-        if flag == 0:
-            performance_ic = PerformanceIc(indir_dataflow, name_dataflow_1, indir_factor, i, indir_perf, method)
-        elif flag == 1:
-            performance_ic = PerformanceIc1(indir_dataflow, name_dataflow_3, indir_factor, i, indir_perf, method)
-        else:
-            performance_ic = PerformanceIc2(indir_dataflow, name_dataflow_3, indir_factor, i, indir_perf, method)
-        # 计算每期ic值，并存储
-        performance_ic.runflow()
-        # 根据每期ic值，计算ic均值
-        temp = performance_ic.result.mean()
-        mean.append(temp)
-        coln.append(temp.index.name)
+    # 数据读取和整合
+    f_name = []
+    ret_1 = []
+    ret_5 = []
+    ret_10 = []
+    ret_20 = []
+    ret_60 = []
+    for i in indir:
+        data = pd.read_pickle(i)
+        f_name.append(data.columns.name)
+        ret_1.append(data.iloc[:, 0])
+        ret_5.append(data.iloc[:, 1])
+        ret_10.append(data.iloc[:, 2])
+        ret_20.append(data.iloc[:, 3])
+        ret_60.append(data.iloc[:, 4])
+    ret = [ret_1, ret_5, ret_10, ret_20, ret_60]
 
-    # 数据调整
-    ic_all_factors = pd.concat(mean, axis=1)
-    ic_all_factors.columns = coln
-    ic_all_factors = ic_all_factors.T
+    # 数据调整和输出
+    for i in range(5):
+        temp = pd.concat(ret[i], axis=1)
+        temp.columns = f_name
+        temp.to_pickle(indir_out[i])
 
-    # ic均值汇总数据输出
-    ic_all_factors.to_csv(indir_perf + name_save)
-
-    return ic_all_factors
+    return 0
 
 
-# ic
-ic_mean = ic_compute_save(0, 'ic_mean_all_factors.csv', 'IC')
-ic1_mean = ic_compute_save(1, 'ic1_mean_all_factors.csv', 'IC')
-ic2_mean = ic_compute_save(2, 'ic2_mean_all_factors.csv', 'IC')
+def table3(method):
+    # ic数据地址和factor文件名
+    indir_perf = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
+    indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+    factors = os.listdir(indir_factor)
+    # 输入、输出地址
+    indir = [indir_perf + method + '_' + i for i in factors] + [indir_perf + method + '_neutral_' + i for i in factors]
+    indir_out = [indir_perf + method + '_both_mean_table' + i + '.csv' for i in ['07-19', '12-19', '17-19']]
 
-# # rank ic
-# rank_ic_mean = ic_compute_save(0, 'ic_mean_all_factors.csv', 'rank IC')
-# rank_ic1_mean = ic_compute_save(1, 'ic1_mean_all_factors.csv', 'rank IC')
-# rank_ic2_mean = ic_compute_save(2, 'ic2_mean_all_factors.csv', 'rank IC')
+    # 数据读取和整合
+    f_name = []
+    mean_07 = []
+    mean_12 = []
+    mean_17 = []
+    for i in indir:
+        data = pd.read_pickle(i)
+        f_name.append(data.columns.name)
+        data.reset_index(inplace=True)
+        data.trade_dt = data.trade_dt.astype(int)
+
+        data07 = data[data.trade_dt >= 20070101]
+        mean_07.append(data07.mean())
+
+        data12 = data[data.trade_dt >= 20120101]
+        mean_12.append(data12.mean())
+
+        data17 = data[data.trade_dt >= 20170101]
+        mean_17.append(data17.mean())
+    mean = [mean_07, mean_12, mean_17]
+
+    for i in range(3):
+        temp = pd.concat(mean[i], axis=1)
+        temp.columns = f_name
+        result = temp.T.drop('trade_dt', axis=1)
+        result.to_csv(indir_out[i])
+
+    return 0
+
+
+if __name__ == '__main__':
+    table5('IC')
+    table3('IC')
 
 # ---------------------------------------------------------------------------------------------------------------------#
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# ---------------------------------------------------------------------------------------------------------------------#
-
-# # 单个因子计算ic
-#
-# # 因子的文件名
-# factor = 'factor_price_ivff.pkl'
-# # IC or rank IC
-# method = 'IC'
-#
-# # dataflow数据地址
-# indir_dataflow = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-# # data数据的文件名
-# name_dataflow_1 = 'all_ret_sum.pkl'
-# name_dataflow_3 = ['all_ret_sum.pkl', 'all_dayindex.pkl', 'all_indu.pkl']
-# # factor数据地址
-# indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-# # performance数据存放地址
-# indir_perf = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
-#
-# # performance_ic = PerformanceIc(indir_dataflow, name_dataflow_1, indir_factor, factor, indir_perf, method)
-# performance_ic = PerformanceIc1(indir_dataflow, name_dataflow_3, indir_factor, factor, indir_perf, method)
-# # performance_ic = PerformanceIc2(indir_dataflow, name_dataflow_3, indir_factor, factor, indir_perf, method)
-# # 计算每期ic值，并存储
-# performance_ic.runflow()
-# # 根据每期ic值，计算ic均值
-# temp = performance_ic.result.mean()

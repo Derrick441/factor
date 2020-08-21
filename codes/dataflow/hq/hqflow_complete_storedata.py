@@ -29,7 +29,6 @@ class HqflowCompleteStoredata(object):
                '((substr(stockcode,1,2) in (\'00\',\'30\')) and substr(stockcode,8,2)=\'SZ\') or ' \
                '((substr(stockcode,1,2) in (\'60\',\'68\')) and substr(stockcode,8,2)=\'SH\') ) ' \
                'order by stockcode,bargaindate,bargaintime'
-
         try:
             sqldata = pd.read_sql(sqlq, conn)
             sqldata.rename(columns=lambda x: x.lower(), inplace=True)
