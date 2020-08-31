@@ -60,7 +60,7 @@ class ComposeFiveMinData(object):
 
     def fileout(self):
         t = time.time()
-        self.result.to_pickle(self.file_i + 'five_' + self.file_n)
+        self.result.to_pickle(self.file_i + self.file_n[0:21] + '_5.pkl')
         print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):

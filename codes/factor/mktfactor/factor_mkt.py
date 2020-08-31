@@ -1,10 +1,9 @@
 import pandas as pd
 import time
 
+
 # 日频率
 # 市场因子：中证500日收益率
-
-
 class Mkt(object):
 
     def __init__(self, indir, index):
@@ -15,12 +14,14 @@ class Mkt(object):
         self.mkt_price = pd.read_pickle(self.indir + self.index + '/' + self.index + '_indexprice.pkl')
 
     def mkt(self):
+        t = time.time()
         self.mkt_reset = self.mkt_price.reset_index()
         # 指数点位 转 指数涨跌幅
         self.mkt_reset['mkt'] = self.mkt_reset.s_dq_change / self.mkt_reset.s_dq_preclose * 100
         # 结果
         item = ['trade_dt', 'mkt']
         self.result = self.mkt_reset[item]
+        print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()

@@ -12,73 +12,75 @@ class IntradayThressIndex(object):
         self.file_indir = file_indir
         self.file_f = file_f
 
-    def filein(self):
+    def filein(self, file):
         t = time.time()
         # 从dataflow文件夹中取日内5分钟高频数据
-        self.data_5min = pd.read_pickle(self.file_indir + self.file_f)
+        self.data_5min = pd.read_pickle(self.file_indir + file)
+        # 从factor文件夹中取5分钟因子数据
+        indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\mktfactor\\'
+        self.mkt_5min = pd.read_pickle(indir_factor + 'factor_mkt_5min_' + file[17:21] + '.pkl')
+        self.smb_5min = pd.read_pickle(indir_factor + 'factor_smb_5min_' + file[17:21] + '.pkl')
+        self.hml_5min = pd.read_pickle(indir_factor + 'factor_hml_5min_' + file[17:21] + '.pkl')
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def data_manage(self):
-        # t = time.time()
-        # print('datamanage running time:%10.4fs' % (time.time() - t))
-        pass
+        t = time.time()
+        self.data = pd.merge(self.data_5min, self.mkt_5min, how='left')
+        self.data = pd.merge(self.data, self.smb_5min, how='left')
+        self.data = pd.merge(self.data, self.hml_5min, how='left')
+        print('datamanage running time:%10.4fs' % (time.time() - t))
 
-    def regress1(self, data, y, x):
+    def regress(self, data, y, x):
         Y = data[y]
         X = data[x]
         X['intercept'] = 1
         result = sm.OLS(Y, X).fit()
-        return np.sqrt(result.ssr)
-
-    def regress2(self, data, y, x):
-        Y = data[y]
-        X = data[x]
-        X['intercept'] = 1
-        result = sm.OLS(Y, X).fit()
-        return result.resid.skew()
-
-    def regress3(self, data, y, x):
-        Y = data[y]
-        X = data[x]
-        X['intercept'] = 1
-        result = sm.OLS(Y, X).fit()
-        return result.resid.kurt()
+        return np.sqrt(result.ssr), result.resid.skew(), result.resid.kurt()
 
     def compute_intraday3index(self):
         t = time.time()
-        # 每股滚动回归计算ivff
-        self.result = self.data_5min.groupby(['s_info_windcode', 'trade_dt']).apply(self.regress1,).reset_index()
-        self.result.rename({0: 'Dvol'})
-        self.result['DSkew'] = self.data_5min.groupby(['s_info_windcode', 'trade_dt']).apply(self.regress1).values
-        self.result['DKurt'] = self.data_5min.groupby(['s_info_windcode', 'trade_dt']).apply(self.regress2).values
+        temp = self.data.groupby(['s_info_windcode', 'trade_dt']) \
+                        .apply(self.regress, 'change', ['mkt', 'smb', 'hml'])\
+                        .apply(pd.Series)\
+                        .reset_index()
+        self.result = temp.rename({0: 'Dvol', 1: 'Dskew', 2: 'Dkurt'})
         print('compute_intraday3index running time:%10.4fs' % (time.time() - t))
-
-    def fileout(self):
-        t = time.time()
-        # 输出到factor文件夹的stockfactor中
-        item = ['trade_dt', 's_info_windcode', 'ivff']
-        indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-        self.result[item].to_pickle(indir_factor + 'factor_price_ivff.pkl')
-        print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
         t = time.time()
         print('compute start')
-        self.filein()
-        self.data_manage()
-        self.compute_ivff()
-        self.fileout()
+        self.result_sum = []
+        # 分年度计算因子
+        for i in self.file_f:
+            print(i)
+            self.filein(i)
+            self.data_manage()
+            self.compute_intraday3index()
+            self.result_sum.append(self.result)
+        # 因子汇总
+        self.result_final = pd.concat(self.result_sum)
+        # 数据对齐
+        self.all_data = pd.read_pickle(self.file_indir + 'all_dayindex.pkl')
+        self.final = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.result_final, how='left')
+        # 三个因子分别输出到factor文件夹的stockfactor中
+        indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+        item1 = ['trade_dt', 's_info_windcode', 'Dvol']
+        item2 = ['trade_dt', 's_info_windcode', 'Dskew']
+        item3 = ['trade_dt', 's_info_windcode', 'Dkurt']
+        self.final[item1].to_pickle(indir_factor + 'factor_price_Dvol.pkl')
+        self.final[item2].to_pickle(indir_factor + 'factor_price_Dskew.pkl')
+        self.final[item3].to_pickle(indir_factor + 'factor_price_Dkurt.pkl')
         print('compute finish, all running time:%10.4fs' % (time.time() - t))
         return self
 
 
 if __name__ == '__main__':
     indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    file_five = ['hpdata_5min_2012.pkl']
-    # file_five = ['hpdata_5min_2012.pkl', 'hpdata_5min_2013.pkl', 'hpdata_5min_2014.pkl',
-    #              'hpdata_5min_2015.pkl', 'hpdata_5min_2016.pkl', 'hpdata_5min_2017.pkl',
-    #              'hpdata_5min_2018.pkl', 'hpdata_5min_2019.pkl', 'hpdata_5min_2020.pkl']
-    for i in file_five:
-        print(i[-8:-4])
-        df = IntradayThressIndex(indir, i)
-        df.runflow()
+    file_index = ['all_store_hqdata_2012_5_derive.pkl']
+    # file_index = ['all_store_hqdata_2012_5_derive.pkl', 'all_store_hqdata_2013_5_derive.pkl',
+    #               'all_store_hqdata_2014_5_derive.pkl', 'all_store_hqdata_2015_5_derive.pkl',
+    #               'all_store_hqdata_2016_5_derive.pkl', 'all_store_hqdata_2017_5_derive.pkl',
+    #               'all_store_hqdata_2018_5_derive.pkl', 'all_store_hqdata_2019_5_derive.pkl',
+    #               'all_store_hqdata_2020_5_derive.pkl']
+    df = IntradayThressIndex(indir, file_index)
+    df.runflow()

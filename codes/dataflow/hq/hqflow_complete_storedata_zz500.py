@@ -51,7 +51,7 @@ class HqflowCompleteStoredata(object):
                     yearhq = pd.concat([yearhq, datehq], axis=0)
 
             if not yearhq.empty:
-                yearhq.to_pickle(self.indir+self.index+'/'+self.index+'_store_hqdata_'+str(year)+'zz500.pkl')
+                yearhq.to_pickle(self.indir+'zz500'+'/'+'zz500_store_hqdata_'+str(year)+'.pkl')
 
     def runflow(self):
         self.filein()

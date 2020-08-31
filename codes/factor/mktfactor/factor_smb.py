@@ -1,10 +1,9 @@
 import pandas as pd
 import time
 
+
 # 日频率
 # 市值因子：每日，根据股票市值，取市值前1/3股票作小市值组合，取市值后1/3股票作大市值组合，两组股票收益率均值之差作市值因子
-
-
 class Smb(object):
 
     def __init__(self, indir, index):
@@ -32,7 +31,7 @@ class Smb(object):
         t = time.time()
         # 计算每日市值因子
         self.result = self.all_data.groupby('trade_dt').apply(self.daysmb).reset_index().rename(columns={0: 'smb'})
-        print('fileout running time:%10.4fs' % (time.time() - t))
+        print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()

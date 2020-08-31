@@ -1,10 +1,9 @@
 import pandas as pd
 import time
 
+
 # 日频率
 # 动量因子：每日，根据股票收益率，取收益率前1/3股票作低收益组合，取收益率后1/3股票作高收益组合，两组股票收益率均值之差作动量因子
-
-
 class Mom(object):
 
     def __init__(self, indir, index):
@@ -32,7 +31,7 @@ class Mom(object):
         t = time.time()
         # 计算每日动量因子
         self.result = self.all_data.groupby('trade_dt').apply(self.daymom).reset_index().rename(columns={0: 'mom'})
-        print('fileout running time:%10.4fs' % (time.time() - t))
+        print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()

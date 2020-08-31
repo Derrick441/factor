@@ -1,10 +1,9 @@
 import pandas as pd
 import time
 
+
 # 日频率
 # 估值因子：每日，根据股票估值，取估值前1/3股票作低估值组合，取估值后1/3股票作高估值组合，两组股票收益率均值之差作估值因子
-
-
 class Hml(object):
 
     def __init__(self, indir, index):
@@ -32,7 +31,7 @@ class Hml(object):
         t = time.time()
         # 计算每日估值因子
         self.result = self.all_data.groupby('trade_dt').apply(self.dayhml).reset_index().rename(columns={0: 'hml'})
-        print('fileout running time:%10.4fs' % (time.time() - t))
+        print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
