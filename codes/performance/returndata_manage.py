@@ -53,6 +53,7 @@ class RetMergeNeutral(object):
         self.data = pd.merge(self.data, self.ind, how='left')
         self.data.set_index(['trade_dt', 's_info_windcode'], inplace=True)
         self.data = pd.get_dummies(self.data)
+        self.data.drop('induname1_综合', axis=1, inplace=True)
         self.data.dropna(inplace=True)
         # 中性化回归
         ret_item = ['ret_1', 'ret_5', 'ret_10', 'ret_20', 'ret_60']

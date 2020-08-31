@@ -14,10 +14,10 @@ class Ivff(object):
 
     def filein(self):
         t = time.time()
-        # 从dataflow文件夹中取量价数据
+        # 从dataflow文件夹中取股票日行情数据
         self.all_data = pd.read_pickle(self.indir + self.index + '/' + self.index + '_dayindex.pkl')
-        # 从factor文件夹中取因子数据
-        indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\basicfactor\\'
+        # 从factor文件夹中取市场因子数据
+        indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\mktfactor\\'
         self.all_mkt = pd.read_pickle(indir_factor + 'factor_mkt.pkl')
         self.all_smb = pd.read_pickle(indir_factor + 'factor_smb.pkl')
         self.all_hml = pd.read_pickle(indir_factor + 'factor_hml.pkl')
@@ -25,6 +25,7 @@ class Ivff(object):
 
     def data_manage(self):
         t = time.time()
+        # 数据合并
         self.data_sum = pd.merge(self.all_data, self.all_mkt, how='left')
         self.data_sum = pd.merge(self.data_sum, self.all_smb, how='left')
         self.data_sum = pd.merge(self.data_sum, self.all_hml, how='left')
@@ -47,6 +48,7 @@ class Ivff(object):
 
     def compute_ivff(self):
         t = time.time()
+        # 每股滚动回归计算ivff
         self.result = self.data_sum.groupby('s_info_windcode').apply(self.rolling_regress)
         # 格式整理
         self.result.reset_index(inplace=True)
@@ -55,10 +57,12 @@ class Ivff(object):
 
     def fileout(self):
         t = time.time()
-        # 存在factor文件夹的stockfactor中
+        # 数据对齐
+        self.final = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.result, how='left')
+        # 输出到factor文件夹的stockfactor中
         item = ['trade_dt', 's_info_windcode', 'ivff']
         indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-        self.result[item].to_pickle(indir_factor + 'factor_price_ivff.pkl')
+        self.final[item].to_pickle(indir_factor + 'factor_price_ivff.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):

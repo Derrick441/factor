@@ -33,6 +33,7 @@ class FactorNeutral(object):
         self.data = pd.merge(self.data, self.ind, how='left')
         self.data.set_index(['trade_dt', 's_info_windcode'], inplace=True)
         self.data = pd.get_dummies(self.data)
+        self.data.drop('induname1_综合', axis=1, inplace=True)
         self.data.dropna(inplace=True)
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
@@ -79,11 +80,11 @@ if __name__ == '__main__':
     # factor中性化后输出地址
     indir_out = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
 
-    fn = FactorNeutral(indir_dataflow, indir_factor, name_factor, indir_out)
-    fn.runflow()
+    # fn = FactorNeutral(indir_dataflow, indir_factor, name_factor, indir_out)
+    # fn.runflow()
 
-    # # 计算全部因子
-    # name_factors = os.listdir(indir_factor)
-    # for i in name_factors:
-    #     fn = FactorNeutral(indir_dataflow, indir_factor, i, indir_out)
-    #     fn.runflow()
+    # 计算全部因子
+    name_factors = os.listdir(indir_factor)
+    for i in name_factors:
+        fn = FactorNeutral(indir_dataflow, indir_factor, i, indir_out)
+        fn.runflow()

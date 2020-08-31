@@ -3,7 +3,7 @@ import time
 
 
 # 日频率
-# 交易热度：特质波动率和特异度的组合
+# 交易热度：特异度和调整换手率的结合
 class Bi(object):
 
     # def __init__(self, indir, index):
@@ -12,7 +12,7 @@ class Bi(object):
 
     def filein(self):
         t = time.time()
-        # 从factor文件夹中取因子数据
+        # 从stockfactor文件夹中取ivr、turnoveradj因子数据
         indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
         self.ivr = pd.read_pickle(indir_factor + 'factor_price_ivr.pkl')
         self.turnoveradj = pd.read_pickle(indir_factor + 'factor_price_turnoveradj.pkl')
@@ -37,16 +37,19 @@ class Bi(object):
 
     def compute_bi(self):
         t = time.time()
+        # 根据两个因子的分位数计算bi
         self.data['bi'] = self.data.groupby(level=0).apply(self.quantile_add).values
         self.result = self.data.reset_index()
         print('compute_bi running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
-        # 存在factor文件夹的stockfactor中
+        # 数据对齐
+        self.final = pd.merge(self.ivr[['trade_dt', 's_info_windcode']], self.result, how='left')
+        # 输出到factor文件夹的stockfactor中
         item = ['trade_dt', 's_info_windcode', 'bi']
         indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-        self.result[item].to_pickle(indir_factor + 'factor_price_bi.pkl')
+        self.final[item].to_pickle(indir_factor + 'factor_price_bi.pkl')
         print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):

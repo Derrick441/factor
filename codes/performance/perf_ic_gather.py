@@ -11,7 +11,6 @@ def table5(method):
     # 输入、输出地址
     indir = [indir_perf + method + '_' + i for i in factors] + [indir_perf + method + '_neutral_' + i for i in factors]
     indir_out = [indir_perf + method + '_both_table' + i + '.pkl' for i in ['1', '5', '10', '20', '60']]
-
     # 数据读取和整合
     f_name = []
     ret_1 = []
@@ -28,13 +27,11 @@ def table5(method):
         ret_20.append(data.iloc[:, 3])
         ret_60.append(data.iloc[:, 4])
     ret = [ret_1, ret_5, ret_10, ret_20, ret_60]
-
     # 数据调整和输出
     for i in range(5):
         temp = pd.concat(ret[i], axis=1)
         temp.columns = f_name
         temp.to_pickle(indir_out[i])
-
     return 0
 
 
@@ -46,7 +43,6 @@ def table3(method):
     # 输入、输出地址
     indir = [indir_perf + method + '_' + i for i in factors] + [indir_perf + method + '_neutral_' + i for i in factors]
     indir_out = [indir_perf + method + '_both_mean_table' + i + '.csv' for i in ['07-19', '12-19', '17-19']]
-
     # 数据读取和整合
     f_name = []
     mean_07 = []
@@ -67,18 +63,14 @@ def table3(method):
         data17 = data[data.trade_dt >= 20170101]
         mean_17.append(data17.mean())
     mean = [mean_07, mean_12, mean_17]
-
     for i in range(3):
         temp = pd.concat(mean[i], axis=1)
         temp.columns = f_name
         result = temp.T.drop('trade_dt', axis=1)
         result.to_csv(indir_out[i])
-
     return 0
 
 
 if __name__ == '__main__':
     table5('IC')
     table3('IC')
-
-# ---------------------------------------------------------------------------------------------------------------------#

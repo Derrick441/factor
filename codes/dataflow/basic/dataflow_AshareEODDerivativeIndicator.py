@@ -3,6 +3,7 @@ import sqlconn
 import time
 
 
+# wind日行情估值指标数据（包含市值、市盈率、市净率、换手率、股价、收益率）
 class DerivativeIndicator(object):
 
     def __init__(self, index, indir, startdate, enddate):
@@ -33,13 +34,15 @@ class DerivativeIndicator(object):
         self.data.rename(columns=lambda x: x.lower(), inplace=True)
         self.data.drop_duplicates(subset=['trade_dt', 's_info_windcode'], keep='first', inplace=True)
 
-        # 根据all_band_dates_stocks_closep计算收益率，将其与wind日行情估值指标数据集合并（纳入收益率数据，并使数据对其）
+        # 根据all_band_dates_stocks_closep计算收益率，并将日收益率与dayindex合并
         self.data_change_pivot = self.price.pivot('trade_dt', 's_info_windcode', 's_dq_close').pct_change()*100
         self.data_change = self.data_change_pivot.stack().reset_index().rename(columns={0: 'change'})
         self.result = pd.merge(self.data_change, self.data, how='left')
 
+        # 数据对齐
+        self.result = pd.merge(self.price[['trade_dt', 's_info_windcode']], self.result, how='left')
+        # 数据排序
         self.result.sort_values(by=['trade_dt', 's_info_windcode'], inplace=True)
-        self.result.reset_index(drop=True, inplace=True)
         print('datamanage running time: %10.4fs' % (time.time() - t))
 
     def fileout(self):

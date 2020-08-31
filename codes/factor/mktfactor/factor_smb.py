@@ -37,7 +37,7 @@ class Smb(object):
     def fileout(self):
         t = time.time()
         # 存在factor文件夹的basicfactor中
-        indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\basicfactor\\'
+        indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\mktfactor\\'
         self.result.to_pickle(indir_factor + 'factor_smb.pkl')
         print('fileout running time:%10.4fs' % (time.time() - t))
 
