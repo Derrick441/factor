@@ -66,13 +66,20 @@ if __name__ == '__main__':
     indir_dataflow_ret = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\all_ret_sum.pkl'
     # factor地址和factor文件名
     indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    name_factor = 'factor_price_bi.pkl'
     # performance中ic地址
     indir_perf_ic = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
     # ic 或者 rank ic
     method = 'IC'
+
+    # name_factor = 'factor_price_bi.pkl'
     # ic = PerfIc(indir_dataflow_ret, indir_factor, name_factor, indir_perf_ic, method)
     # ic.runflow()
+
+    # 计算多个因子ic
+    name_factors = ['factor_price_Dkurt.pkl', 'factor_price_Dskew.pkl', 'factor_price_Dvol.pkl']
+    for i in name_factors:
+        ic = PerfIc(indir_dataflow_ret, indir_factor, i, indir_perf_ic, method)
+        ic.runflow()
 
     # 计算全部因子ic
     name_factors = os.listdir(indir_factor)
@@ -80,12 +87,35 @@ if __name__ == '__main__':
         ic = PerfIc(indir_dataflow_ret, indir_factor, i, indir_perf_ic, method)
         ic.runflow()
 
-# 中性化ic--------------------------------------------------------------------------------------------------------------
+# 中性化因子ic--------------------------------------------------------------------------------------------------------------
     indir_dataflow_ret = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\all_ret_sum_neutral.pkl'
     indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
-    name_factor = 'neutral_factor_price_bi.pkl'
     indir_perf_ic = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
     method = 'IC'
+
+    # name_factor = 'neutral_factor_price_bi.pkl'
+    # ic = PerfIc(indir_dataflow_ret, indir_factor, name_factor, indir_perf_ic, method)
+    # ic.runflow()
+
+    # 计算多个因子ic
+    name_factors = ['neutral_factor_price_Dkurt.pkl', 'neutral_factor_price_Dskew.pkl', 'neutral_factor_price_Dvol.pkl']
+    for i in name_factors:
+        ic = PerfIc(indir_dataflow_ret, indir_factor, i, indir_perf_ic, method)
+        ic.runflow()
+
+    # 计算全部因子ic
+    name_factors = os.listdir(indir_factor)
+    for i in name_factors:
+        ic = PerfIc(indir_dataflow_ret, indir_factor, i, indir_perf_ic, method)
+        ic.runflow()
+
+# 组合因子（中性化因子组合而成的因子）ic--------------------------------------------------------------------------------------------------------------
+    indir_dataflow_ret = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\all_ret_sum_neutral.pkl'
+    indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_combine\\'
+    indir_perf_ic = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
+    method = 'IC'
+
+    # name_factor = 'mean.pkl'
     # ic = PerfIc(indir_dataflow_ret, indir_factor, name_factor, indir_perf_ic, method)
     # ic.runflow()
 

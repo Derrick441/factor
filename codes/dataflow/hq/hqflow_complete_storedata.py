@@ -66,7 +66,7 @@ class HqflowCompleteStoredata(object):
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
     file_index = 'all'
-    data_startdate = '20120102'
-    data_enddate = '20200630'
+    data_startdate = '20120101'
+    data_enddate = '20191231'
     hcs = HqflowCompleteStoredata(file_indir, file_index, data_startdate, data_enddate, 'M1')
     hcs.runflow()

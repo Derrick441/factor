@@ -70,13 +70,12 @@ class DataflowPricelist(object):
         # self.data_fillna_pivot()
         self.data_fillna()
         self.fileout()
-        return self
 
 
 if __name__ == '__main__':
     file_index = 'all'
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
-    data_startdate = '20050701'
-    data_enddate = '20200630'
+    data_startdate = '20050101'
+    data_enddate = '20191231'
     pricelist = DataflowPricelist(file_index, file_indir, data_startdate, data_enddate)
     pricelist.runflow()

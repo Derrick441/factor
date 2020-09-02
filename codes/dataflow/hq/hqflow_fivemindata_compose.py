@@ -5,20 +5,20 @@ import time
 # 由1分钟高频数据合成5分钟高频数据
 class ComposeFiveMinData(object):
 
-    def __init__(self, file_i, file_n):
-        self.file_i = file_i
-        self.file_n = file_n
+    def __init__(self, file_indir, file_name):
+        self.file_indir = file_indir
+        self.file_name = file_name
 
     def filein(self):
         t = time.time()
         # 从dataflow文件夹中取日内高频数据
-        self.all_data = pd.read_pickle(self.file_i + self.file_n)
+        self.all_data = pd.read_pickle(self.file_indir + self.file_name)
         print('filein running time:%10.4fs' % (time.time() - t))
 
     def compose_one_five(self, data):
-        # 显示
+        # 数据显示
         print(data.iloc[0, 0]+'-'+data.iloc[0, 2])
-        # 数据排序（9.30->15.00）
+        # 数据排序
         data1 = data.sort_values(by='bargaintime')
         # 索引
         len1 = len(data)
@@ -50,7 +50,6 @@ class ComposeFiveMinData(object):
         return result
 
     def datamanage(self):
-
         t = time.time()
         # 一分钟数据合并成5分钟数据
         self.result = self.all_data.groupby(['s_info_windcode', 'trade_dt'])\
@@ -60,7 +59,7 @@ class ComposeFiveMinData(object):
 
     def fileout(self):
         t = time.time()
-        self.result.to_pickle(self.file_i + self.file_n[0:21] + '_5.pkl')
+        self.result.to_pickle(self.file_indir + self.file_name[0:21] + '_5.pkl')
         print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
@@ -74,11 +73,11 @@ class ComposeFiveMinData(object):
 
 
 if __name__ == '__main__':
-    indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    file_name = ['all_store_hqdata_2012.pkl', 'all_store_hqdata_2013.pkl', 'all_store_hqdata_2014.pkl',
-                 'all_store_hqdata_2015.pkl', 'all_store_hqdata_2016.pkl', 'all_store_hqdata_2017.pkl',
-                 'all_store_hqdata_2018.pkl', 'all_store_hqdata_2019.pkl', 'all_store_hqdata_2020.pkl']
-    for i in file_name:
+    file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
+    file_names = ['all_store_hqdata_2012.pkl', 'all_store_hqdata_2013.pkl', 'all_store_hqdata_2014.pkl',
+                  'all_store_hqdata_2015.pkl', 'all_store_hqdata_2016.pkl', 'all_store_hqdata_2017.pkl',
+                  'all_store_hqdata_2018.pkl', 'all_store_hqdata_2019.pkl']
+    for i in file_names:
         print(i[-8:-4])
-        fmd = ComposeFiveMinData(indir, i)
+        fmd = ComposeFiveMinData(file_indir, i)
         fmd.runflow()

@@ -6,30 +6,31 @@ import statsmodels.api as sm
 # 汇总5个收益率数据，并对其进行中性化处理
 class RetMergeNeutral(object):
 
-    def __init__(self, indir_d):
-        self.indir_d = indir_d
+    def __init__(self, file_indir):
+        self.file_indir = file_indir
 
     def filein(self):
         t = time.time()
         # 从dataflow文件夹中读取return数据
-        self.ret_1 = pd.read_pickle(self.indir_d + 'all_band_price_label1.pkl')
-        self.ret_5 = pd.read_pickle(self.indir_d + 'all_band_price_label5.pkl')
-        self.ret_10 = pd.read_pickle(self.indir_d + 'all_band_price_label10.pkl')
-        self.ret_20 = pd.read_pickle(self.indir_d + 'all_band_price_label20.pkl')
-        self.ret_60 = pd.read_pickle(self.indir_d + 'all_band_price_label60.pkl')
+        self.ret_1 = pd.read_pickle(self.file_indir + 'all_band_price_label1.pkl')
+        self.ret_5 = pd.read_pickle(self.file_indir + 'all_band_price_label5.pkl')
+        self.ret_10 = pd.read_pickle(self.file_indir + 'all_band_price_label10.pkl')
+        self.ret_20 = pd.read_pickle(self.file_indir + 'all_band_price_label20.pkl')
+        self.ret_60 = pd.read_pickle(self.file_indir + 'all_band_price_label60.pkl')
         # 从dataflow文件夹中读取市值、行业数据
-        self.dayindex = pd.read_pickle(self.indir_d + 'all_dayindex.pkl')
-        self.inds = pd.read_pickle(self.indir_d + 'all_band_indu.pkl')
+        self.dayindex = pd.read_pickle(self.file_indir + 'all_dayindex.pkl')
+        self.inds = pd.read_pickle(self.file_indir + 'all_band_indu.pkl')
         print('filein running time:%10.4fs' % (time.time() - t))
 
     def datamange_merge(self):
-        # 收益数据合并
+        # 数据处理
         t = time.time()
         temp1 = self.ret_1.reset_index().rename(columns={0: 'ret_1'})
         temp5 = self.ret_5.reset_index().rename(columns={0: 'ret_5'})
         temp10 = self.ret_10.reset_index().rename(columns={0: 'ret_10'})
         temp20 = self.ret_20.reset_index().rename(columns={0: 'ret_20'})
         temp60 = self.ret_60.reset_index().rename(columns={0: 'ret_60'})
+        # 收益数据合并
         data = pd.merge(temp1, temp5, how='left')
         data = pd.merge(data, temp10, how='left')
         data = pd.merge(data, temp20, how='left')
@@ -67,8 +68,8 @@ class RetMergeNeutral(object):
 
     def fileout(self):
         t = time.time()
-        self.result1.to_pickle(self.indir_d + 'all_ret_sum.pkl')
-        self.result2.to_pickle(self.indir_d + 'all_ret_sum_neutral.pkl')
+        self.result1.to_pickle(self.file_indir + 'all_ret_sum.pkl')
+        self.result2.to_pickle(self.file_indir + 'all_ret_sum_neutral.pkl')
         print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
@@ -79,6 +80,6 @@ class RetMergeNeutral(object):
 
 
 if __name__ == '__main__':
-    indir_dataflow = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    ret_manage = RetMergeNeutral(indir_dataflow)
+    file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
+    ret_manage = RetMergeNeutral(file_indir)
     ret_manage.runflow()

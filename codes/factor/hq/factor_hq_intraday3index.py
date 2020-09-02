@@ -8,9 +8,9 @@ import statsmodels.api as sm
 # 高频数据计算的：日内特质波动率，日内偏度，日内峰度
 class IntradayThressIndex(object):
 
-    def __init__(self, file_indir, file_f):
+    def __init__(self, file_indir, file_name):
         self.file_indir = file_indir
-        self.file_f = file_f
+        self.file_name = file_name
 
     def filein(self, file):
         t = time.time()
@@ -43,44 +43,45 @@ class IntradayThressIndex(object):
                         .apply(self.regress, 'change', ['mkt', 'smb', 'hml'])\
                         .apply(pd.Series)\
                         .reset_index()
-        self.result = temp.rename({0: 'Dvol', 1: 'Dskew', 2: 'Dkurt'})
+        self.temp_result = temp.rename(columns={0: 'Dvol', 1: 'Dskew', 2: 'Dkurt'})
         print('compute_intraday3index running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
         t = time.time()
-        print('compute start')
+        print('start')
         self.result_sum = []
         # 分年度计算因子
-        for i in self.file_f:
+        for i in self.file_name:
             print(i)
             self.filein(i)
             self.data_manage()
             self.compute_intraday3index()
-            self.result_sum.append(self.result)
+            self.result_sum.append(self.temp_result)
+
         # 因子汇总
-        self.result_final = pd.concat(self.result_sum)
+        print('sum')
+        self.result_concat = pd.concat(self.result_sum)
         # 数据对齐
         self.all_data = pd.read_pickle(self.file_indir + 'all_dayindex.pkl')
-        self.final = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.result_final, how='left')
+        self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.result_concat, how='left')
+
         # 三个因子分别输出到factor文件夹的stockfactor中
         indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
         item1 = ['trade_dt', 's_info_windcode', 'Dvol']
         item2 = ['trade_dt', 's_info_windcode', 'Dskew']
         item3 = ['trade_dt', 's_info_windcode', 'Dkurt']
-        self.final[item1].to_pickle(indir_factor + 'factor_price_Dvol.pkl')
-        self.final[item2].to_pickle(indir_factor + 'factor_price_Dskew.pkl')
-        self.final[item3].to_pickle(indir_factor + 'factor_price_Dkurt.pkl')
-        print('compute finish, all running time:%10.4fs' % (time.time() - t))
-        return self
+        self.result[item1].to_pickle(indir_factor + 'factor_price_Dvol.pkl')
+        self.result[item2].to_pickle(indir_factor + 'factor_price_Dskew.pkl')
+        self.result[item3].to_pickle(indir_factor + 'factor_price_Dkurt.pkl')
+        print('end running time:%10.4fs' % (time.time() - t))
 
 
 if __name__ == '__main__':
-    indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    file_index = ['all_store_hqdata_2012_5_derive.pkl']
-    # file_index = ['all_store_hqdata_2012_5_derive.pkl', 'all_store_hqdata_2013_5_derive.pkl',
-    #               'all_store_hqdata_2014_5_derive.pkl', 'all_store_hqdata_2015_5_derive.pkl',
-    #               'all_store_hqdata_2016_5_derive.pkl', 'all_store_hqdata_2017_5_derive.pkl',
-    #               'all_store_hqdata_2018_5_derive.pkl', 'all_store_hqdata_2019_5_derive.pkl',
-    #               'all_store_hqdata_2020_5_derive.pkl']
-    df = IntradayThressIndex(indir, file_index)
+    file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
+    # file_index = ['all_store_hqdata_2012_5_derive.pkl']
+    file_name = ['all_store_hqdata_2012_5_derive.pkl', 'all_store_hqdata_2013_5_derive.pkl',
+                 'all_store_hqdata_2014_5_derive.pkl', 'all_store_hqdata_2015_5_derive.pkl',
+                 'all_store_hqdata_2016_5_derive.pkl', 'all_store_hqdata_2017_5_derive.pkl',
+                 'all_store_hqdata_2018_5_derive.pkl', 'all_store_hqdata_2019_5_derive.pkl']
+    df = IntradayThressIndex(file_indir, file_name)
     df.runflow()

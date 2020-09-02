@@ -9,24 +9,24 @@ import statsmodels.api as sm
 # 回归换手率和市值，取残差作为市值调整换手率
 class TurnoverAdjusted(object):
 
-    def __init__(self, indir, index):
-        self.indir = indir
-        self.index = index
+    def __init__(self, file_indir, file_name):
+        self.file_indir = file_indir
+        self.file_name = file_name
 
     def filein(self):
         t = time.time()
-        # 从dataflow文件夹中取量价数据
-        self.price = pd.read_pickle(self.indir + self.index + '/' + self.index + '_band_dates_stocks_closep.pkl')
-        self.all_band_price = pd.read_pickle(self.indir + self.index + '/' + self.index + '_band_price.pkl')
-        self.all_fashre = pd.read_pickle(self.indir + self.index + '/' + self.index + '_float_a_shr.pkl')
-        self.all_famv = pd.read_pickle(self.indir + self.index + '/' + self.index + '_float_a_mv.pkl')
+        # 从dataflow文件夹中取股票日行情数据
+        self.price = pd.read_pickle(self.file_indir + self.file_name[0])
+        self.all_band_price = pd.read_pickle(self.file_indir + self.file_name[1])
+        self.all_fashre = pd.read_pickle(self.file_indir + self.file_name[2])
+        self.all_famv = pd.read_pickle(self.file_indir + self.file_name[3])
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def data_manage(self):
         t = time.time()
         # 取成交量数据
         data_volume = self.all_band_price[['trade_dt', 's_info_windcode', 's_dq_volume']]
-        # 股本、市值数据reset_index()
+        # 股本、市值数据调整
         data_fashre_reset = self.all_fashre.reset_index()
         data_famv_reset = self.all_famv.reset_index()
         # 数据合并
@@ -65,26 +65,25 @@ class TurnoverAdjusted(object):
     def fileout(self):
         t = time.time()
         # 数据对齐
-        item = ['trade_dt', 's_info_windcode', 'turnoveradj']
-        self.result = pd.merge(self.price, self.result_temp[item])
+        self.result = pd.merge(self.price[['trade_dt', 's_info_windcode']], self.result_temp[item])
         # 输出到factor文件夹的stockfactor中
+        item = ['trade_dt', 's_info_windcode', 'turnoveradj']
         indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
         self.result[item].to_pickle(indir_factor + 'factor_price_turnoveradj.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
         t = time.time()
-        print('compute start')
+        print('start')
         self.filein()
         self.data_manage()
         self.compute_turnover_adjusted()
         self.fileout()
-        print('compute finish, all running time:%10.4fs' % (time.time() - t))
-        return self
+        print('end running time:%10.4fs' % (time.time() - t))
 
 
 if __name__ == '__main__':
-    file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
-    file_index = 'all'
-    turnover_adjusted = TurnoverAdjusted(file_indir, file_index)
+    file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
+    file_name = ['all_band_dates_stocks_closep.pkl', '_band_price.pkl', '_float_a_shr.pkl', '_float_a_mv.pkl']
+    turnover_adjusted = TurnoverAdjusted(file_indir, file_name)
     turnover_adjusted.runflow()

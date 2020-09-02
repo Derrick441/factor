@@ -10,14 +10,14 @@ np.seterr(invalid='ignore')
 # ln_price_spread=ln(p)-ln(ref_p)   [ln_price_spread-mean(ln_price_spread,60)]/std(ln_price_spread,60)
 class Spreadbias(object):
 
-    def __init__(self, indir, index):
-        self.indir = indir
-        self.index = index
+    def __init__(self, file_indir, file_name):
+        self.file_indir = file_indir
+        self.file_name = file_name
 
     def filein(self):
         t = time.time()
-        # 从dataflow文件夹中取股价数据
-        self.price = pd.read_pickle(self.indir + self.index + '/' + self.index + '_band_dates_stocks_closep.pkl')
+        # 从dataflow文件夹中取股票日行情数据
+        self.price = pd.read_pickle(self.file_indir + self.file_name)
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def data_manage(self):
@@ -81,26 +81,25 @@ class Spreadbias(object):
     def fileout(self):
         t = time.time()
         # 数据对齐
-        item = ['trade_dt', 's_info_windcode', 'spreadbias']
-        self.result = pd.merge(self.price, self.data_sum[item], how='left')
+        self.result = pd.merge(self.price[['trade_dt', 's_info_windcode']], self.data_sum[item], how='left')
         # 输出到factor文件夹的stockfactor中
+        item = ['trade_dt', 's_info_windcode', 'spreadbias']
         indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
         self.result[item].to_pickle(indir_factor + 'factor_price_spreadbias.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
         t = time.time()
-        print('compute start')
+        print('start')
         self.filein()
         self.data_manage()
         self.compute_spreadbias()
         self.fileout()
-        print('compute finish, all running time:%10.4fs' % (time.time() - t))
-        return self
+        print('end running time:%10.4fs' % (time.time() - t))
 
 
 if __name__ == '__main__':
-    file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
-    file_index = 'all'
-    spreadbias = Spreadbias(file_indir, file_index)
+    file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
+    file_name = 'all_band_dates_stocks_closep.pkl'
+    spreadbias = Spreadbias(file_indir, file_name)
     spreadbias.runflow()

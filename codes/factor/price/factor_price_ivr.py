@@ -7,14 +7,14 @@ import statsmodels.regression.rolling as regroll
 # 特异度：1-收益率剔除市场因子、市值因子、估值因子回归模型的rsquared
 class Ivr(object):
 
-    def __init__(self, indir, index):
-        self.indir = indir
-        self.index = index
+    def __init__(self, file_indir, file_name):
+        self.file_indir = file_indir
+        self.file_name = file_name
 
     def filein(self):
         t = time.time()
         # 从dataflow文件夹中取股票日行情数据
-        self.all_data = pd.read_pickle(self.indir + self.index + '/' + self.index + '_dayindex.pkl')
+        self.all_data = pd.read_pickle(self.file_indir + self.file_name)
         # 从factor文件夹中取市场因子数据
         indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\mktfactor\\'
         self.all_mkt = pd.read_pickle(indir_factor + 'factor_mkt.pkl')
@@ -67,17 +67,16 @@ class Ivr(object):
 
     def runflow(self):
         t = time.time()
-        print('compute start')
+        print('start')
         self.filein()
         self.data_manage()
         self.compute_ivr()
         self.fileout()
-        print('compute finish, all running time:%10.4fs' % (time.time() - t))
-        return self
+        print('end running time:%10.4fs' % (time.time() - t))
 
 
 if __name__ == '__main__':
-    indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
-    index = 'all'
-    ivr = Ivr(indir, index)
+    file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
+    file_name = 'all_dayindex.pkl'
+    ivr = Ivr(file_indir, file_name)
     ivr.runflow()

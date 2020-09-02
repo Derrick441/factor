@@ -4,16 +4,16 @@ from sqlconn import sqlconnJYDB
 
 class HqflowCompleteStoredata(object):
 
-    def __init__(self, indir, index, startdate, enddate, hqtype):
-        self.indir = indir
-        self.index = index
+    def __init__(self, file_indir, file_name, startdate, enddate, hqtype):
+        self.file_indir = file_indir
+        self.file_name = file_name
         self.startdate = startdate
         self.enddate = enddate
         self.hqtype = hqtype
         self.hqdata = pd.DataFrame()
 
     def filein(self):
-        self.dates = pd.read_pickle(self.indir+self.index+'\\'+self.index+'_dates.pkl')
+        self.dates = pd.read_pickle(self.file_indir + 'all_dates.pkl')
         self.dates.drop_duplicates(inplace=True)
         self.dates = self.dates.loc[(self.dates >= self.startdate) & (self.dates <= self.enddate)]
         self.dates = self.dates.to_frame('trade_dt')
@@ -51,7 +51,8 @@ class HqflowCompleteStoredata(object):
                     yearhq = pd.concat([yearhq, datehq], axis=0)
 
             if not yearhq.empty:
-                yearhq.to_pickle(self.indir+'zz500'+'/'+'zz500_store_hqdata_'+str(year)+'.pkl')
+                indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\zz500\\'
+                yearhq.to_pickle(indir + 'zz500_store_hqdata_'+str(year)+'.pkl')
 
     def runflow(self):
         self.filein()
@@ -59,9 +60,9 @@ class HqflowCompleteStoredata(object):
 
 
 if __name__ == '__main__':
-    file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
-    file_index = 'all'
-    data_startdate = '20120102'
-    data_enddate = '20200630'
-    hcs = HqflowCompleteStoredata(file_indir, file_index, data_startdate, data_enddate, 'M1')
+    file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
+    file_name = 'all_band_dates_stocks_closep.pkl'
+    startdate = '20050101'
+    enddate = '20191231'
+    hcs = HqflowCompleteStoredata(file_indir, file_name, startdate, enddate, 'M1')
     hcs.runflow()

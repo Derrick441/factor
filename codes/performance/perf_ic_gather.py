@@ -4,13 +4,13 @@ import os
 
 # method:IC or rank_IC
 def table5(method):
-    # ic数据地址和factor文件名
-    indir_perf = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
-    indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    factors = os.listdir(indir_factor)
-    # 输入、输出地址
-    indir = [indir_perf + method + '_' + i for i in factors] + [indir_perf + method + '_neutral_' + i for i in factors]
-    indir_out = [indir_perf + method + '_both_table' + i + '.pkl' for i in ['1', '5', '10', '20', '60']]
+    # 输入地址
+    indir_ic = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
+    ics = os.listdir(indir_ic)
+    indir = [indir_ic + i for i in ics]
+    # 输出地址
+    indir_ic_sum = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic_sum\\'
+    indir_out = [indir_ic_sum + method + '_table' + i + '.pkl' for i in ['1', '5', '10', '20', '60']]
     # 数据读取和整合
     f_name = []
     ret_1 = []
@@ -37,12 +37,12 @@ def table5(method):
 
 def table3(method):
     # ic数据地址和factor文件名
-    indir_perf = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
-    indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    factors = os.listdir(indir_factor)
-    # 输入、输出地址
-    indir = [indir_perf + method + '_' + i for i in factors] + [indir_perf + method + '_neutral_' + i for i in factors]
-    indir_out = [indir_perf + method + '_both_mean_table' + i + '.csv' for i in ['07-19', '12-19', '17-19']]
+    indir_ic = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
+    ics = os.listdir(indir_ic)
+    indir = [indir_ic + i for i in ics]
+    # 输出地址
+    indir_ic_sum = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic_sum\\'
+    indir_out = [indir_ic_sum + method + '_mean_table' + i + '.csv' for i in ['07-19', '12-19', '17-19']]
     # 数据读取和整合
     f_name = []
     mean_07 = []

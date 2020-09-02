@@ -7,11 +7,11 @@ import os
 # 因子中性化
 class FactorNeutral(object):
 
-    def __init__(self, indir_d, indir_f, name_f, indir_o):
+    def __init__(self, indir_d, indir_f, indir_o, name_f):
         self.indir_d = indir_d
         self.indir_f = indir_f
-        self.name_f = name_f
         self.indir_o = indir_o
+        self.name_f = name_f
         print(self.name_f)
 
     def filein(self):
@@ -65,10 +65,13 @@ class FactorNeutral(object):
         print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
+        t = time.time()
+        print('start')
         self.filein()
         self.datamanage()
         self.factorneutral()
         self.fileout()
+        print('end running time:%10.4fs' % (time.time()-t))
 
 
 if __name__ == '__main__':
@@ -76,15 +79,22 @@ if __name__ == '__main__':
     indir_dataflow = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
     # factor地址和factor文件名
     indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    name_factor = 'factor_price_bi.pkl'
     # factor中性化后输出地址
     indir_out = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
 
-    # fn = FactorNeutral(indir_dataflow, indir_factor, name_factor, indir_out)
+    # # 中性化一个因子
+    # name_factor = 'factor_price_bi.pkl'
+    # fn = FactorNeutral(indir_dataflow, indir_factor, indir_out, name_factor)
     # fn.runflow()
 
-    # 计算全部因子
-    name_factors = os.listdir(indir_factor)
+    # 中性化多个因子
+    name_factors = ['factor_price_Dkurt.pkl', 'factor_price_Dskew.pkl', 'factor_price_Dvol.pkl']
     for i in name_factors:
-        fn = FactorNeutral(indir_dataflow, indir_factor, i, indir_out)
+        fn = FactorNeutral(indir_dataflow, indir_factor, indir_out, i)
         fn.runflow()
+
+    # # 中性化全部因子
+    # name_factors = os.listdir(indir_factor)
+    # for i in name_factors:
+    #     fn = FactorNeutral(indir_dataflow, indir_factor, indir_out, i)
+    #     fn.runflow()

@@ -83,11 +83,12 @@ class DataflowIndugen(object):
         self.indudata_merge()
         self.indudata_mix()
         self.fileout()
+        print('end')
 
 
 if __name__ == '__main__':
     file_index = 'all'
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
-    data_enddate = '20200630'
+    data_enddate = '20191231'
     indugen = DataflowIndugen(file_index, file_indir, data_enddate)
     indugen.runflow()

@@ -52,6 +52,7 @@ class DataflowListdate(object):
         self.filein()
         self.sqlin()
         self.listdate_gen()
+        print('end')
 
 
 if __name__ == '__main__':

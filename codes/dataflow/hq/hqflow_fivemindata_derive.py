@@ -5,15 +5,16 @@ import time
 # 日指标衍生出5分钟指标
 class DaytoFivemin(object):
 
-    def __init__(self, file_indir, file_d, file_f):
+    def __init__(self, file_indir, file_dayindex, file_name):
         self.file_indir = file_indir
-        self.file_d = file_d
-        self.file_f = file_f
+        self.file_dayindex = file_dayindex
+        self.file_name = file_name
 
     def filein(self):
         t = time.time()
-        self.data_day = pd.read_pickle(self.file_indir + self.file_d)
-        self.data_five = pd.read_pickle(self.file_indir + self.file_f)
+        # 读入日指标数据和5分钟数据
+        self.data_day = pd.read_pickle(self.file_indir + self.file_dayindex)
+        self.data_five = pd.read_pickle(self.file_indir + self.file_name)
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def datamange(self):
@@ -29,7 +30,7 @@ class DaytoFivemin(object):
 
     def fileout(self):
         t = time.time()
-        self.result.to_pickle(indir + self.file_f[0:23] + '_derive.pkl')
+        self.result.to_pickle(self.file_indir + self.file_name[0:23] + '_derive.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
@@ -38,17 +39,17 @@ class DaytoFivemin(object):
         self.filein()
         self.datamange()
         self.fileout()
-        print('end\nusing time:%10.4fs' % (time.time()-t))
+        print('end running time:%10.4fs' % (time.time()-t))
 
 
 if __name__ == '__main__':
-    indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    file_day = 'all_dayindex.pkl'
-    # file_five = ['all_store_hqdata_2012_5.pkl']
-    file_five = ['all_store_hqdata_2012_5.pkl', 'all_store_hqdata_2013_5.pkl', 'all_store_hqdata_2014_5.pkl',
-                 'all_store_hqdata_2015_5.pkl', 'all_store_hqdata_2016_5.pkl', 'all_store_hqdata_2017_5.pkl',
-                 'all_store_hqdata_2018_5.pkl', 'all_store_hqdata_2019_5.pkl', 'all_store_hqdata_2020_5.pkl']
-    for i in file_five:
+    file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
+    file_dayindex = 'all_dayindex.pkl'
+    # file_names = ['all_store_hqdata_2012_5.pkl']
+    file_names = ['all_store_hqdata_2012_5.pkl', 'all_store_hqdata_2013_5.pkl', 'all_store_hqdata_2014_5.pkl',
+                  'all_store_hqdata_2015_5.pkl', 'all_store_hqdata_2016_5.pkl', 'all_store_hqdata_2017_5.pkl',
+                  'all_store_hqdata_2018_5.pkl', 'all_store_hqdata_2019_5.pkl', 'all_store_hqdata_2020_5.pkl']
+    for i in file_names:
         print(i[-10:-6])
-        df = DaytoFivemin(indir, file_day, i)
+        df = DaytoFivemin(file_indir, file_dayindex, i)
         df.runflow()

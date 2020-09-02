@@ -44,12 +44,13 @@ class DataflowIndexprice(object):
     def runflow(self):
         self.sqlin()
         self.fileout()
+        print('end')
 
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
-    data_startdate = '20050701'
-    data_enddate = '20200630'
+    data_startdate = '20050101'
+    data_enddate = '20191231'
     file_index = 'zz500'
     indexprice = DataflowIndexprice(file_index, file_indir, data_startdate, data_enddate)
     indexprice.runflow()

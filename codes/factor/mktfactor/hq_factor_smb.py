@@ -56,12 +56,12 @@ class Smb(object):
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    file_index = ['all_store_hqdata_2012_5_derive.pkl']
-    # file_index = ['all_store_hqdata_2012_5_derive.pkl', 'all_store_hqdata_2013_5_derive.pkl',
-    #               'all_store_hqdata_2014_5_derive.pkl', 'all_store_hqdata_2015_5_derive.pkl',
-    #               'all_store_hqdata_2016_5_derive.pkl', 'all_store_hqdata_2017_5_derive.pkl',
-    #               'all_store_hqdata_2018_5_derive.pkl', 'all_store_hqdata_2019_5_derive.pkl',
-    #               'all_store_hqdata_2020_5_derive.pkl']
+    # file_index = ['all_store_hqdata_2012_5_derive.pkl']
+    file_index = ['all_store_hqdata_2012_5_derive.pkl', 'all_store_hqdata_2013_5_derive.pkl',
+                  'all_store_hqdata_2014_5_derive.pkl', 'all_store_hqdata_2015_5_derive.pkl',
+                  'all_store_hqdata_2016_5_derive.pkl', 'all_store_hqdata_2017_5_derive.pkl',
+                  'all_store_hqdata_2018_5_derive.pkl', 'all_store_hqdata_2019_5_derive.pkl',
+                  'all_store_hqdata_2020_5_derive.pkl']
     for i in file_index:
         print(i[17:21])
         smb = Smb(file_indir, i)

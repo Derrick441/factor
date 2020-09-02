@@ -57,11 +57,12 @@ class DataflowSt(object):
         self.filein()
         self.sqlin()
         self.st_gen()
+        print('end')
 
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\'
     file_index = 'all'
-    data_enddate = '20200630'
+    data_enddate = '20191231'
     ST = DataflowSt(file_indir, file_index, data_enddate)
     ST.run_flow()
