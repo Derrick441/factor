@@ -25,12 +25,17 @@ class FactorNeutral(object):
 
     def datamanage(self):
         t = time.time()
+        # 数据选取
         self.mv = self.dayindex[['trade_dt', 's_info_windcode', 's_dq_mv']]
         self.ind = self.inds[['trade_dt', 's_info_windcode', 'induname1']]
+        # 取因子名
         self.factor_name = self.factor.columns.copy()[-1]
+        # 数据重命名
         self.factor.columns = ['trade_dt', 's_info_windcode', 'factor']
+        # 数据合并
         self.data = pd.merge(self.factor, self.mv, how='left')
         self.data = pd.merge(self.data, self.ind, how='left')
+        # 数据独热处理
         self.data.set_index(['trade_dt', 's_info_windcode'], inplace=True)
         self.data = pd.get_dummies(self.data)
         self.data.drop('induname1_综合', axis=1, inplace=True)
@@ -46,10 +51,9 @@ class FactorNeutral(object):
 
     def factorneutral(self):
         t = time.time()
-        # 取市值、行业列名
         mv_ind_item = list(set(self.data.columns)-set('factor'))
-        # 因子中性化
         item = self.factor_name + '_neutral'
+        # 因子中性化处理
         self.data[item] = self.data.groupby(level=0).apply(self.neutral, 'factor', mv_ind_item).values
         self.data.reset_index(inplace=True)
         # 数据对齐
@@ -60,7 +64,6 @@ class FactorNeutral(object):
 
     def fileout(self):
         t = time.time()
-        # 将因子中性化结果存储在factor文件夹中
         self.result.to_pickle(self.indir_o + 'neutral_' + self.name_f)
         print('fileout running time:%10.4fs' % (time.time() - t))
 

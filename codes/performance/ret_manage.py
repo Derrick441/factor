@@ -46,12 +46,14 @@ class RetMergeNeutral(object):
         return result.resid
 
     def datamanage_neutral(self):
-        # 数据处理
         t = time.time()
+        # 数据选取
         self.mv = self.dayindex[['trade_dt', 's_info_windcode', 's_dq_mv']]
         self.ind = self.inds[['trade_dt', 's_info_windcode', 'induname1']]
+        # 数据合并
         self.data = pd.merge(self.result1, self.mv, how='left')
         self.data = pd.merge(self.data, self.ind, how='left')
+        # 独热处理
         self.data.set_index(['trade_dt', 's_info_windcode'], inplace=True)
         self.data = pd.get_dummies(self.data)
         self.data.drop('induname1_综合', axis=1, inplace=True)
