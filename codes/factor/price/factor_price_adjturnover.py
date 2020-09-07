@@ -4,7 +4,7 @@ import time
 import statsmodels.regression.rolling as regroll
 
 
-# 月度的日频率
+# 日频率
 # 市值调整换手率：剔除换手率中市值影响
 # 回归换手率和市值，取残差作为市值调整换手率
 class AdjTurnover(object):
@@ -51,16 +51,20 @@ class AdjTurnover(object):
     def compute_turnover_adjusted(self):
         t = time.time()
         # 滚动回归计算残差作为调整换手率
-        self.result = self.all_data.groupby('s_info_windcode').apply(self.rolling_regress)
+        self.result_temp = self.all_data.groupby('s_info_windcode').apply(self.rolling_regress)
         # 格式整理
-        self.result.reset_index(inplace=True)
-        self.result.drop('level_1', axis=1, inplace=True)
+        self.result_temp.reset_index(inplace=True)
+        self.result_temp.drop('level_1', axis=1, inplace=True)
         print('compute_turnover_adjusted running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
+        # 数据对齐
+        self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.result_temp, how='left')
+        # 输出到factor文件夹的stockfactor中
         indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-        self.result.to_pickle(indir_factor + 'factor_price_adjturnover.pkl')
+        item = ['trade_dt', 's_info_windcode', 'adjturnover']
+        self.result[item].to_pickle(indir_factor + 'factor_price_adjturnover.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):

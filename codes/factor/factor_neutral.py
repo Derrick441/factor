@@ -33,8 +33,8 @@ class FactorNeutral(object):
         # 数据重命名
         self.factor.columns = ['trade_dt', 's_info_windcode', 'factor']
         # 数据合并
-        self.data = pd.merge(self.factor, self.mv, how='left')
-        self.data = pd.merge(self.data, self.ind, how='left')
+        temp = pd.merge(self.factor, self.mv, how='left')
+        self.data = pd.merge(temp, self.ind, how='left')
         # 数据独热处理
         self.data.set_index(['trade_dt', 's_info_windcode'], inplace=True)
         self.data = pd.get_dummies(self.data)
@@ -85,16 +85,16 @@ if __name__ == '__main__':
     # factor中性化后输出地址
     indir_out = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
 
-    # # 中性化一个因子
-    # name_factor = 'factor_price_bi.pkl'
-    # fn = FactorNeutral(indir_dataflow, indir_factor, indir_out, name_factor)
-    # fn.runflow()
+    # 中性化一个因子
+    name_factor = 'factor_price_bi.pkl'
+    fn = FactorNeutral(indir_dataflow, indir_factor, indir_out, name_factor)
+    fn.runflow()
 
-    # 中性化多个因子
-    name_factors = ['factor_price_Dkurt.pkl', 'factor_price_Dskew.pkl', 'factor_price_Dvol.pkl']
-    for i in name_factors:
-        fn = FactorNeutral(indir_dataflow, indir_factor, indir_out, i)
-        fn.runflow()
+    # # 中性化多个因子
+    # name_factors = ['factor_price_Dkurt.pkl', 'factor_price_Dskew.pkl', 'factor_price_Dvol.pkl']
+    # for i in name_factors:
+    #     fn = FactorNeutral(indir_dataflow, indir_factor, indir_out, i)
+    #     fn.runflow()
 
     # # 中性化全部因子
     # name_factors = os.listdir(indir_factor)

@@ -88,7 +88,7 @@ if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\zz500\\'
     file_index = ['zz500_store_hqdata_2012.pkl', 'zz500_store_hqdata_2013.pkl', 'zz500_store_hqdata_2014.pkl',
                   'zz500_store_hqdata_2015.pkl', 'zz500_store_hqdata_2016.pkl', 'zz500_store_hqdata_2017.pkl',
-                  'zz500_store_hqdata_2018.pkl', 'zz500_store_hqdata_2019.pkl', 'zz500_store_hqdata_2020.pkl']
+                  'zz500_store_hqdata_2018.pkl', 'zz500_store_hqdata_2019.pkl']
     for i in file_index:
         print(i[19:23])
         mkt = Mkt(file_indir, i)

@@ -49,21 +49,20 @@ class IntradayThressIndex(object):
     def runflow(self):
         t = time.time()
         print('start')
-        self.result_sum = []
+
         # 分年度计算因子
+        self.result_sum = []
         for i in self.file_name:
             print(i)
             self.filein(i)
             self.data_manage()
             self.compute_intraday3index()
             self.result_sum.append(self.temp_result)
-
         # 因子汇总
-        print('sum')
-        self.result_concat = pd.concat(self.result_sum)
+        self.result_temp = pd.concat(self.result_sum)
         # 数据对齐
         self.all_data = pd.read_pickle(self.file_indir + 'all_dayindex.pkl')
-        self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.result_concat, how='left')
+        self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.result_temp, how='left')
 
         # 三个因子分别输出到factor文件夹的stockfactor中
         indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
@@ -78,10 +77,14 @@ class IntradayThressIndex(object):
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    # file_index = ['all_store_hqdata_2012_5_derive.pkl']
     file_name = ['all_store_hqdata_2012_5_derive.pkl', 'all_store_hqdata_2013_5_derive.pkl',
                  'all_store_hqdata_2014_5_derive.pkl', 'all_store_hqdata_2015_5_derive.pkl',
                  'all_store_hqdata_2016_5_derive.pkl', 'all_store_hqdata_2017_5_derive.pkl',
                  'all_store_hqdata_2018_5_derive.pkl', 'all_store_hqdata_2019_5_derive.pkl']
     df = IntradayThressIndex(file_indir, file_name)
     df.runflow()
+
+    # file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
+    # file_index = ['all_store_hqdata_2012_5_derive.pkl']
+    # df = IntradayThressIndex(file_indir, file_name)
+    # df.runflow()

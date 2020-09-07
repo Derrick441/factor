@@ -12,15 +12,15 @@ class Bi(object):
 
     def filein(self):
         t = time.time()
-        # 从stockfactor文件夹中取ivr、turnoveradj因子数据
+        # 从stockfactor文件夹中取ivr、adjturnover因子数据
         self.ivr = pd.read_pickle(self.file_indir + file_name[0])
-        self.turnoveradj = pd.read_pickle(self.file_indir + file_name[1])
+        self.adjturnover = pd.read_pickle(self.file_indir + file_name[1])
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
         # 数据合并
-        self.data = pd.merge(self.ivr, self.turnoveradj, how='left')
+        self.data = pd.merge(self.ivr, self.adjturnover, how='left')
         self.data.set_index(['trade_dt', 's_info_windcode'], inplace=True)
         self.data.dropna(inplace=True)
         print('datamanage running time:%10.4fs' % (time.time() - t))
@@ -28,8 +28,8 @@ class Bi(object):
     def quantile_add(self, data):
         data_len = len(data)
         q_ivr = data.ivr.rank()/data_len
-        q_turnoveradj = data.turnoveradj/data_len
-        result = (q_ivr + q_turnoveradj)/2
+        q_adjturnover = data.adjturnover/data_len
+        result = (q_ivr + q_adjturnover)/2
         return result
 
     def compute_bi(self):
@@ -61,6 +61,6 @@ class Bi(object):
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    file_name = ['factor_price_ivr.pkl', 'factor_price_turnoveradj.pkl']
+    file_name = ['factor_price_ivr.pkl', 'factor_price_adjturnover.pkl']
     bi = Bi(file_indir, file_name)
     bi.runflow()
