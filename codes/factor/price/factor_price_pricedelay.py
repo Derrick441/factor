@@ -51,7 +51,7 @@ class PriceDelay(object):
             print(time.time() - t)
             return result
         else:
-            result = pd.DataFrame({'trade_dt': data.trade_dt.values, 'ivff': [None for i in range(len(data))]})
+            result = pd.DataFrame({'trade_dt': data.trade_dt.values, 'pricedelay': [None for i in range(len(data))]})
             return result
 
     def compute_pricedelay(self):
