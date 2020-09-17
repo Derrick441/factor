@@ -69,9 +69,9 @@ class IntradayThressIndex(object):
         item1 = ['trade_dt', 's_info_windcode', 'Dvol']
         item2 = ['trade_dt', 's_info_windcode', 'Dskew']
         item3 = ['trade_dt', 's_info_windcode', 'Dkurt']
-        self.result[item1].to_pickle(indir_factor + 'factor_price_Dvol.pkl')
-        self.result[item2].to_pickle(indir_factor + 'factor_price_Dskew.pkl')
-        self.result[item3].to_pickle(indir_factor + 'factor_price_Dkurt.pkl')
+        self.result[item1].to_pickle(indir_factor + 'factor_hq_Dvol.pkl')
+        self.result[item2].to_pickle(indir_factor + 'factor_hq_Dskew.pkl')
+        self.result[item3].to_pickle(indir_factor + 'factor_hq_Dkurt.pkl')
         print('end running time:%10.4fs' % (time.time() - t))
 
 
