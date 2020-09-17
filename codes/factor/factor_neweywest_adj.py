@@ -43,6 +43,7 @@ class NeweyWestAdj(object):
                 model = sm.OLS(temp1['ret'], temp1[item]).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
                 stde = model.params / model.tvalues
                 result.append(stde.values[1])
+
             print(time.time()-t)
             return pd.DataFrame({'trade_dt': data.trade_dt.values, 'sd'+self.fac_name: result})
         else:
@@ -59,8 +60,8 @@ class NeweyWestAdj(object):
 
     def factor_compute(self):
         t = time.time()
-        self.fac_ret['temp'] = self.fac_ret.factor+self.fac_ret.ret
-        self.fac_ret_drop = self.fac_ret[(self.fac_ret.temp > 0) | (self.fac_ret.temp < 0)].copy()
+        self.fac_ret_drop = self.fac_ret.dropna().copy()
+        self.fac_ret_drop = self.fac_ret_drop[self.fac_ret_drop.factor != 0]
         self.stde = self.fac_ret_drop.groupby('s_info_windcode')\
                                      .apply(self.neweywest_stde)\
                                      .reset_index()\
@@ -78,7 +79,7 @@ class NeweyWestAdj(object):
         self.result = pd.merge(self.fac[['trade_dt', 's_info_windcode']], self.stde, how='left')
         # 输出到factor文件夹的stockfactor中
         item = ['trade_dt', 's_info_windcode', 'sd'+self.fac_name]
-        self.result[item].to_pickle(self.file_indir[1] + self.file_name[1][:-8] + 'sd' + self.file_name[1][-8:])
+        self.result[item].to_pickle(self.file_indir[1] + self.file_name[1][:-4] + 'sd.pkl')
         print(time.time()-t)
 
     def runflow(self):
