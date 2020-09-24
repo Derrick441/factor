@@ -19,6 +19,7 @@ class NeweyWestAdj(object):
         self.ret = self.ret.reset_index().rename(columns={0: 'ret'})
         # 读入因子数据
         self.fac = pd.read_pickle(self.file_indir[1] + self.file_name[1])
+        # 记录因子名称
         self.fac_name = self.fac.columns[-1]
         self.fac = self.fac.rename(columns={self.fac_name: 'factor'})
         print('filein using time:%10.4fs' % (time.time()-t))
@@ -26,20 +27,22 @@ class NeweyWestAdj(object):
 
     def datamanage(self):
         t = time.time()
+        # 收益率数据和因子数据合并
         self.fac_ret = pd.merge(self.fac, self.ret, how='left')
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
     def neweywest_stde(self, data):
         t = time.time()
         print(len(data))
-        if len(data) >= 20:
+        if len(data) > 20:
             temp = data.copy()
             temp['intercept'] = 1
             item = ['intercept', 'factor']
-            result = [None for i in range(19)]
-            for i in range(19, len(data)):
+            result = [None for i in range(20)]
+            # 第21个开始，计算回归的newey-west调整标准误
+            for i in range(20, len(data)):
                 # print(i)
-                temp1 = temp.iloc[(i-19):(i+1), :]
+                temp1 = temp.iloc[(i-20):i, :]
                 model = sm.OLS(temp1['ret'], temp1[item]).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
                 stde = model.params / model.tvalues
                 result.append(stde.values[1])
@@ -51,12 +54,12 @@ class NeweyWestAdj(object):
             return pd.DataFrame({'trade_dt': data.trade_dt.values, 'sd'+self.fac_name: result})
 
     def rollingmean(self, data):
-        if len(data) >= 20:
+        if len(data) > 20:
             mean = data['factor'].rolling(20).mean()
-            return pd.DataFrame({'trade_dt': data.trade_dt.values, 'mean': mean.vlaues})
+            return pd.DataFrame({'trade_dt': data.trade_dt.values, 'temp_mean': mean})
         else:
             result = [None for i in range(len(data))]
-            return pd.DataFrame({'trade_dt': data.trade_dt.values, 'mean': result})
+            return pd.DataFrame({'trade_dt': data.trade_dt.values, 'temp_mean': result})
 
     def factor_compute(self):
         t = time.time()
@@ -67,10 +70,10 @@ class NeweyWestAdj(object):
                                      .reset_index()\
                                      .drop('level_1', axis=1)
         if self.fac_name in ['rvol', 'vvol']:
-            self.mean = self.fac_ret_drop.groupby('s_info_windcode')\
+            self.data_mean = self.fac_ret_drop.groupby('s_info_windcode')\
                                          .apply(self.rollingmean)\
                                          .reset_index()
-            self.stde['sd'+self.fac_name] = self.stde['sd'+self.fac_name] / self.mean.mean
+            self.stde['sd'+self.fac_name] = self.stde['sd'+self.fac_name] / self.data_mean['temp_mean']
         print('factor compute using time:%10.4fs' % (time.time()-t))
 
     def fileout(self):
@@ -95,12 +98,13 @@ class NeweyWestAdj(object):
 if __name__ == '__main__':
     file_indir = ['D:\\wuyq02\\develop\\python\\data\\developflow\\all\\',
                   'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\']
-    # file_name = ['all_band_adjvwap_hh_price_label1.pkl',
-    #              'factor_hq_rskew.pkl']
 
-    factor = ['factor_hq_rskew.pkl', 'factor_hq_rkurt.pkl', 'factor_hq_vhhi.pkl',
-              'factor_hq_vkurt.pkl', 'factor_hq_vkurt.pkl',
-              'factor_hq_rvol.pkl', 'factor_hq_vvol.pkl']
+    # factor = ['factor_hq_rskew.pkl', 'factor_hq_rkurt.pkl',
+    #           'factor_hq_vskew.pkl', 'factor_hq_vkurt.pkl',
+    #           'factor_hq_rvol.pkl', 'factor_hq_vvol.pkl',
+    #           'factor_hq_vhhi.pkl']
+
+    factor = ['factor_hq_rvol.pkl', 'factor_hq_vskew.pkl', 'factor_hq_vvol.pkl']
 
     for i in factor:
         file_name = ['all_band_adjvwap_hh_price_label1.pkl', i]
