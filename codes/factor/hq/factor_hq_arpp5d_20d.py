@@ -39,25 +39,39 @@ class Arpp(object):
 
     def roll_arpp5d(self, data):
         temp = data.copy()
-        result = [None for i in range(5)]
-        for i in range(5, len(temp)):
-            temp5d = temp.iloc[i-5:i, :]
-            twap = temp5d.twap.mean()
-            L = temp5d.L.min()
-            H = temp5d.H.max()
-            result.append((twap-L)/(H-L))
-        return pd.DataFrame({'trade_dt': temp.trade_dt, 'arpp5d': result})
+        if len(data) > 5:
+            result = [None for i in range(5)]
+            for i in range(5, len(temp)):
+                temp5d = temp.iloc[i-5:i, :]
+                twap = temp5d.twap.mean()
+                L = temp5d.L.min()
+                H = temp5d.H.max()
+                if (H-L) == 0:
+                    result.append(np.nan)
+                else:
+                    result.append((twap-L)/(H-L))
+            return pd.DataFrame({'trade_dt': temp.trade_dt, 'arpp5d': result})
+        else:
+            result = [None for i in range(len(data))]
+            return pd.DataFrame({'trade_dt': temp.trade_dt, 'arpp5d': result})
 
     def roll_arpp20d(self, data):
         temp = data.copy()
-        result = [None for i in range(20)]
-        for i in range(20, len(temp)):
-            temp20d = temp.iloc[i-20:i, :]
-            twap = temp20d.twap.mean()
-            L = temp20d.L.min()
-            H = temp20d.H.max()
-            result.append((twap-L)/(H-L))
-        return pd.DataFrame({'trade_dt': temp.trade_dt, 'arpp20d': result})
+        if len(data) > 20:
+            result = [None for i in range(20)]
+            for i in range(20, len(temp)):
+                temp20d = temp.iloc[i-20:i, :]
+                twap = temp20d.twap.mean()
+                L = temp20d.L.min()
+                H = temp20d.H.max()
+                if (H - L) == 0:
+                    result.append(np.nan)
+                else:
+                    result.append((twap - L) / (H - L))
+            return pd.DataFrame({'trade_dt': temp.trade_dt, 'arpp20d': result})
+        else:
+            result = [None for i in range(len(data))]
+            return pd.DataFrame({'trade_dt': temp.trade_dt, 'arpp20d': result})
 
     def factor_compute(self):
         t = time.time()
