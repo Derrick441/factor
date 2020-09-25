@@ -51,16 +51,16 @@ class AdjTurnover(object):
     def compute_turnover_adjusted(self):
         t = time.time()
         # 滚动回归计算残差作为调整换手率
-        self.result_temp = self.all_data.groupby('s_info_windcode').apply(self.rolling_regress)
+        self.temp_result = self.all_data.groupby('s_info_windcode').apply(self.rolling_regress)
         # 格式整理
-        self.result_temp.reset_index(inplace=True)
-        self.result_temp.drop('level_1', axis=1, inplace=True)
+        self.temp_result.reset_index(inplace=True)
+        self.temp_result.drop('level_1', axis=1, inplace=True)
         print('compute_turnover_adjusted running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
         # 数据对齐
-        self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.result_temp, how='left')
+        self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
         # 输出到factor文件夹的stockfactor中
         indir_factor = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
         item = ['trade_dt', 's_info_windcode', 'adjturnover']

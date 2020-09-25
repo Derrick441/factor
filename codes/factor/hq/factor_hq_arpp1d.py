@@ -3,8 +3,10 @@ import numpy as np
 import time
 
 
-# 日均价偏差apb: 日的5分钟成交量加权平均价的平均价/日成交量加权的5分钟成交量加权平均价的平均价
-class Apb(object):
+# arpp时间加权平均的相对价格位置: （p-l)/(h-l)在时间上的积分
+# 若交易时间合计为1，则（p-l)/(h-l)*delta t等于（p-l)/(h-l)*1/n，n为微小单位的数量
+# （p-l)/(h-l)在时间上的积分等价于n个（p-l)/(h-l)的平均值
+class Arpp(object):
 
     def __init__(self, file_indirs, file_names):
         self.file_indirs = file_indirs
@@ -20,28 +22,30 @@ class Apb(object):
         t = time.time()
         # 将0值替换为nan
         self.data = self.data.replace(0, np.nan)
-        # 去除没有成交量的数据
-        self.data_drop = self.data[self.data['volume'] != np.nan]
-        # 5分钟成交量加权平均价
-        self.data_drop['vwap'] = self.data_drop['amount'] / self.data_drop['volume']*10
+        # 去除没有收盘价的数据
+        self.data_drop = self.data[self.data['closeprice'] != np.nan]
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
-    def dayin_apb(self, data):
+    def dayin_arpp(self, data):
         temp = data.copy()
-        # 日的5分钟成交量加权平均价的平均价
-        mean = temp['vwap'].mean()
-        # 日的成交量加权的5分钟成交量加权平均价的平均价
-        vol_sum = temp['volume'].sum()
-        mean_vol_weight = (temp['volume'] / vol_sum * temp['vwap']).sum()
-        return np.log(mean/mean_vol_weight)
+        # 日内最高最低价
+        L = temp['lowprice'].min()
+        H = temp['highprice'].max()
+        # 1分钟开盘收盘价均值
+        temp['ocmean'] = (temp['openprice'] + temp['closeprice'])/2
+        # 计算1分钟rpp
+        temp['rpp'] = (temp['ocmean'] - L) / (temp['ocmean'] - H)
+        # 计算日的arpp
+        result = temp['rpp'].mean()
+        return result
 
     def factor_compute(self):
         t = time.time()
-        # 计算apb
+        # 计算arpp
         self.result_part = self.data_drop.groupby(['s_info_windcode', 'trade_dt'])\
-                                         .apply(self.dayin_apb)\
+                                         .apply(self.dayin_arpp)\
                                          .reset_index()\
-                                         .rename(columns={0: 'apb1d'})
+                                         .rename(columns={0: 'arpp1d'})
         print('factor_compute using time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
@@ -59,21 +63,21 @@ class Apb(object):
         self.all_data = pd.read_pickle(self.file_indirs[0] + 'all_dayindex.pkl')
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
         # 数据输出
-        item = ['trade_dt', 's_info_windcode', 'apb1d']
-        self.result[item].to_pickle(self.file_indirs[1] + 'factor_hq_apb.pkl')
+        item = ['trade_dt', 's_info_windcode', 'arpp1d']
+        self.result[item].to_pickle(self.file_indirs[1] + 'factor_hq_arpp1d.pkl')
         print('finish using time:%10.4fs' % (time.time()-t))
 
 
 if __name__ == '__main__':
     file_indir = ['D:\\wuyq02\\develop\\python\\data\\developflow\\all\\',
                   'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\']
-    file_name = ['all_store_hqdata_2012_5_derive.pkl', 'all_store_hqdata_2013_5_derive.pkl',
-                 'all_store_hqdata_2014_5_derive.pkl', 'all_store_hqdata_2015_5_derive.pkl',
-                 'all_store_hqdata_2016_5_derive.pkl', 'all_store_hqdata_2017_5_derive.pkl',
-                 'all_store_hqdata_2018_5_derive.pkl', 'all_store_hqdata_2019_5_derive.pkl']
-    apb = Apb(file_indir, file_name)
-    apb.runflow()
+    file_name = ['all_store_hqdata_2012.pkl', 'all_store_hqdata_2013.pkl',
+                 'all_store_hqdata_2014.pkl', 'all_store_hqdata_2015.pkl',
+                 'all_store_hqdata_2016.pkl', 'all_store_hqdata_2017.pkl',
+                 'all_store_hqdata_2018.pkl', 'all_store_hqdata_2019.pkl']
+    arpp = Arpp(file_indir, file_name)
+    arpp.runflow()
 
-# apb.filein()
-# apb.datamanage()
-# apb.factor_compute()
+# arpp.filein()
+# arpp.datamanage()
+# arpp.factor_compute()

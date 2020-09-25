@@ -23,7 +23,7 @@ class Apb1m(object):
         # 去除没有成交量的数据
         self.data_drop = self.data[self.data['s_dq_volume'] != np.nan]
         # 日成交量加权平均价
-        self.data_drop['vwap'] = self.data_drop['amount'] / self.data_drop['volume'] * 10
+        self.data_drop['vwap'] = self.data_drop['s_dq_amount'] / self.data_drop['s_dq_volume'] * 10
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
     def month_apb(self, data):
@@ -48,10 +48,10 @@ class Apb1m(object):
     def fileout(self):
         t = time.time()
         # 数据对齐
-        self.result = pd.merge(self.data['trade_dt', 's_info_windcode'], self.temp_result, how='left')
+        self.result = pd.merge(self.data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
         # 数据输出
         item = ['trade_dt', 's_info_windcode', 'apb1m']
-        self.data[item].to_pickle(self.file_indir[1] + 'factor_price_apb1m.pkl')
+        self.result[item].to_pickle(self.file_indir[1] + 'factor_price_apb1m.pkl')
         print('fileout using time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
