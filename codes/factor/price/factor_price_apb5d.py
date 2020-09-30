@@ -3,7 +3,7 @@ import numpy as np
 import time
 
 
-# 5日均价偏差apb: 5日的成交量加权平均价的平均价/5日的成交量加权的成交量加权平均价的平均价
+# 5日均价偏差apb: 5日的日成交量加权平均价的平均价/5日的成交量加权的日成交量加权平均价的平均价
 class Apb5d(object):
 
     def __init__(self, file_indir, file_name):

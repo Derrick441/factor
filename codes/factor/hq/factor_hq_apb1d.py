@@ -60,7 +60,7 @@ class Apb(object):
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
         # 数据输出
         item = ['trade_dt', 's_info_windcode', 'apb1d']
-        self.result[item].to_pickle(self.file_indirs[1] + 'factor_hq_apb.pkl')
+        self.result[item].to_pickle(self.file_indirs[1] + 'factor_hq_apb1d.pkl')
         print('finish using time:%10.4fs' % (time.time()-t))
 
 

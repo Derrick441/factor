@@ -108,7 +108,7 @@ class Arpp(object):
         self.result5d = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result5d, how='left')
         self.result20d = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result20d, how='left')
         # 数据输出
-        item = ['trade_dt', 's_info_windcode', 'arpp1d']
+        item = ['trade_dt', 's_info_windcode', 'arpp20d']
         self.result5d[item].to_pickle(self.file_indirs[1] + 'factor_hq_arpp5d.pkl')
         self.result20d[item].to_pickle(self.file_indirs[1] + 'factor_hq_arpp20d.pkl')
         print('finish using time:%10.4fs' % (time.time()-t))
