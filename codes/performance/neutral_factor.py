@@ -86,22 +86,18 @@ class FactorNeutral(object):
 
 
 if __name__ == '__main__':
-    # 市值、行业
     file_indir1 = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
     file_names1 = ['all_dayindex.pkl', 'all_band_indu.pkl']
-    # 因子地址
     file_indir2 = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    # 中性化后存储地址
+    file_names2 = os.listdir(file_indir2)
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
+
+    for i in file_names2:
+        fn = FactorNeutral(file_indir1, file_names1, file_indir2, i, save_indir)
+        fn.runflow()
 
     # # 中性化部分因子
     # file_names2 = ['factor_hq_apb1d.pkl', 'factor_price_bi.pkl', 'factor_price_ivff.pkl']
     # for i in file_names2:
     #     fn = FactorNeutral(file_indir1, file_names1, file_indir2, i, save_indir)
     #     fn.runflow()
-
-    # 中性化全部因子
-    file_names2 = os.listdir(file_indir2)
-    for i in file_names2:
-        fn = FactorNeutral(file_indir1, file_names1, file_indir2, i, save_indir)
-        fn.runflow()

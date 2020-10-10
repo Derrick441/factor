@@ -28,7 +28,7 @@ class FactorCombine(object):
         # 日期数据类型转换为int
         temp_0['trade_dt'] = temp_0['trade_dt'].apply(lambda x: int(x))
         temp_0.set_index(['trade_dt', 's_info_windcode'], inplace=True)
-        print('files read in:%10.4fs' % (time.time()-t))
+        print('files read in:%10.4fs' % (time.time() - t))
         return temp_0
 
     def ic_read(self, day):
@@ -73,14 +73,11 @@ class FactorCombine(object):
 
         # IC：计算20移动均值、数据对齐
         temp_ic.set_index('trade_dt', inplace=True)
-        ic_roll20 = temp_ic.rolling(20).mean()
-        ic_roll20.reset_index(inplace=True)
-        temp_ic_roll20 = pd.merge(temp_fa[item], ic_roll20, how='left')
+        mean = np.mean(temp_ic)
 
         # 因子：IC加权、求和得到合并因子
         temp1 = temp_fa.set_index(item)
-        temp2 = temp_ic_roll20.set_index(item)
-        result = pd.DataFrame(np.array(temp1) * np.array(temp2), index=temp1.index)
+        result = pd.DataFrame(np.array(temp1) * np.array(mean), index=temp1.index)
         result[name] = result.sum(axis=1)
 
         # 调整
@@ -90,7 +87,7 @@ class FactorCombine(object):
         return result[['trade_dt', 's_info_windcode', name]]
 
     def compute(self):
-        # 合并因子(以ic为权重）
+        # 合并因子(以ic均值为权重）
         self.combine_factor_ic_1 = self.combine_ic(self.table_ic_1, self.factor_std, '_ic_1')
         self.combine_factor_ic_5 = self.combine_ic(self.table_ic_5, self.factor_std, '_ic_5')
         self.combine_factor_ic_10 = self.combine_ic(self.table_ic_10, self.factor_std, '_ic_10')
@@ -120,10 +117,10 @@ if __name__ == '__main__':
     file_indir2 = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_combine\\'
     file_names = os.listdir(file_indir1)
-    
+
     fc = FactorCombine(file_indir1, file_indir2, save_indir, file_names)
     fc.runflow()
-    
+
     # # 因子文件名
     # file_names = ['neutral_factor_hq_apb1d.pkl', 'neutral_factor_price_bi.pkl']
     # fc = FactorCombine(file_indir1, file_indir2, save_indir, file_names)

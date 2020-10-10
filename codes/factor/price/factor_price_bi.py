@@ -72,7 +72,3 @@ if __name__ == '__main__':
 
     bi = Bi(file_indir, factor_indir, save_indir, file_names)
     bi.runflow()
-
-# bi.filein()
-# bi.datamanage()
-# bi.compute()

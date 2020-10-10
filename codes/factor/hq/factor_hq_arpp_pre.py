@@ -3,8 +3,10 @@ import numpy as np
 import time
 
 
-# 日均价偏差apb: 日的5分钟成交量加权平均价的平均价/日成交量加权的5分钟成交量加权平均价的平均价
-class Apb(object):
+# arpp时间加权平均的相对价格位置: （p-l)/(h-l)在时间上的积分
+# 若交易时间合计为1，则（p-l)/(h-l)*delta t等于（p-l)/(h-l)*1/n，n为微小单位的数量
+# （p-l)/(h-l)在时间上的积分等价于n个（p-l)/(h-l)的平均值
+class Arpp(object):
 
     def __init__(self, file_indir, save_indir, file_name):
         self.file_indir = file_indir
@@ -18,44 +20,34 @@ class Apb(object):
         print('filein using time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
-        t = time.time()
-        # 将0值替换为nan
-        self.data = self.data.replace(0, np.nan)
-        # 去除成交量为nan的数据
-        self.data_dropna = self.data[self.data['volume'] != np.nan].copy()
-        # 5分钟成交量加权平均价
-        self.data_dropna['vwap'] = self.data_dropna['amount'] / self.data_dropna['volume']*10
-        print('datamanage using time:%10.4fs' % (time.time()-t))
+        pass
 
-    def oneday_apb(self, data):
+    def dayin_arpp(self, data):
         temp = data.copy()
-        # 平均价
-        mean = temp['vwap'].mean()
-        # 成交量加权平均价
-        vol_sum = temp['volume'].sum()
-        mean_weight = (temp['volume'] / vol_sum * temp['vwap']).sum()
-        # 0值处理
-        if (mean == 0) | (mean_weight == 0):
-            result = np.nan
-        else:
-            result = np.log(mean/mean_weight)
-        return result
+        # 最高最低价
+        L = np.min(temp['lowprice'])
+        H = np.max(temp['highprice'])
+        # twap
+        item = ['openprice', 'highprice', 'lowprice', 'closeprice']
+        twap = np.mean(np.mean(temp[item]))
+        return twap, L, H
 
     def compute(self):
         t = time.time()
-        # 计算apb
-        self.result = self.data_dropna.groupby(['s_info_windcode', 'trade_dt'])\
-                                      .apply(self.oneday_apb)\
-                                      .reset_index()\
-                                      .rename(columns={0: 'apb1d'})
-        print('compute using time:%10.4fs' % (time.time()-t))
+        # 计算arpp
+        self.result = self.data.groupby(['s_info_windcode', 'trade_dt'])\
+                               .apply(self.dayin_arpp)\
+                               .apply(pd.Series)\
+                               .reset_index()\
+                               .rename(columns={0: 'twap', 1: 'L', 2: 'H'})
+        print('factor_compute using time:%10.4fs' % (time.time()-t))
 
     def fileout(self):
         t = time.time()
         # 数据输出
-        item = ['trade_dt', 's_info_windcode', 'apb1d']
-        self.result[item].to_pickle(self.save_indir + 'factor_hq_apb1d_' + self.file_name[17:21] + '.pkl')
-        print('fileout using time:%10.4fs' % (time.time()-t))
+        item1 = ['trade_dt', 's_info_windcode', 'twap', 'L', 'H']
+        self.result[item1].to_pickle(self.save_indir + 'factor_hq_arpp_' + self.file_name[17:21] + '.pkl')
+        print('fileout using time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
         t = time.time()
@@ -64,7 +56,7 @@ class Apb(object):
         self.datamanage()
         self.compute()
         self.fileout()
-        print('finish using time:%10.4fs' % (time.time() - t))
+        print('end running time:%10.4fs' % (time.time() - t))
 
 
 if __name__ == '__main__':
@@ -77,8 +69,8 @@ if __name__ == '__main__':
 
     for file_name in file_names:
         print(file_name)
-        apb = Apb(file_indir, save_indir, file_name)
-        apb.runflow()
+        arpp = Arpp(file_indir, save_indir, file_name)
+        arpp.runflow()
 
     def merge_data(factor_name, names):
         # 分开数据读取、合并
@@ -90,10 +82,10 @@ if __name__ == '__main__':
         # 合并数据对齐、输出
         all_data = pd.read_pickle(file_indir + 'all_dayindex.pkl')
         result = pd.merge(all_data[['trade_dt', 's_info_windcode']], temp_result, how='left')
-        item = ['trade_dt', 's_info_windcode', factor_name]
-        indir2 = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+        item = ['trade_dt', 's_info_windcode', 'twap', 'L', 'H']
+        indir2 = 'D:\\wuyq02\\develop\\python\\data\\factor\\minfactor\\'
         result[item].to_pickle(indir2 + 'factor_hq_' + factor_name + '.pkl')
 
-    factor_name = 'apb1d'
+    factor_name = 'arpp'
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)

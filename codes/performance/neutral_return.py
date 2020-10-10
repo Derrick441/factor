@@ -90,16 +90,14 @@ class ReturnNeutral(object):
 
 
 if __name__ == '__main__':
-    # 数据地址
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    # 市值、行业
     file_names1 = ['all_dayindex.pkl', 'all_band_indu.pkl']
-    # 收益率
     file_names2 = ['all_band_adjvwap_hh_price_label1.pkl',
                    'all_band_adjvwap_hh_price_label5.pkl',
                    'all_band_adjvwap_hh_price_label10.pkl',
                    'all_band_adjvwap_hh_price_label20.pkl',
                    'all_band_adjvwap_hh_price_label60.pkl']
+
     for i in file_names2:
         rn = ReturnNeutral(file_indir, file_names1, i)
         rn.runflow()

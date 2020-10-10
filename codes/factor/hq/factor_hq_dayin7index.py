@@ -81,6 +81,7 @@ if __name__ == '__main__':
                   'all_store_hqdata_2014_5_derive.pkl', 'all_store_hqdata_2015_5_derive.pkl',
                   'all_store_hqdata_2016_5_derive.pkl', 'all_store_hqdata_2017_5_derive.pkl',
                   'all_store_hqdata_2018_5_derive.pkl', 'all_store_hqdata_2019_5_derive.pkl']
+
     for file_name in file_names:
         print(file_name)
         dsi = DayinSevenIndex(file_indir, save_indir, file_name)
@@ -93,7 +94,6 @@ if __name__ == '__main__':
         for name in names:
             data_sum.append(pd.read_pickle(indir1 + name))
         temp_result = pd.concat(data_sum)
-
         # 合并数据对齐、输出
         all_data = pd.read_pickle(file_indir + 'all_dayindex.pkl')
         result = pd.merge(all_data[['trade_dt', 's_info_windcode']], temp_result, how='left')

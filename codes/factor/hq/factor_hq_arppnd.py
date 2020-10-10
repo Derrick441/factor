@@ -1,0 +1,81 @@
+import pandas as pd
+import numpy as np
+import time
+
+
+# arpp时间加权平均的相对价格位置: （p-l)/(h-l)在时间上的积分
+# 若交易时间合计为1，则（p-l)/(h-l)*delta t等于（p-l)/(h-l)*1/n，n为微小单位的数量
+# （p-l)/(h-l)在时间上的积分等价于n个（p-l)/(h-l)的平均值
+class ArppNd(object):
+
+    def __init__(self, file_indir, save_indir, file_name):
+        self.file_indir = file_indir
+        self.save_indir = save_indir
+        self.file_name = file_name
+
+    def filein(self):
+        t = time.time()
+        # 读入数据
+        self.data = pd.read_pickle(self.file_indir + self.file_name)
+        print('filein using time:%10.4fs' % (time.time()-t))
+
+    def datamanage(self):
+        t = time.time()
+        self.data_dropna = self.data.dropna().copy()
+        print('datamanage using time:%10.4fs' % (time.time()-t))
+
+    def roll_arppnd(self, data, perid):
+        temp = data.copy()
+        temp['roll_twap'] = temp['twap'].rolling(perid).apply(lambda x: np.mean(x))
+        temp['roll_L'] = temp['L'].rolling(perid).apply(lambda x: np.min(x))
+        temp['roll_H'] = temp['H'].rolling(perid).apply(lambda x: np.max(x))
+        name = 'arpp' + str(perid) + 'd'
+        temp[name] = (temp['roll_twap'] - temp['roll_L']) / (temp['roll_H'] - temp['roll_L'])
+        return temp[['trade_dt', name]]
+
+    def compute(self):
+        t = time.time()
+        # 计算arpp
+        temp_data = self.data_dropna.copy()
+        self.temp_result1 = (temp_data['twap'] - temp_data['L'])/(temp_data['H'] - temp_data['L'])
+        self.temp_result5 = self.data_dropna.groupby('s_info_windcode')\
+                                            .apply(self.roll_arppnd, 5)\
+                                            .reset_index()
+        self.temp_result20 = self.data_dropna.groupby('s_info_windcode')\
+                                             .apply(self.roll_arppnd, 20)\
+                                             .reset_index()
+        print('factor_compute using time:%10.4fs' % (time.time()-t))
+
+    def fileout(self):
+        t = time.time()
+        # 数据对齐
+        self.all_data = pd.read_pickle(self.file_indir + 'all_dayindex.pkl')
+        self.result1 = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result1, how='left')
+        self.result5 = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result5, how='left')
+        self.result20 = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result20, how='left')
+        # 输出到factor文件夹的stockfactor中
+        item = ['trade_dt', 's_info_windcode', 'arpp1d']
+        self.result1[item].to_pickle(self.save_indir + 'factor_price_arpp1d.pkl')
+        item = ['trade_dt', 's_info_windcode', 'arpp5d']
+        self.result5[item].to_pickle(self.save_indir + 'factor_price_arpp5d.pkl')
+        item = ['trade_dt', 's_info_windcode', 'arpp20d']
+        self.result20[item].to_pickle(self.save_indir + 'factor_price_arpp20d.pkl')
+        print('fileout running time:%10.4fs' % (time.time()-t))
+
+    def runflow(self):
+        t = time.time()
+        print('start')
+        self.filein()
+        self.datamanage()
+        self.compute()
+        self.fileout()
+        print('finish using time:%10.4fs' % (time.time() - t))
+
+
+if __name__ == '__main__':
+    file_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\minfactor\\'
+    save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+    file_name = 'factor_hq_arpp.pkl'
+
+    arppnd = ArppNd(file_indir, save_indir, file_name)
+    arppnd.runflow()

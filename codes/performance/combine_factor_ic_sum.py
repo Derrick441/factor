@@ -74,8 +74,11 @@ class IcSum(object):
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic_sum\\'
+    file_names = ['factor_ic_1.pkl',
+                  'factor_ic_5.pkl',
+                  'factor_ic_10.pkl',
+                  'factor_ic_20.pkl',
+                  'factor_ic_60.pkl']
 
-    file_names = ['factor_ic_1.pkl', 'factor_ic_5.pkl', 'factor_ic_10.pkl',
-                  'factor_ic_20.pkl', 'factor_ic_60.pkl']
     icsum = IcSum(file_indir, file_names, save_indir)
     icsum.runflow()

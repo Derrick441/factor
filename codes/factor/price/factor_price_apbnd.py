@@ -95,7 +95,3 @@ if __name__ == '__main__':
 
     apb = ApbNd(file_indir, save_indir, file_name)
     apb.runflow()
-
-# apb.filein()
-# apb.datamanage()
-# apb.compute()

@@ -101,8 +101,9 @@ if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
     factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
     file_name = 'all_dayindex.pkl'
-    factors = ['factor_hq_rskew.pkl', 'factor_hq_rkurt.pkl', 'factor_hq_rvol.pkl',
-               'factor_hq_vskew.pkl', 'factor_hq_vkurt.pkl', 'factor_hq_vvol.pkl',
+    factors = ['factor_hq_rskew.pkl', 'factor_hq_rkurt.pkl',
+               'factor_hq_rvol.pkl',  'factor_hq_vskew.pkl',
+               'factor_hq_vkurt.pkl', 'factor_hq_vvol.pkl',
                'factor_hq_vhhi.pkl']
 
     for factor in factors:

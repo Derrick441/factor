@@ -113,6 +113,3 @@ if __name__ == '__main__':
     
     sb = Spreadbias(file_indir, save_indir, file_name)
     sb.runflow()
-
-# sb.filein()
-# sb.datamanage()

@@ -82,9 +82,11 @@ class Mkt(object):
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\zz500\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\mktfactor\\'
-    file_names = ['zz500_store_hqdata_2012.pkl', 'zz500_store_hqdata_2013.pkl', 'zz500_store_hqdata_2014.pkl',
-                  'zz500_store_hqdata_2015.pkl', 'zz500_store_hqdata_2016.pkl', 'zz500_store_hqdata_2017.pkl',
+    file_names = ['zz500_store_hqdata_2012.pkl', 'zz500_store_hqdata_2013.pkl',
+                  'zz500_store_hqdata_2014.pkl', 'zz500_store_hqdata_2015.pkl',
+                  'zz500_store_hqdata_2016.pkl', 'zz500_store_hqdata_2017.pkl',
                   'zz500_store_hqdata_2018.pkl', 'zz500_store_hqdata_2019.pkl']
+
     for file_name in file_names:
         print(file_name)
         mkt = Mkt(file_indir, save_indir, file_name)

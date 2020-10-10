@@ -79,13 +79,11 @@ class IcSum(object):
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic_sum\\'
+    file_names = os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\')
+
+    icsum = IcSum(file_indir, file_names, save_indir)
+    icsum.runflow()
 
     # file_names = ['factor_hq_apb1d.pkl', 'factor_price_bi.pkl', 'factor_price_ivff.pkl']
     # icsum = IcSum(file_indir, file_names, save_indir)
     # icsum.runflow()
-
-    # 计算所有因子ic汇总结果
-    file_indir_factors = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    file_names = os.listdir(file_indir_factors)
-    icsum = IcSum(file_indir, file_names, save_indir)
-    icsum.runflow()

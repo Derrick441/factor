@@ -87,61 +87,51 @@ class PerfIc(object):
 
 
 if __name__ == '__main__':
-    # 因子
     file_indir1 = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    file_names1 = ['factor_hq_apb1d.pkl', 'factor_price_bi.pkl']
-    # 收益率
+    file_names1 = os.listdir(file_indir1)
     file_indir2 = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
     file_names2 = ['all_band_adjvwap_hh_price_label1.pkl',
                    'all_band_adjvwap_hh_price_label5.pkl',
                    'all_band_adjvwap_hh_price_label10.pkl',
                    'all_band_adjvwap_hh_price_label20.pkl',
                    'all_band_adjvwap_hh_price_label60.pkl']
-    # IC存储地址
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
-    # IC或Rank IC
     method = 'IC'
-    # 是否中性化
     neutral = 0
 
-    # for i in file_names1:
-    #     for j in file_names2:
-    #         ic = PerfIc(file_indir1, i, file_indir2, j, save_indir, method, neutral)
-    #         ic.runflow()
-
     # 计算全部因子ic
-    file_names1 = os.listdir(file_indir1)
     for i in file_names1:
         for j in file_names2:
             ic = PerfIc(file_indir1, i, file_indir2, j, save_indir, method, neutral)
             ic.runflow()
 
+    # file_names1 = ['factor_hq_apb1d.pkl', 'factor_price_bi.pkl']
+    # for i in file_names1:
+    #     for j in file_names2:
+    #         ic = PerfIc(file_indir1, i, file_indir2, j, save_indir, method, neutral)
+    #         ic.runflow()
+
 # 中性化因子ic--------------------------------------------------------------------------------
-    # 因子
     file_indir1 = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
-    file_names1 = ['neutral_factor_hq_arpp1d.pkl']
-    # 收益率
     file_indir2 = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
     file_names2 = ['ret_1_neutral.pkl',
                    'ret_5_neutral.pkl',
                    'ret_10_neutral.pkl',
                    'ret_20_neutral.pkl',
                    'ret_60_neutral.pkl']
-    # IC存储地址
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
-    # IC或Rank IC
     method = 'IC'
-    # 是否中性化
     neutral = 1
 
-    # for i in file_names1:
-    #     for j in file_names2:
-    #         ic = PerfIc(file_indir1, i, file_indir2, j, save_indir, method, neutral)
-    #         ic.runflow()
-
-    # 计算全部因子ic
     file_names1 = os.listdir(file_indir1)
     for i in file_names1:
         for j in file_names2:
             ic = PerfIc(file_indir1, i, file_indir2, j, save_indir, method, neutral)
             ic.runflow()
+
+    # # 计算部分因子
+    # file_names1 = ['neutral_factor_hq_arpp1d.pkl']
+    # for i in file_names1:
+    #     for j in file_names2:
+    #         ic = PerfIc(file_indir1, i, file_indir2, j, save_indir, method, neutral)
+    #         ic.runflow()

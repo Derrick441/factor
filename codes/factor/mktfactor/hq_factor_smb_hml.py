@@ -67,6 +67,7 @@ if __name__ == '__main__':
                   'all_store_hqdata_2014_5_derive.pkl', 'all_store_hqdata_2015_5_derive.pkl',
                   'all_store_hqdata_2016_5_derive.pkl', 'all_store_hqdata_2017_5_derive.pkl',
                   'all_store_hqdata_2018_5_derive.pkl', 'all_store_hqdata_2019_5_derive.pkl']
+
     for file_name in file_names:
         print(file_name)
         tf = TwoFactor(file_indir, save_indir, file_name)
