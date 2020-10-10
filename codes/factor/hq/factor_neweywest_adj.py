@@ -2,87 +2,89 @@ import pandas as pd
 import numpy as np
 import time
 import statsmodels.api as sm
-import statsmodels.regression.rolling as regroll
 
 
-# 计算滚动回归的newey-west调整标准误
+# 滚动计算：因子的时间序列回归newey-west调整标准误
 class NeweyWestAdj(object):
 
-    def __init__(self, file_indir, file_name):
+    def __init__(self, file_indir, factor_indir, file_name, factor):
         self.file_indir = file_indir
+        self.factor_indir = factor_indir
         self.file_name = file_name
+        self.factor = factor
 
     def filein(self):
         t = time.time()
-        # 读入收益率数据
-        self.ret = pd.read_pickle(self.file_indir[0] + self.file_name[0])
-        self.ret = self.ret.reset_index().rename(columns={0: 'ret'})
+        # 读入日数据（包含收益率）
+        self.data = pd.read_pickle(self.file_indir + self.file_name)
         # 读入因子数据
-        self.fac = pd.read_pickle(self.file_indir[1] + self.file_name[1])
-        # 记录因子名称
-        self.fac_name = self.fac.columns[-1]
-        self.fac = self.fac.rename(columns={self.fac_name: 'factor'})
+        self.fac = pd.read_pickle(self.factor_indir + self.factor)
         print('filein using time:%10.4fs' % (time.time()-t))
-        print(self.fac_name)
 
     def datamanage(self):
         t = time.time()
-        # 收益率数据和因子数据合并
-        self.fac_ret = pd.merge(self.fac, self.ret, how='left')
+        # 因子名保留、调整
+        self.fac_name = self.fac.columns[-1]
+        print(self.fac_name)
+        self.fac = self.fac.rename(columns={self.fac_name: 'factor'})
+        # 收益率提取
+        self.ret = self.data[['trade_dt', 's_info_windcode', 'change']]
+        # 因子和收益率合并
+        self.data_sum = pd.merge(self.fac, self.ret, how='left')
+        # 0值空值处理
+        self.temp = self.data_sum.replace(0, np.nan).copy()
+        self.data_dropna = self.temp.dropna().copy()
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
-    def neweywest_stde(self, data):
+    def neweywest_stde(self, data, perid, factor_name):
         t = time.time()
-        print(len(data))
-        if len(data) > 20:
-            temp = data.copy()
+        temp = data.copy()
+        num = len(temp)
+        if num > perid:
             temp['intercept'] = 1
             item = ['intercept', 'factor']
-            result = [None for i in range(20)]
+            result = [None for i in range(perid)]
             # 第21个开始，计算回归的newey-west调整标准误
-            for i in range(20, len(data)):
-                # print(i)
-                temp1 = temp.iloc[(i-20):i, :]
-                model = sm.OLS(temp1['ret'], temp1[item]).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
+            for i in range(perid, num):
+                temp1 = temp.iloc[(i-perid):i, :]
+                model = sm.OLS(temp1['change'], temp1[item]).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
                 stde = model.params / model.tvalues
                 result.append(stde.values[1])
-
             print(time.time()-t)
-            return pd.DataFrame({'trade_dt': data.trade_dt.values, 'sd'+self.fac_name: result})
+            return pd.DataFrame({'trade_dt': temp.trade_dt.values, 'sd' + factor_name: result})
         else:
-            result = [None for i in range(len(data))]
-            return pd.DataFrame({'trade_dt': data.trade_dt.values, 'sd'+self.fac_name: result})
+            result = [None for i in range(num)]
+            return pd.DataFrame({'trade_dt': temp.trade_dt.values, 'sd' + factor_name: result})
 
-    def rollingmean(self, data):
-        if len(data) > 20:
-            mean = data['factor'].rolling(20).mean()
-            return pd.DataFrame({'trade_dt': data.trade_dt.values, 'temp_mean': mean})
+    def rollingmean(self, data, perid):
+        temp = data.copy()
+        num = len(temp)
+        if num > perid:
+            result = temp['factor'].rolling(perid).mean()
+            return pd.DataFrame({'trade_dt': temp.trade_dt.values, 'temp_mean': result})
         else:
-            result = [None for i in range(len(data))]
-            return pd.DataFrame({'trade_dt': data.trade_dt.values, 'temp_mean': result})
+            result = [None for i in range(num)]
+            return pd.DataFrame({'trade_dt': temp.trade_dt.values, 'temp_mean': result})
 
-    def factor_compute(self):
+    def compute(self):
         t = time.time()
-        self.fac_ret_drop = self.fac_ret.dropna().copy()
-        self.fac_ret_drop = self.fac_ret_drop[self.fac_ret_drop.factor != 0]
-        self.stde = self.fac_ret_drop.groupby('s_info_windcode')\
-                                     .apply(self.neweywest_stde)\
-                                     .reset_index()\
-                                     .drop('level_1', axis=1)
+        self.stde = self.data_dropna.groupby('s_info_windcode')\
+                                    .apply(self.neweywest_stde, 20, self.fac_name)\
+                                    .reset_index()
         if self.fac_name in ['rvol', 'vvol']:
-            self.data_mean = self.fac_ret_drop.groupby('s_info_windcode')\
-                                         .apply(self.rollingmean)\
-                                         .reset_index()
-            self.stde['sd'+self.fac_name] = self.stde['sd'+self.fac_name] / self.data_mean['temp_mean']
+            self.mean = self.data_dropna.groupby('s_info_windcode')\
+                                        .apply(self.rollingmean, 20)\
+                                        .reset_index()
+            self.stde['sd'+self.fac_name] = self.stde['sd' + self.fac_name] / self.mean['temp_mean']
         print('factor compute using time:%10.4fs' % (time.time()-t))
 
     def fileout(self):
         t = time.time()
         # 数据对齐
         self.result = pd.merge(self.fac[['trade_dt', 's_info_windcode']], self.stde, how='left')
-        # 输出到factor文件夹的stockfactor中
-        item = ['trade_dt', 's_info_windcode', 'sd'+self.fac_name]
-        self.result[item].to_pickle(self.file_indir[1] + self.file_name[1][:-4] + 'sd.pkl')
+        # 数据输出
+        item = ['trade_dt', 's_info_windcode', 'sd' + self.fac_name]
+        self.result[item].to_pickle(self.factor_indir + 'factor_hq_sd' + self.fac_name + '.pkl')
         print(time.time()-t)
 
     def runflow(self):
@@ -90,52 +92,19 @@ class NeweyWestAdj(object):
         print('start')
         self.filein()
         self.datamanage()
-        self.factor_compute()
+        self.compute()
         self.fileout()
         print('finish using time:%10.4fs' % (time.time()-t))
 
 
 if __name__ == '__main__':
-    file_indir = ['D:\\wuyq02\\develop\\python\\data\\developflow\\all\\',
-                  'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\']
+    file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
+    factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+    file_name = 'all_dayindex.pkl'
+    factors = ['factor_hq_rskew.pkl', 'factor_hq_rkurt.pkl', 'factor_hq_rvol.pkl',
+               'factor_hq_vskew.pkl', 'factor_hq_vkurt.pkl', 'factor_hq_vvol.pkl',
+               'factor_hq_vhhi.pkl']
 
-    factor = ['factor_hq_rskew.pkl', 'factor_hq_rkurt.pkl',
-              'factor_hq_vskew.pkl', 'factor_hq_vkurt.pkl',
-              'factor_hq_rvol.pkl', 'factor_hq_vvol.pkl',
-              'factor_hq_vhhi.pkl']
-
-    # factor = ['factor_hq_rvol.pkl', 'factor_hq_vskew.pkl', 'factor_hq_vvol.pkl']
-
-    for i in factor:
-        file_name = ['all_band_adjvwap_hh_price_label1.pkl', i]
-        nw = NeweyWestAdj(file_indir, file_name)
+    for factor in factors:
+        nw = NeweyWestAdj(file_indir, factor_indir, file_name, factor)
         nw.runflow()
-
-
-# nw.filein()
-# nw.datamanage()
-# nw.factor_compute()
-#
-#     def neweywest_stde(data):
-#         t = time.time()
-#         print(len(data))
-#         if len(data) >= 20:
-#             temp = data.copy()
-#             temp['intercept'] = 1
-#             item = ['intercept', 'factor']
-#             result = [None for i in range(19)]
-#             for i in range(19, len(data)):
-#                 temp1 = temp.iloc[(i-19):(i+1), :]
-#                 model = sm.OLS(temp1['ret'], temp1[item]).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
-#                 stde = model.params / model.tvalues
-#                 result.append(stde.values[1])
-#             print(time.time()-t)
-#             return pd.DataFrame({'trade_dt': data.trade_dt.values, 'sd': result})
-#         else:
-#             result = [None for i in range(len(data))]
-#             return pd.DataFrame({'trade_dt': data.trade_dt.values, 'sd': result})
-#
-# temp = nw.fac_ret.iloc[:2800000, :]
-# fac_ret_dropna = temp.dropna()
-# result = fac_ret_dropna.groupby('s_info_windcode').apply(neweywest_stde).reset_index().drop('level_1', axis=1)
-# result
