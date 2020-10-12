@@ -4,7 +4,7 @@ import time
 
 
 # 日均价偏差apb: 日的5分钟成交量加权平均价的平均价/日成交量加权的5分钟成交量加权平均价的平均价
-class Apb(object):
+class Apb1d(object):
 
     def __init__(self, file_indir, save_indir, file_name):
         self.file_indir = file_indir
@@ -69,7 +69,7 @@ class Apb(object):
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\minfactor\\'
+    save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'
     file_names = ['all_store_hqdata_2012_5_derive.pkl', 'all_store_hqdata_2013_5_derive.pkl',
                   'all_store_hqdata_2014_5_derive.pkl', 'all_store_hqdata_2015_5_derive.pkl',
                   'all_store_hqdata_2016_5_derive.pkl', 'all_store_hqdata_2017_5_derive.pkl',
@@ -77,12 +77,12 @@ if __name__ == '__main__':
 
     for file_name in file_names:
         print(file_name)
-        apb = Apb(file_indir, save_indir, file_name)
+        apb = Apb1d(file_indir, save_indir, file_name)
         apb.runflow()
 
     def merge_data(factor_name, names):
         # 分开数据读取、合并
-        indir1 = 'D:\\wuyq02\\develop\\python\\data\\factor\\minfactor\\'
+        indir1 = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'
         data_sum = []
         for name in names:
             data_sum.append(pd.read_pickle(indir1 + name))

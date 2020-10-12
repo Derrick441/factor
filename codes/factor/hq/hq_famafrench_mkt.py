@@ -81,7 +81,7 @@ class Mkt(object):
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\zz500\\'
-    save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\mktfactor\\'
+    save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\famafrench_factor\\'
     file_names = ['zz500_store_hqdata_2012.pkl', 'zz500_store_hqdata_2013.pkl',
                   'zz500_store_hqdata_2014.pkl', 'zz500_store_hqdata_2015.pkl',
                   'zz500_store_hqdata_2016.pkl', 'zz500_store_hqdata_2017.pkl',

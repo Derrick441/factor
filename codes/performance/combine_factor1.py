@@ -78,6 +78,7 @@ class FactorCombine(object):
         # 因子：IC加权、求和得到合并因子
         temp1 = temp_fa.set_index(item)
         result = pd.DataFrame(np.array(temp1) * np.array(mean), index=temp1.index)
+        result.replace(np.nan, 0, inplace=True)
         result[name] = result.sum(axis=1)
 
         # 调整
@@ -96,11 +97,11 @@ class FactorCombine(object):
 
     def fileout(self):
         # 数据输出（因子之前已数据对齐，所以不再数据对齐）
-        self.combine_factor_ic_1.to_pickle(self.save_indir + 'combine_factor_ic_1.pkl')
-        self.combine_factor_ic_5.to_pickle(self.save_indir + 'combine_factor_ic_5.pkl')
-        self.combine_factor_ic_10.to_pickle(self.save_indir + 'combine_factor_ic_10.pkl')
-        self.combine_factor_ic_20.to_pickle(self.save_indir + 'combine_factor_ic_20.pkl')
-        self.combine_factor_ic_60.to_pickle(self.save_indir + 'combine_factor_ic_60.pkl')
+        self.combine_factor_ic_1.to_pickle(self.save_indir + 'combine1_factor_ic_1.pkl')
+        self.combine_factor_ic_5.to_pickle(self.save_indir + 'combine1_factor_ic_5.pkl')
+        self.combine_factor_ic_10.to_pickle(self.save_indir + 'combine1_factor_ic_10.pkl')
+        self.combine_factor_ic_20.to_pickle(self.save_indir + 'combine1_factor_ic_20.pkl')
+        self.combine_factor_ic_60.to_pickle(self.save_indir + 'combine1_factor_ic_60.pkl')
 
     def runflow(self):
         print('start')

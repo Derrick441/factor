@@ -71,8 +71,8 @@ class DayinThreeIndex(object):
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\mktfactor\\'
-    save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\minfactor\\'
+    factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\famafrench_factor\\'
+    save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'
     file_names = ['all_store_hqdata_2012_5_derive.pkl', 'all_store_hqdata_2013_5_derive.pkl',
                   'all_store_hqdata_2014_5_derive.pkl', 'all_store_hqdata_2015_5_derive.pkl',
                   'all_store_hqdata_2016_5_derive.pkl', 'all_store_hqdata_2017_5_derive.pkl',
@@ -85,7 +85,7 @@ if __name__ == '__main__':
 
     def merge_data(factor_name, names):
         # 分开数据读取、合并
-        indir1 = 'D:\\wuyq02\\develop\\python\\data\\factor\\minfactor\\'
+        indir1 = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'
         data_sum = []
         for name in names:
             data_sum.append(pd.read_pickle(indir1 + name))

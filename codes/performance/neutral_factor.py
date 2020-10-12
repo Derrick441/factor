@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import time
 import statsmodels.api as sm
 import os
@@ -23,12 +24,12 @@ class FactorNeutral(object):
         self.factor = pd.read_pickle(self.file_indir2 + self.file_name2)
         print('filein running time:%10.4fs' % (time.time() - t))
 
-    def datamanage_prepare(self):
+    def datamanage(self):
         t = time.time()
         # 因子名
         self.factor_name = self.factor.columns[-1]
 
-        # 数据选取
+        # 市值、行业数据选取
         self.mv = self.dayindex[['trade_dt', 's_info_windcode', 's_dq_mv']]
         self.indu = self.bandindu[['trade_dt', 's_info_windcode', 'induname1']]
 
@@ -42,18 +43,20 @@ class FactorNeutral(object):
         self.data_dum.drop('induname1_综合', axis=1, inplace=True)
 
         # 去除空值
+        self.data_dum.replace([np.inf, -np.inf], np.nan, inplace=True)
         self.data_dum.dropna(inplace=True)
-        print('datamanage-prepare running time:%10.4fs' % (time.time() - t))
+        print('datamanage running time:%10.4fs' % (time.time() - t))
 
     # 中性化回归函数
     def neutral(self, data, y_item, x_item):
-        y = data[y_item]
-        x = data[x_item]
+        temp = data.copy()
+        y = temp[y_item]
+        x = temp[x_item]
         x['intercept'] = 1
         result = sm.OLS(y, x).fit()
         return result.resid
 
-    def datamanage_neutral(self):
+    def compute(self):
         t = time.time()
         # 中性化回归
         y_item = [self.factor_name]
@@ -63,7 +66,7 @@ class FactorNeutral(object):
                                         .droplevel(0)\
                                         .reset_index()\
                                         .rename(columns={0: 'neutral_' + self.factor_name})
-        print('datamanage-neutral running time:%10.4fs' % (time.time() - t))
+        print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
@@ -79,8 +82,8 @@ class FactorNeutral(object):
         t = time.time()
         print('start')
         self.filein()
-        self.datamanage_prepare()
-        self.datamanage_neutral()
+        self.datamanage()
+        self.compute()
         self.fileout()
         print('finish using time:%10.4fs' % (time.time() - t))
 
@@ -92,12 +95,12 @@ if __name__ == '__main__':
     file_names2 = os.listdir(file_indir2)
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
 
-    for i in file_names2:
-        fn = FactorNeutral(file_indir1, file_names1, file_indir2, i, save_indir)
-        fn.runflow()
-
-    # # 中性化部分因子
-    # file_names2 = ['factor_hq_apb1d.pkl', 'factor_price_bi.pkl', 'factor_price_ivff.pkl']
     # for i in file_names2:
     #     fn = FactorNeutral(file_indir1, file_names1, file_indir2, i, save_indir)
     #     fn.runflow()
+
+    # 中性化部分因子
+    file_names2 = ['factor_hq_arpp1d.pkl', 'factor_hq_arpp5d.pkl', 'factor_hq_arpp20d.pkl']
+    for i in file_names2:
+        fn = FactorNeutral(file_indir1, file_names1, file_indir2, i, save_indir)
+        fn.runflow()

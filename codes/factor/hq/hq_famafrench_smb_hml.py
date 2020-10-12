@@ -62,7 +62,7 @@ class TwoFactor(object):
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\mktfactor\\'
+    save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\famafrench_factor\\'
     file_names = ['all_store_hqdata_2012_5_derive.pkl', 'all_store_hqdata_2013_5_derive.pkl',
                   'all_store_hqdata_2014_5_derive.pkl', 'all_store_hqdata_2015_5_derive.pkl',
                   'all_store_hqdata_2016_5_derive.pkl', 'all_store_hqdata_2017_5_derive.pkl',

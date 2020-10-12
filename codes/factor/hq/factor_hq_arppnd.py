@@ -8,15 +8,16 @@ import time
 # （p-l)/(h-l)在时间上的积分等价于n个（p-l)/(h-l)的平均值
 class ArppNd(object):
 
-    def __init__(self, file_indir, save_indir, file_name):
-        self.file_indir = file_indir
+    def __init__(self, file_indir1, file_indir2, save_indir, file_name):
+        self.file_indir1 = file_indir1
+        self.file_indir2 = file_indir2
         self.save_indir = save_indir
         self.file_name = file_name
 
     def filein(self):
         t = time.time()
         # 读入数据
-        self.data = pd.read_pickle(self.file_indir + self.file_name)
+        self.data = pd.read_pickle(self.file_indir2 + self.file_name)
         print('filein using time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
@@ -26,18 +27,26 @@ class ArppNd(object):
 
     def roll_arppnd(self, data, perid):
         temp = data.copy()
+        name = 'arpp' + str(perid) + 'd'
         temp['roll_twap'] = temp['twap'].rolling(perid).apply(lambda x: np.mean(x))
         temp['roll_L'] = temp['L'].rolling(perid).apply(lambda x: np.min(x))
         temp['roll_H'] = temp['H'].rolling(perid).apply(lambda x: np.max(x))
-        name = 'arpp' + str(perid) + 'd'
-        temp[name] = (temp['roll_twap'] - temp['roll_L']) / (temp['roll_H'] - temp['roll_L'])
-        return temp[['trade_dt', name]]
+
+        temp['temp1'] = temp['roll_twap'] - temp['roll_L']
+        temp['temp2'] = temp['roll_H'] - temp['roll_L']
+        # temp['temp1'] = temp['temp1'].replace(0, np.nan)
+        temp['temp2'] = temp['temp2'].replace(0, np.nan)
+        temp[name] = temp['temp1'] / temp['temp2']
+
+        result = temp[['trade_dt', name]].copy()
+        return result
 
     def compute(self):
         t = time.time()
         # 计算arpp
-        temp_data = self.data_dropna.copy()
-        self.temp_result1 = (temp_data['twap'] - temp_data['L'])/(temp_data['H'] - temp_data['L'])
+        tempdata = self.data_dropna.copy()
+        tempdata['arpp1d'] = (tempdata['twap'] - tempdata['L'])/(tempdata['H'] - tempdata['L'])
+        self.temp_result1 = tempdata.copy()
         self.temp_result5 = self.data_dropna.groupby('s_info_windcode')\
                                             .apply(self.roll_arppnd, 5)\
                                             .reset_index()
@@ -49,17 +58,17 @@ class ArppNd(object):
     def fileout(self):
         t = time.time()
         # 数据对齐
-        self.all_data = pd.read_pickle(self.file_indir + 'all_dayindex.pkl')
+        self.all_data = pd.read_pickle(self.file_indir1 + 'all_dayindex.pkl')
         self.result1 = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result1, how='left')
         self.result5 = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result5, how='left')
         self.result20 = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result20, how='left')
         # 输出到factor文件夹的stockfactor中
         item = ['trade_dt', 's_info_windcode', 'arpp1d']
-        self.result1[item].to_pickle(self.save_indir + 'factor_price_arpp1d.pkl')
+        self.result1[item].to_pickle(self.save_indir + 'factor_hq_arpp1d.pkl')
         item = ['trade_dt', 's_info_windcode', 'arpp5d']
-        self.result5[item].to_pickle(self.save_indir + 'factor_price_arpp5d.pkl')
+        self.result5[item].to_pickle(self.save_indir + 'factor_hq_arpp5d.pkl')
         item = ['trade_dt', 's_info_windcode', 'arpp20d']
-        self.result20[item].to_pickle(self.save_indir + 'factor_price_arpp20d.pkl')
+        self.result20[item].to_pickle(self.save_indir + 'factor_hq_arpp20d.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
@@ -73,9 +82,14 @@ class ArppNd(object):
 
 
 if __name__ == '__main__':
-    file_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\minfactor\\'
+    file_indir1 = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
+    file_indir2 = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    file_name = 'factor_hq_arpp.pkl'
+    file_name = 'factor_hq_arpp_all.pkl'
 
-    arppnd = ArppNd(file_indir, save_indir, file_name)
+    arppnd = ArppNd(file_indir1, file_indir2, save_indir, file_name)
     arppnd.runflow()
+
+# arppnd.filein()
+# arppnd.datamanage()
+# arppnd.compute()

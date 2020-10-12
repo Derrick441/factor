@@ -61,7 +61,7 @@ class Arpp(object):
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\minfactor\\'
+    save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'
     file_names = ['all_store_hqdata_2012_5_derive.pkl', 'all_store_hqdata_2013_5_derive.pkl',
                   'all_store_hqdata_2014_5_derive.pkl', 'all_store_hqdata_2015_5_derive.pkl',
                   'all_store_hqdata_2016_5_derive.pkl', 'all_store_hqdata_2017_5_derive.pkl',
@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
     def merge_data(factor_name, names):
         # 分开数据读取、合并
-        indir1 = 'D:\\wuyq02\\develop\\python\\data\\factor\\minfactor\\'
+        indir1 = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'
         data_sum = []
         for name in names:
             data_sum.append(pd.read_pickle(indir1 + name))
@@ -83,9 +83,9 @@ if __name__ == '__main__':
         all_data = pd.read_pickle(file_indir + 'all_dayindex.pkl')
         result = pd.merge(all_data[['trade_dt', 's_info_windcode']], temp_result, how='left')
         item = ['trade_dt', 's_info_windcode', 'twap', 'L', 'H']
-        indir2 = 'D:\\wuyq02\\develop\\python\\data\\factor\\minfactor\\'
+        indir2 = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'
         result[item].to_pickle(indir2 + 'factor_hq_' + factor_name + '.pkl')
 
-    factor_name = 'arpp'
+    factor_name = 'arpp_all'
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)

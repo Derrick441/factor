@@ -105,7 +105,7 @@ if __name__ == '__main__':
             ic = PerfIc(file_indir1, i, file_indir2, j, save_indir, method, neutral)
             ic.runflow()
 
-    # file_names1 = ['factor_hq_apb1d.pkl', 'factor_price_bi.pkl']
+    # file_names1 = ['factor_hq_arpp1d.pkl', 'factor_hq_arpp5d.pkl', 'factor_hq_arpp20d.pkl']
     # for i in file_names1:
     #     for j in file_names2:
     #         ic = PerfIc(file_indir1, i, file_indir2, j, save_indir, method, neutral)
@@ -130,7 +130,7 @@ if __name__ == '__main__':
             ic.runflow()
 
     # # 计算部分因子
-    # file_names1 = ['neutral_factor_hq_arpp1d.pkl']
+    # file_names1 = ['neutral_factor_hq_arpp1d.pkl', 'neutral_factor_hq_arpp5d.pkl', 'neutral_factor_hq_arpp20d.pkl']
     # for i in file_names1:
     #     for j in file_names2:
     #         ic = PerfIc(file_indir1, i, file_indir2, j, save_indir, method, neutral)

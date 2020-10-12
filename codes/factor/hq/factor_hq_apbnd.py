@@ -73,9 +73,9 @@ class ApbNd(object):
         self.result_20 = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result_20, how='left')
         # 数据输出
         item = ['trade_dt', 's_info_windcode', 'apb5d']
-        self.result_5[item].to_pickle(self.save_indir + 'factor_price_apb5d.pkl')
+        self.result_5[item].to_pickle(self.save_indir + 'factor_hq_apb5d.pkl')
         item = ['trade_dt', 's_info_windcode', 'apb20d']
-        self.result_20[item].to_pickle(self.save_indir + 'factor_price_apb20d.pkl')
+        self.result_20[item].to_pickle(self.save_indir + 'factor_hq_apb20d.pkl')
         print('fileout using time:%10.4fs' % (time.time()-t))
 
     def runflow(self):

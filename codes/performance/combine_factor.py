@@ -81,6 +81,7 @@ class FactorCombine(object):
         temp1 = temp_fa.set_index(item)
         temp2 = temp_ic_roll20.set_index(item)
         result = pd.DataFrame(np.array(temp1) * np.array(temp2), index=temp1.index)
+        result.replace(np.nan, 0, inplace=True)
         result[name] = result.sum(axis=1)
 
         # 调整

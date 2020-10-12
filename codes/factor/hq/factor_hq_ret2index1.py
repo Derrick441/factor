@@ -19,7 +19,7 @@ class ReturnTwoIndex1(object):
     def datamanage(self):
         pass
 
-    def return_overnight(self, data):
+    def overnight_return(self, data):
         temp = data.copy()
         temp['onr'] = (temp['s_dq_open'] - temp['s_dq_close'].shift(1)) / temp['s_dq_close'].shift(1) * 100
         return pd.DataFrame({'trade_dt': temp.trade_dt.values, 'onr': temp['onr'].values})
@@ -28,7 +28,7 @@ class ReturnTwoIndex1(object):
         t = time.time()
         # 隔夜收益计算
         self.temp_result = self.data.groupby('s_info_windcode') \
-                                    .apply(self.return_overnight) \
+                                    .apply(self.overnight_return) \
                                     .reset_index()
         print('compute running time:%10.4fs' % (time.time() - t))
 
@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
     # 加总两个收益率为收益率动量因子
     factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    factor_name = 'factor_hq_mild'
+    factor_name = 'factor_hq_mild.pkl'
     factor = pd.read_pickle(factor_indir + factor_name)
     data = pd.merge(factor, rti1.result[['trade_dt', 's_info_windcode', 'onr']], how='left')
     data['rmom'] = data['mild'] + data['onr']
