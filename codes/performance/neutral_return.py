@@ -22,7 +22,7 @@ class ReturnNeutral(object):
 
     def datamange_prepare(self):
         t = time.time()
-        # 收益率name
+        # 收益名
         temp = self.file_name2[31:]
         self.ret_name = 'ret_' + temp[:-4]
         self.ret_reset = self.ret.reset_index().rename(columns={0: self.ret_name})

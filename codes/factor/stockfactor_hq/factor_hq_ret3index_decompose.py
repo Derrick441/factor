@@ -4,7 +4,7 @@ import time
 
 
 # 收益的动量成分和反转成分：动量成分=对数（隔夜收益+日内温和收益之和），反转成分=对数（日内极端收益之和）
-class ReturnTwoIndex(object):
+class ReturnThreeIndexD(object):
 
     def __init__(self, file_indir, save_indir, file_name):
         self.file_indir = file_indir
@@ -23,7 +23,6 @@ class ReturnTwoIndex(object):
         self.data_dropna = self.data.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
-    # ******************************************************************************************************************
     # 日内收益分解
     def decompose(self, data):
         temp = data.copy()
@@ -49,7 +48,6 @@ class ReturnTwoIndex(object):
                                       .reset_index()\
                                       .rename(columns={0: 'mild', 1: 'rrev'})
         print('factor_compute using time:%10.4fs' % (time.time()-t))
-    # ******************************************************************************************************************
 
     def fileout(self):
         t = time.time()
@@ -80,10 +78,9 @@ if __name__ == '__main__':
 
     for file_name in file_names:
         print(file_name)
-        # ******************************************************************************************************************
-        rti = ReturnTwoIndex(file_indir, save_indir, file_name)
-        rti.runflow()
-        # ******************************************************************************************************************
+
+        rtid = ReturnThreeIndexD(file_indir, save_indir, file_name)
+        rtid.runflow()
 
     def merge_data(factor_name, names):
         # 分开数据读取、合并
@@ -99,19 +96,21 @@ if __name__ == '__main__':
         indir2 = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
         result[item].to_pickle(indir2 + 'factor_hq_' + factor_name + '.pkl')
 
-    # ******************************************************************************************************************
     factor_name = 'mild'
-    # ******************************************************************************************************************
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)
 
-    # ******************************************************************************************************************
     factor_name = 'rrev'
-    # ******************************************************************************************************************
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)
 
-# rti = ReturnTwoIndex(file_indir, save_indir, file_name)
-# rti.filein()
-# rti.datamanage()
-# rti.compute()
+    # 收益率动量因子：温和收益率+隔夜收益
+    # 读入
+    factor1 = pd.read_pickle('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\' + 'factor_hq_mild.pkl')
+    factor2 = pd.read_pickle('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\' + 'factor_price_onr.pkl')
+    # 计算rmom
+    data = pd.merge(factor1, factor2, how='left')
+    data['rmom'] = data['mild'] + data['onr']
+    # 输出
+    item = ['trade_dt', 's_info_windcode', 'rmom']
+    data[item].to_pickle(save_indir + 'factor_hq_rmom.pkl')

@@ -24,7 +24,6 @@ class ApbNd(object):
         self.data_dropna = self.all_data[item].dropna().copy()
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
-    # ******************************************************************************************************************
     def roll_apb(self, data, index, weight, perid):
         temp = data.copy()
         name = 'apb' + str(perid) + 'd'
@@ -59,7 +58,6 @@ class ApbNd(object):
                                               .apply(self.roll_apb, 'vwap', 's_dq_volume', 20)\
                                               .reset_index()
         print('compute using time:%10.4fs' % (time.time() - t))
-    # ******************************************************************************************************************
 
     def fileout(self):
         t = time.time()
@@ -68,9 +66,9 @@ class ApbNd(object):
         self.result_20 = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result_20, how='left')
         # 数据输出
         item = ['trade_dt', 's_info_windcode', 'apb5d']
-        self.result_5[item].to_pickle(self.save_indir + 'factor_hq_apb5d.pkl')
+        self.result_5[item].to_pickle(self.save_indir + 'factor_price_apb5d.pkl')
         item = ['trade_dt', 's_info_windcode', 'apb20d']
-        self.result_20[item].to_pickle(self.save_indir + 'factor_hq_apb20d.pkl')
+        self.result_20[item].to_pickle(self.save_indir + 'factor_price_apb20d.pkl')
         print('fileout using time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
@@ -88,7 +86,5 @@ if __name__ == '__main__':
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
     file_name = 'all_dayindex.pkl'
 
-    # ******************************************************************************************************************
     apbn = ApbNd(file_indir, save_indir, file_name)
     apbn.runflow()
-    # ******************************************************************************************************************

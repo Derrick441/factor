@@ -26,7 +26,6 @@ class ArppNd(object):
         self.data_dropna = self.data.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
-    # ******************************************************************************************************************
     def roll_arppnd(self, data, perid):
         temp = data.copy()
         name = 'arpp' + str(perid) + 'd'
@@ -36,7 +35,6 @@ class ArppNd(object):
 
         temp['temp1'] = temp['roll_twap'] - temp['roll_L']
         temp['temp2'] = temp['roll_H'] - temp['roll_L']
-        # temp['temp1'] = temp['temp1'].replace(0, np.nan)
         temp['temp2'] = temp['temp2'].replace(0, np.nan)
         temp[name] = temp['temp1'] / temp['temp2']
 
@@ -56,7 +54,6 @@ class ArppNd(object):
                                              .apply(self.roll_arppnd, 20)\
                                              .reset_index()
         print('factor_compute using time:%10.4fs' % (time.time()-t))
-    # ******************************************************************************************************************
 
     def fileout(self):
         t = time.time()
@@ -88,13 +85,7 @@ if __name__ == '__main__':
     file_indir1 = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
     file_indir2 = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    file_name = 'factor_hq_arpp_all.pkl'
+    file_name = 'factor_hq_arpp.pkl'
 
-    # ******************************************************************************************************************
     arppnd = ArppNd(file_indir1, file_indir2, save_indir, file_name)
     arppnd.runflow()
-    # ******************************************************************************************************************
-
-# arppnd.filein()
-# arppnd.datamanage()
-# arppnd.compute()

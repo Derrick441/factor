@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import pandas as pd
 import numpy as np
 
@@ -144,9 +143,9 @@ class TradeModuleAdj(object):
 
 if __name__ == '__main__':
     initmoney = 100000000
-    costsell = 0.0025
     costbuy = 0.0015
-    enddate = '20180125'
+    costsell = 0.0025
+    enddate = '20190630'
     dir = 'D:\\develop\\python\\data\\tradeflow\\test\\'
 
     # 价格数据

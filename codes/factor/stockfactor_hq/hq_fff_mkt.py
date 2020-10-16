@@ -89,5 +89,6 @@ if __name__ == '__main__':
 
     for file_name in file_names:
         print(file_name)
+
         mkt = Mkt(file_indir, save_indir, file_name)
         mkt.runflow()

@@ -29,13 +29,12 @@ class NeweyWestAdj(object):
         self.fac = self.fac.rename(columns={self.fac_name: 'factor'})
 
         # 因子和收益率合并
-        item = ['trade_dt', 's_info_windcode', 'change']
+        item = ['trade_dt', 's_info_windcode', 's_dq_pctchange']
         self.data_sum = pd.merge(self.fac, self.all_data[item], how='left')
         # 去除nan
         self.data_dropna = self.data_sum.dropna().copy()
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
-    # ******************************************************************************************************************
     def neweywest_stde(self, data, perid, factor_name):
         t = time.time()
         temp = data.copy()
@@ -48,7 +47,7 @@ class NeweyWestAdj(object):
             # 第21个开始，计算回归的newey-west调整标准误
             for i in range(perid, num):
                 temp1 = temp.iloc[(i-perid):i, :]
-                model = sm.OLS(temp1['change'], temp1[item]).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
+                model = sm.OLS(temp1['s_dq_pctchange'], temp1[item]).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
                 stde = model.params / model.tvalues
                 result.append(stde.values[1])
             print(time.time()-t)
@@ -76,7 +75,6 @@ class NeweyWestAdj(object):
                                         .reset_index()
             self.stde['sd'+self.fac_name] = self.stde['sd' + self.fac_name] / self.mean['temp_mean']
         print('factor compute using time:%10.4fs' % (time.time()-t))
-    # ******************************************************************************************************************
 
     def fileout(self):
         t = time.time()
@@ -107,7 +105,7 @@ if __name__ == '__main__':
                'factor_hq_vhhi.pkl']
 
     for factor in factors:
-        # ******************************************************************************************************************
+        print(factor)
+
         nw = NeweyWestAdj(file_indir, factor_indir, file_name, factor)
         nw.runflow()
-        # ******************************************************************************************************************

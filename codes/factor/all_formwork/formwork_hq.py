@@ -13,15 +13,15 @@ class X(object):
 
     def filein(self):
         t = time.time()
-        # 输入数据
+        # 股票5分钟数据
         self.data = pd.read_pickle(self.file_indir + self.file_name)
         print('filein using time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
-        # t = time.time()
-        # # 数据整理
-        # print('datamanage using time:%10.4fs' % (time.time() - t))
-        pass
+        t = time.time()
+        # 去除nan
+        self.data_dropna = self.data.dropna().copy()
+        print('datamanage using time:%10.4fs' % (time.time()-t))
 
     def method(self, data):
         temp = data.copy()

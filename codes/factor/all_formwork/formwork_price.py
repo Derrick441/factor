@@ -12,17 +12,17 @@ class X(object):
 
     def filein(self):
         t = time.time()
-        # 读入数据
-        self.data = pd.read_pickle(self.file_indir + self.file_name)
-        print('filein using time:%10.4fs' % (time.time()-t))
+        # 股票日数据
+        self.all_data = pd.read_pickle(self.file_indir + self.file_name)
+        print('filein running time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
-        # 数据整理
-
-        self.temp = self.data.replace(0, np.nan).copy()
-        self.data_dropna = self.temp.dropna().copy()
-        print('datamanage using time:%10.4fs' % (time.time() - t))
+        # 数据合并
+        self.data = pd.merge(self.xx, self.xx, how='left')
+        # 去除空值
+        self.data_dropna = self.data.dropna().copy()
+        print('datamanage running time:%10.4fs' % (time.time() - t))
 
     def method(self, data, perid):
         temp = data.copy()

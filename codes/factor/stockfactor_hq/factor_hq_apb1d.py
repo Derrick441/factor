@@ -23,7 +23,6 @@ class Apb1d(object):
         self.data_dropna = self.data.dropna().copy()
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
-    # ******************************************************************************************************************
     def oneday_apb(self, data, index):
         temp = data.copy()
         # 平均价
@@ -48,7 +47,6 @@ class Apb1d(object):
                                       .reset_index()\
                                       .rename(columns={0: 'apb1d'})
         print('compute using time:%10.4fs' % (time.time()-t))
-    # ******************************************************************************************************************
 
     def fileout(self):
         t = time.time()
@@ -77,10 +75,9 @@ if __name__ == '__main__':
 
     for file_name in file_names:
         print(file_name)
-        # ******************************************************************************************************************
+
         apb1 = Apb1d(file_indir, save_indir, file_name)
         apb1.runflow()
-        # ******************************************************************************************************************
 
     def merge_data(factor_name, names):
         # 分开数据读取、合并
@@ -96,8 +93,6 @@ if __name__ == '__main__':
         indir2 = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
         result[item].to_pickle(indir2 + 'factor_hq_' + factor_name + '.pkl')
 
-    # ******************************************************************************************************************
     factor_name = 'apb1d'
-    # ******************************************************************************************************************
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)

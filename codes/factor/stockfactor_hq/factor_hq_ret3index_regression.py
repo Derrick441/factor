@@ -5,7 +5,7 @@ import statsmodels.api as sm
 
 
 # 高频数据计算的：日内特质波动率，日内偏度，日内峰度
-class DayinThreeIndex(object):
+class ReturnThreeIndexR(object):
 
     def __init__(self, file_indir, factor_indir, save_indir, file_name):
         self.file_indir = file_indir
@@ -33,7 +33,6 @@ class DayinThreeIndex(object):
         self.data_dropna = self.data.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
-    # ******************************************************************************************************************
     def regress(self, data, y, x):
         Y = data[y]
         X = data[x]
@@ -50,7 +49,6 @@ class DayinThreeIndex(object):
                                       .reset_index()\
                                       .rename(columns={0: 'Dvol', 1: 'Dskew', 2: 'Dkurt'})
         print('compute running time:%10.4fs' % (time.time() - t))
-    # ******************************************************************************************************************
 
     def fileout(self):
         t = time.time()
@@ -84,10 +82,9 @@ if __name__ == '__main__':
 
     for file_name in file_names:
         print(file_name)
-        # ******************************************************************************************************************
-        dti = DayinThreeIndex(file_indir, factor_indir, save_indir, file_name)
-        dti.runflow()
-        # ******************************************************************************************************************
+
+        dtic = ReturnThreeIndexR(file_indir, factor_indir, save_indir, file_name)
+        dtic.runflow()
 
     def merge_data(factor_name, names):
         # 分开数据读取、合并

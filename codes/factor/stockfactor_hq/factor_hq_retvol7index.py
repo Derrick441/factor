@@ -24,7 +24,6 @@ class DayinSevenIndex(object):
         self.data_dropna = self.data.dropna().copy()
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
-    # ******************************************************************************************************************
     def sevenindex(self, data):
         rvol = np.std(data['change'], ddof=1)
         rskew = data['change'].skew()
@@ -46,7 +45,6 @@ class DayinSevenIndex(object):
                                                 3: 'vvol', 4: 'vskew', 5: 'vkurt',
                                                 6: 'vhhi'})
         print('compute_intraday7index running time:%10.4fs' % (time.time() - t))
-    # ******************************************************************************************************************
 
     def fileout(self):
         t = time.time()
@@ -89,10 +87,9 @@ if __name__ == '__main__':
 
     for file_name in file_names:
         print(file_name)
-        # ******************************************************************************************************************
+
         dsi = DayinSevenIndex(file_indir, save_indir, file_name)
         dsi.runflow()
-        # ******************************************************************************************************************
 
     def merge_data(factor_name, names):
         # 分开数据读取、合并
