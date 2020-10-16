@@ -26,8 +26,9 @@ class FactorCombine(object):
                 temp = pd.read_pickle(file_indir + file_names[i])
                 temp_0 = pd.merge(temp_0, temp, how='left')
         # 日期数据类型转换为int
-        temp_0['trade_dt'] = temp_0['trade_dt'].apply(lambda x: int(x))
+        # temp_0['trade_dt'] = temp_0['trade_dt'].apply(lambda x: int(x))
         temp_0.set_index(['trade_dt', 's_info_windcode'], inplace=True)
+        temp_0.replace(np.nan, 0, inplace=True)
         print('files read in:%10.4fs' % (time.time()-t))
         return temp_0
 
@@ -41,8 +42,9 @@ class FactorCombine(object):
                 temp = pd.read_pickle(read_indir)
                 table = pd.merge(table, temp, how='outer')
         # 日期数据类型转换为int
-        table['trade_dt'] = table['trade_dt'].apply(lambda x: int(x))
+        # table['trade_dt'] = table['trade_dt'].apply(lambda x: int(x))
         table.sort_values(by='trade_dt', inplace=True)
+        table.replace(np.nan, 0, inplace=True)
         print('files read in:%10.4fs' % (time.time() - t))
         return table
 
@@ -86,7 +88,7 @@ class FactorCombine(object):
 
         # 调整
         result.reset_index(inplace=True)
-        result['trade_dt'] = result['trade_dt'].apply(lambda x: str(x))
+        # result['trade_dt'] = result['trade_dt'].apply(lambda x: str(x))
         print('combine using time:%10.4fs' % (time.time() - t))
         return result[['trade_dt', 's_info_windcode', name]]
 

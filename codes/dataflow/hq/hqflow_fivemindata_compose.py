@@ -5,23 +5,25 @@ import time
 # 由1分钟高频数据合成5分钟高频数据
 class ComposeFiveMinData(object):
 
-    def __init__(self, file_indir, file_name):
+    def __init__(self, file_indir, save_indir, file_name):
         self.file_indir = file_indir
+        self.save_indir = save_indir
         self.file_name = file_name
 
     def filein(self):
         t = time.time()
-        # 从dataflow文件夹中取日内高频数据
+        # 取一年高频数据（1分钟）
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
         print('filein running time:%10.4fs' % (time.time() - t))
 
     def compose_one_five(self, data):
+        temp = data.copy()
         # 数据显示
-        print(data.iloc[0, 0]+'-'+data.iloc[0, 2])
+        print(temp.iloc[0, 0]+'-'+temp.iloc[0, 2])
         # 数据排序
-        data1 = data.sort_values(by='bargaintime')
+        data1 = temp.sort_values(by='bargaintime')
         # 索引
-        len1 = len(data)
+        len1 = len(temp)
         len2 = len1-1
         head_list = list(range(0, len2, 5))
         tail_list = list(range(5, len2, 5))
@@ -45,11 +47,11 @@ class ComposeFiveMinData(object):
             result_list.append(info_list)
         # 格式调整
         result = pd.DataFrame(result_list)
-        result.columns = data.columns
+        result.columns = temp.columns
         # 返回合并结果
         return result
 
-    def datamanage(self):
+    def compose(self):
         t = time.time()
         # 一分钟数据合并成5分钟数据
         self.result = self.all_data.groupby(['s_info_windcode', 'trade_dt'])\
@@ -59,14 +61,14 @@ class ComposeFiveMinData(object):
 
     def fileout(self):
         t = time.time()
-        self.result.to_pickle(self.file_indir + self.file_name[0:21] + '_5.pkl')
+        self.result.to_pickle(self.save_indir + self.file_name[:-4] + '_5.pkl')
         print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
         t = time.time()
         print('compute start')
         self.filein()
-        self.datamanage()
+        self.compose()
         self.fileout()
         print('compute finish, all running time:%10.4fs' % (time.time() - t))
         return self
@@ -74,10 +76,13 @@ class ComposeFiveMinData(object):
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    file_names = ['all_store_hqdata_2012.pkl', 'all_store_hqdata_2013.pkl', 'all_store_hqdata_2014.pkl',
-                  'all_store_hqdata_2015.pkl', 'all_store_hqdata_2016.pkl', 'all_store_hqdata_2017.pkl',
+    save_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
+    file_names = ['all_store_hqdata_2012.pkl', 'all_store_hqdata_2013.pkl',
+                  'all_store_hqdata_2014.pkl', 'all_store_hqdata_2015.pkl',
+                  'all_store_hqdata_2016.pkl', 'all_store_hqdata_2017.pkl',
                   'all_store_hqdata_2018.pkl', 'all_store_hqdata_2019.pkl']
-    for i in file_names:
-        print(i[-8:-4])
-        fmd = ComposeFiveMinData(file_indir, i)
+
+    for file_name in file_names:
+        print(file_name[-8:-4])
+        fmd = ComposeFiveMinData(file_indir, save_indir, file_name)
         fmd.runflow()

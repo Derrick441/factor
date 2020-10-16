@@ -14,41 +14,40 @@ class AdjTurnover(object):
 
     def filein(self):
         t = time.time()
-        # 股票日行情数据
+        # 股票日数据
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
+        # 0值转空值
         item = ['s_dq_freeturnover', 's_dq_mv']
-        # 0->nan
         self.all_data[item] = self.all_data[item].replace(0, np.nan)
-        # 取对数
+        # 对数化
         self.all_data['ln_turnover'] = np.log(self.all_data['s_dq_freeturnover'])
         self.all_data['ln_mv'] = np.log(self.all_data['s_dq_mv'])
-        # 数据选取、去除nan
+        # 数据选取
         self.data = self.all_data[['trade_dt', 's_info_windcode', 'ln_turnover', 'ln_mv']].copy()
+        # 去除nan
         self.data_dropna = self.data.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
     def roll_regress(self, data, perid):
         t = time.time()
-        temp_data = data.copy()
-        num = len(temp_data)
+        temp = data.copy()
+        num = len(temp)
         if num > perid:
-            temp_data['intercept'] = 1
+            temp['intercept'] = 1
             item = ['intercept', 'ln_mv']
             # 滚动回归
-            model = regroll.RollingOLS(temp_data['ln_turnover'], temp_data[item], window=perid).fit()
+            model = regroll.RollingOLS(temp['ln_turnover'], temp[item], window=perid).fit()
             # 根据回归参数计算调整换手率
             coef = model.params
-            temp_data['adjturnover'] = temp_data['ln_turnover']-(coef.intercept*1+coef.ln_mv*temp_data['ln_mv'])
-            result = pd.DataFrame({'trade_dt': temp_data.trade_dt.values, 'adjturnover': temp_data.adjturnover.values})
+            temp['adjturnover'] = temp['ln_turnover']-(coef.intercept*1+coef.ln_mv*temp['ln_mv'])
             print(time.time() - t)
-            return result
+            return pd.DataFrame({'trade_dt': temp.trade_dt.values, 'adjturnover': temp.adjturnover.values})
         else:
-            result = pd.DataFrame({'trade_dt': temp_data.trade_dt.values, 'adjturnover': [None for i in range(num)]})
-            return result
+            return pd.DataFrame({'trade_dt': temp.trade_dt.values, 'adjturnover': [None for i in range(num)]})
 
     def compute(self):
         t = time.time()
@@ -61,7 +60,6 @@ class AdjTurnover(object):
     def fileout(self):
         t = time.time()
         # 数据对齐
-        self.all_data = pd.read_pickle(self.file_indir + 'all_dayindex.pkl')
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
         # 数据输出
         item = ['trade_dt', 's_info_windcode', 'adjturnover']

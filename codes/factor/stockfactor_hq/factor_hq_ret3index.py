@@ -29,8 +29,11 @@ class DayinThreeIndex(object):
         self.data = pd.merge(self.data_5min, self.mkt_5min, how='left')
         self.data = pd.merge(self.data, self.smb_5min, how='left')
         self.data = pd.merge(self.data, self.hml_5min, how='left')
+        # 去除nan
+        self.data_dropna = self.data.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
+    # ******************************************************************************************************************
     def regress(self, data, y, x):
         Y = data[y]
         X = data[x]
@@ -41,12 +44,13 @@ class DayinThreeIndex(object):
 
     def compute(self):
         t = time.time()
-        self.result = self.data.groupby(['s_info_windcode', 'trade_dt']) \
-                               .apply(self.regress, 'change', ['mkt', 'smb', 'hml'])\
-                               .apply(pd.Series)\
-                               .reset_index()\
-                               .rename(columns={0: 'Dvol', 1: 'Dskew', 2: 'Dkurt'})
+        self.result = self.data_dropna.groupby(['s_info_windcode', 'trade_dt']) \
+                                      .apply(self.regress, 'change', ['mkt', 'smb', 'hml'])\
+                                      .apply(pd.Series)\
+                                      .reset_index()\
+                                      .rename(columns={0: 'Dvol', 1: 'Dskew', 2: 'Dkurt'})
         print('compute running time:%10.4fs' % (time.time() - t))
+    # ******************************************************************************************************************
 
     def fileout(self):
         t = time.time()
@@ -80,8 +84,10 @@ if __name__ == '__main__':
 
     for file_name in file_names:
         print(file_name)
+        # ******************************************************************************************************************
         dti = DayinThreeIndex(file_indir, factor_indir, save_indir, file_name)
         dti.runflow()
+        # ******************************************************************************************************************
 
     def merge_data(factor_name, names):
         # 分开数据读取、合并

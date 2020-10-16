@@ -3,7 +3,7 @@ import numpy as np
 import time
 
 
-# 日均价偏差apb: 日的5分钟成交量加权平均价的平均价/日成交量加权的5分钟成交量加权平均价的平均价
+# 日均价偏差apb: 5分钟成交量加权平均价的平均价/成交量加权的5分钟成交量加权平均价的平均价
 class Apb1d(object):
 
     def __init__(self, file_indir, save_indir, file_name):
@@ -13,27 +13,24 @@ class Apb1d(object):
 
     def filein(self):
         t = time.time()
-        # 输入数据
+        # 股票5分钟数据
         self.data = pd.read_pickle(self.file_indir + self.file_name)
         print('filein using time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
-        # 将0值替换为nan
-        self.data = self.data.replace(0, np.nan)
-        # 去除成交量为nan的数据
-        self.data_dropna = self.data[self.data['volume'] != np.nan].copy()
-        # 5分钟成交量加权平均价
-        self.data_dropna['vwap'] = self.data_dropna['amount'] / self.data_dropna['volume']*10
+        # 去除nan
+        self.data_dropna = self.data.dropna().copy()
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
-    def oneday_apb(self, data):
+    # ******************************************************************************************************************
+    def oneday_apb(self, data, index):
         temp = data.copy()
         # 平均价
-        mean = temp['vwap'].mean()
+        mean = temp[index].mean()
         # 成交量加权平均价
         vol_sum = temp['volume'].sum()
-        mean_weight = (temp['volume'] / vol_sum * temp['vwap']).sum()
+        mean_weight = (temp['volume'] / vol_sum * temp[index]).sum()
         # 0值处理
         if (mean == 0) | (mean_weight == 0):
             result = np.nan
@@ -43,12 +40,15 @@ class Apb1d(object):
 
     def compute(self):
         t = time.time()
+        # 5分钟成交量加权平均价
+        self.data_dropna['vwap'] = self.data_dropna['amount'] / self.data_dropna['volume']*10
         # 计算apb
         self.result = self.data_dropna.groupby(['s_info_windcode', 'trade_dt'])\
-                                      .apply(self.oneday_apb)\
+                                      .apply(self.oneday_apb, 'vwap')\
                                       .reset_index()\
                                       .rename(columns={0: 'apb1d'})
         print('compute using time:%10.4fs' % (time.time()-t))
+    # ******************************************************************************************************************
 
     def fileout(self):
         t = time.time()
@@ -77,8 +77,10 @@ if __name__ == '__main__':
 
     for file_name in file_names:
         print(file_name)
-        apb = Apb1d(file_indir, save_indir, file_name)
-        apb.runflow()
+        # ******************************************************************************************************************
+        apb1 = Apb1d(file_indir, save_indir, file_name)
+        apb1.runflow()
+        # ******************************************************************************************************************
 
     def merge_data(factor_name, names):
         # 分开数据读取、合并
@@ -94,6 +96,8 @@ if __name__ == '__main__':
         indir2 = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
         result[item].to_pickle(indir2 + 'factor_hq_' + factor_name + '.pkl')
 
+    # ******************************************************************************************************************
     factor_name = 'apb1d'
+    # ******************************************************************************************************************
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)

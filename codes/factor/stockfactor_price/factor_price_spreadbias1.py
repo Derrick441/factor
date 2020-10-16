@@ -1,11 +1,12 @@
 import pandas as pd
 import numpy as np
 import time
+
 np.seterr(invalid='ignore')
 
 
 # 价差偏离度：股价与参考价格的对数价差的偏离度
-class Spreadbias(object):
+class Spreadbias1(object):
 
     def __init__(self, file_indir, save_indir, file_name):
         self.file_indir = file_indir
@@ -18,11 +19,12 @@ class Spreadbias(object):
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
         # self.all_data['trade_dt'] = self.all_data['trade_dt'].apply(lambda x: int(x))
         # self.all_data = self.all_data[self.all_data['trade_dt'] > 20180801]
-        print('filein running time:%10.4fs' % (time.time()-t))
+        print('filein running time:%10.4fs' % (time.time() - t))
 
     def datamanage(self):
         t = time.time()
         # 股价、涨幅数据
+        self.all_data['s_dq_close'] = self.all_data['s_dq_close'] * self.all_data['s_dq_adjfactor']
         self.price = self.all_data[['trade_dt', 's_info_windcode', 's_dq_close']].copy()
         self.change = self.all_data[['trade_dt', 's_info_windcode', 's_dq_pctchange']].copy()
         # 数据pivot
@@ -57,11 +59,11 @@ class Spreadbias(object):
         if num > perid:
             temp_mea = temp[index].rolling(perid).mean()
             temp_std = temp[index].rolling(perid).std()
-            t = (temp[index]-temp_mea)/temp_std
-            result = pd.DataFrame({'trade_dt': temp.trade_dt.values, 'spreadbias': t.values})
+            t = (temp[index] - temp_mea) / temp_std
+            result = pd.DataFrame({'trade_dt': temp.trade_dt.values, 'spreadbias1': t.values})
             return result
         else:
-            result = pd.DataFrame({'trade_dt': temp.trade_dt.values, 'spreadbias': [None for i in range(num)]})
+            result = pd.DataFrame({'trade_dt': temp.trade_dt.values, 'spreadbias1': [None for i in range(num)]})
             return result
 
     def compute(self):
@@ -87,26 +89,26 @@ class Spreadbias(object):
         self.refprice = pd.concat(self.refprice)
         # 数据unstack
         self.refprice_unstack = self.refprice.unstack() \
-                                             .reset_index() \
-                                             .rename(columns={'level_1': 'trade_dt', 0: 'refprice'})
+            .reset_index() \
+            .rename(columns={'level_1': 'trade_dt', 0: 'refprice'})
         # merge参考价格、股价
         self.data_sum = pd.merge(self.refprice_unstack, self.price, how='left')
         # 计算对数价差
         self.data_sum['pricespread'] = np.log(self.data_sum['s_dq_close']) - np.log(self.data_sum['refprice'])
         # 计算价差偏离度
-        self.temp_result = self.data_sum.groupby('s_info_windcode')\
-                                        .apply(self.roll_t, 'pricespread', 60)\
-                                        .reset_index()
-        print('compute running time:%10.4fs' % (time.time()-t))
+        self.temp_result = self.data_sum.groupby('s_info_windcode') \
+            .apply(self.roll_t, 'pricespread', 60) \
+            .reset_index()
+        print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
         # 数据对齐
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
         # 输出到factor文件夹的stockfactor中
-        item = ['trade_dt', 's_info_windcode', 'spreadbias']
-        self.result[item].to_pickle(self.save_indir + 'factor_price_spreadbias.pkl')
-        print('fileout running time:%10.4fs' % (time.time()-t))
+        item = ['trade_dt', 's_info_windcode', 'spreadbias1']
+        self.result[item].to_pickle(self.save_indir + 'factor_price_spreadbias1.pkl')
+        print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
         t = time.time()
@@ -122,6 +124,6 @@ if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
     file_name = 'all_dayindex.pkl'
-    
-    sb = Spreadbias(file_indir, save_indir, file_name)
-    sb.runflow()
+
+    sb1 = Spreadbias1(file_indir, save_indir, file_name)
+    sb1.runflow()

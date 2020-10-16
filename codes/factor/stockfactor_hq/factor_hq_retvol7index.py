@@ -19,17 +19,21 @@ class DayinSevenIndex(object):
         print('filein using time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
-        pass
+        t = time.time()
+        # 去除nan
+        self.data_dropna = self.data.dropna().copy()
+        print('datamanage using time:%10.4fs' % (time.time()-t))
 
+    # ******************************************************************************************************************
     def sevenindex(self, data):
-        rvol = np.sqrt(data['change'].var())
+        rvol = np.std(data['change'], ddof=1)
         rskew = data['change'].skew()
         rkurt = data['change'].kurt()
-        vvol = np.sqrt(data['volume'].var())
+        vvol = np.std(data['volume'], ddof=1)
         vskew = data['volume'].skew()
         vkurt = data['volume'].kurt()
-        temp = data['volume']/data['volume'].sum()
-        vhhi = temp.apply(lambda x: x ** 2).sum()
+        temp = data['volume'] / np.sum(data['volume'])
+        vhhi = np.sum(temp.apply(lambda x: x ** 2))
         return rvol, rskew, rkurt, vvol, vskew, vkurt, vhhi
 
     def compute(self):
@@ -42,6 +46,7 @@ class DayinSevenIndex(object):
                                                 3: 'vvol', 4: 'vskew', 5: 'vkurt',
                                                 6: 'vhhi'})
         print('compute_intraday7index running time:%10.4fs' % (time.time() - t))
+    # ******************************************************************************************************************
 
     def fileout(self):
         t = time.time()
@@ -84,8 +89,10 @@ if __name__ == '__main__':
 
     for file_name in file_names:
         print(file_name)
+        # ******************************************************************************************************************
         dsi = DayinSevenIndex(file_indir, save_indir, file_name)
         dsi.runflow()
+        # ******************************************************************************************************************
 
     def merge_data(factor_name, names):
         # 分开数据读取、合并

@@ -53,11 +53,8 @@ class PerfIc(object):
 
     def compute_ic(self):
         t = time.time()
-        # 识别因子是否已中性化
-        if self.neutral == 0:
-            self.ic_name = self.fac_name + '_' + self.method
-        else:
-            self.ic_name = self.fac_name + '_neutral_' + self.method
+        # ic名称
+        self.ic_name = self.fac_name + '_' + self.method
         # 计算每期因子的ic或rank ic值
         self.result = self.data.groupby(level=0)\
                                .apply(self.perf_single_ic, method=self.method)\

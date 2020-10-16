@@ -19,13 +19,15 @@ class ReturnTwoIndex(object):
 
     def datamanage(self):
         t = time.time()
-        # 去除没有收益的数据
-        self.data_dropna = self.data[self.data['change'] != np.nan].copy()
-        print('datamanage using time:%10.4fs' % (time.time()-t))
+        # 去除nan
+        self.data_dropna = self.data.dropna().copy()
+        print('datamanage running time:%10.4fs' % (time.time() - t))
 
+    # ******************************************************************************************************************
     # 日内收益分解
     def decompose(self, data):
         temp = data.copy()
+
         median = np.median(temp['change'])
         temp['temp'] = temp['change'].apply(lambda x: abs(x-median))
         MAD = np.median(temp['temp'])
@@ -33,11 +35,9 @@ class ReturnTwoIndex(object):
         MADE = 1.96*MADe
 
         temp['flag'] = temp['change'].apply(lambda x: 1 if abs(x-median) > MADE else 0)
-        data_mild = temp['change'][temp['flag'] == 0]
-        data_extreme = temp['change'][temp['flag'] == 1]
+        mild = np.sum(temp['change'][temp['flag'] == 0])
+        extreme = np.sum(temp['change'][temp['flag'] == 1])
 
-        mild = np.sum(data_mild)
-        extreme = np.sum(data_extreme)
         return mild, extreme
 
     def compute(self):
@@ -49,6 +49,7 @@ class ReturnTwoIndex(object):
                                       .reset_index()\
                                       .rename(columns={0: 'mild', 1: 'rrev'})
         print('factor_compute using time:%10.4fs' % (time.time()-t))
+    # ******************************************************************************************************************
 
     def fileout(self):
         t = time.time()
@@ -79,8 +80,10 @@ if __name__ == '__main__':
 
     for file_name in file_names:
         print(file_name)
+        # ******************************************************************************************************************
         rti = ReturnTwoIndex(file_indir, save_indir, file_name)
         rti.runflow()
+        # ******************************************************************************************************************
 
     def merge_data(factor_name, names):
         # 分开数据读取、合并
@@ -96,11 +99,15 @@ if __name__ == '__main__':
         indir2 = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
         result[item].to_pickle(indir2 + 'factor_hq_' + factor_name + '.pkl')
 
+    # ******************************************************************************************************************
     factor_name = 'mild'
+    # ******************************************************************************************************************
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)
 
+    # ******************************************************************************************************************
     factor_name = 'rrev'
+    # ******************************************************************************************************************
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)
 

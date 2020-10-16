@@ -3,9 +3,7 @@ import numpy as np
 import time
 
 
-# arpp时间加权平均的相对价格位置: （p-l)/(h-l)在时间上的积分
-# 若交易时间合计为1，则（p-l)/(h-l)*delta t等于（p-l)/(h-l)*1/n，n为微小单位的数量
-# （p-l)/(h-l)在时间上的积分等价于n个（p-l)/(h-l)的平均值
+# arpp: 时间加权的平均相对价格位置（p-l)/(h-l)在时间上的积分
 class Arpp(object):
 
     def __init__(self, file_indir, save_indir, file_name):
@@ -15,13 +13,17 @@ class Arpp(object):
 
     def filein(self):
         t = time.time()
-        # 输入数据
+        # 股票5分钟数据
         self.data = pd.read_pickle(self.file_indir + self.file_name)
         print('filein using time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
-        pass
+        t = time.time()
+        # 去除nan
+        self.data_dropna = self.data.dropna().copy()
+        print('datamanage running time:%10.4fs' % (time.time() - t))
 
+    # ******************************************************************************************************************
     def dayin_arpp(self, data):
         temp = data.copy()
         # 最高最低价
@@ -41,6 +43,7 @@ class Arpp(object):
                                .reset_index()\
                                .rename(columns={0: 'twap', 1: 'L', 2: 'H'})
         print('factor_compute using time:%10.4fs' % (time.time()-t))
+    # ******************************************************************************************************************
 
     def fileout(self):
         t = time.time()
@@ -69,8 +72,10 @@ if __name__ == '__main__':
 
     for file_name in file_names:
         print(file_name)
+        # ******************************************************************************************************************
         arpp = Arpp(file_indir, save_indir, file_name)
         arpp.runflow()
+        # ******************************************************************************************************************
 
     def merge_data(factor_name, names):
         # 分开数据读取、合并
@@ -86,6 +91,8 @@ if __name__ == '__main__':
         indir2 = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'
         result[item].to_pickle(indir2 + 'factor_hq_' + factor_name + '.pkl')
 
+    # ******************************************************************************************************************
     factor_name = 'arpp_all'
+    # ******************************************************************************************************************
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)

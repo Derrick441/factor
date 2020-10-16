@@ -13,23 +13,21 @@ class ApbNd(object):
 
     def filein(self):
         t = time.time()
-        # 股票数据
+        # 股票日数据
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
         print('filein using time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
-        item = ['trade_dt', 's_info_windcode', 's_dq_amount', 's_dq_volume']
-        # 0->nan
-        self.data = self.all_data[item].replace(0, np.nan).copy()
         # 去除nan
-        self.data_dropna = self.data.dropna().copy()
-        # 日成交量加权平均价(千元/百股*10=元/股）
-        self.data_dropna['vwap'] = self.data_dropna['s_dq_amount'] / self.data_dropna['s_dq_volume'] * 10
+        item = ['trade_dt', 's_info_windcode', 's_dq_amount', 's_dq_volume']
+        self.data_dropna = self.all_data[item].dropna().copy()
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
+    # ******************************************************************************************************************
     def roll_apb(self, data, index, weight, perid):
         temp = data.copy()
+        name = 'apb' + str(perid) + 'd'
         num = len(temp)
         if num > perid:
             # 计算perid日的日成交量加权平均价的平均价
@@ -45,18 +43,15 @@ class ApbNd(object):
             temp['weight_mean'] = temp['weight_mean'].replace(0, np.nan)
 
             # 计算apb
-            name = 'apb' + str(perid) + 'd'
             temp[name] = np.log(temp['mean'] / temp['weight_mean'])
-
-            result = temp[['trade_dt', name]].copy()
-            return result
+            return temp[['trade_dt', name]]
         else:
-            name = 'apb' + str(perid) + 'd'
-            result = pd.DataFrame({'trade_dt': temp.trade_dt.values, name: [None for i in range(num)]})
-            return result
+            return pd.DataFrame({'trade_dt': temp.trade_dt.values, name: [None for i in range(num)]})
 
     def compute(self):
         t = time.time()
+        # 日成交量加权平均价(千元/百股*10=元/股）
+        self.data_dropna['vwap'] = self.data_dropna['s_dq_amount'] / self.data_dropna['s_dq_volume'] * 10
         self.temp_result_5 = self.data_dropna.groupby('s_info_windcode')\
                                              .apply(self.roll_apb, 'vwap', 's_dq_volume', 5)\
                                              .reset_index()
@@ -64,11 +59,11 @@ class ApbNd(object):
                                               .apply(self.roll_apb, 'vwap', 's_dq_volume', 20)\
                                               .reset_index()
         print('compute using time:%10.4fs' % (time.time() - t))
+    # ******************************************************************************************************************
 
     def fileout(self):
         t = time.time()
         # 数据对齐
-        self.all_data = pd.read_pickle(self.file_indir + 'all_dayindex.pkl')
         self.result_5 = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result_5, how='left')
         self.result_20 = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result_20, how='left')
         # 数据输出
@@ -91,7 +86,9 @@ class ApbNd(object):
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    file_name = 'all_band_price.pkl'
+    file_name = 'all_dayindex.pkl'
 
-    apb = ApbNd(file_indir, save_indir, file_name)
-    apb.runflow()
+    # ******************************************************************************************************************
+    apbn = ApbNd(file_indir, save_indir, file_name)
+    apbn.runflow()
+    # ******************************************************************************************************************

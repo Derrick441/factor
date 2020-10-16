@@ -22,9 +22,11 @@ class ArppNd(object):
 
     def datamanage(self):
         t = time.time()
+        # 去除nan
         self.data_dropna = self.data.dropna().copy()
-        print('datamanage using time:%10.4fs' % (time.time()-t))
+        print('datamanage running time:%10.4fs' % (time.time() - t))
 
+    # ******************************************************************************************************************
     def roll_arppnd(self, data, perid):
         temp = data.copy()
         name = 'arpp' + str(perid) + 'd'
@@ -54,6 +56,7 @@ class ArppNd(object):
                                              .apply(self.roll_arppnd, 20)\
                                              .reset_index()
         print('factor_compute using time:%10.4fs' % (time.time()-t))
+    # ******************************************************************************************************************
 
     def fileout(self):
         t = time.time()
@@ -87,8 +90,10 @@ if __name__ == '__main__':
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
     file_name = 'factor_hq_arpp_all.pkl'
 
+    # ******************************************************************************************************************
     arppnd = ArppNd(file_indir1, file_indir2, save_indir, file_name)
     arppnd.runflow()
+    # ******************************************************************************************************************
 
 # arppnd.filein()
 # arppnd.datamanage()

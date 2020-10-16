@@ -30,19 +30,19 @@ class IcSum(object):
     def construct_five_table(self):
         t = time.time()
         self.table_ic_1 = self.data_readin_merge(1)
-        self.table_ic_1.to_pickle(self.save_indir + 'ic_1.pkl')
+        self.table_ic_1.to_csv(self.save_indir + 'ic_all_1.csv')
 
         self.table_ic_5 = self.data_readin_merge(5)
-        self.table_ic_5.to_pickle(self.save_indir + 'ic_5.pkl')
+        self.table_ic_5.to_csv(self.save_indir + 'ic_all_5.csv')
 
         self.table_ic_10 = self.data_readin_merge(10)
-        self.table_ic_10.to_pickle(self.save_indir + 'ic_10.pkl')
+        self.table_ic_10.to_csv(self.save_indir + 'ic_all_10.csv')
 
         self.table_ic_20 = self.data_readin_merge(20)
-        self.table_ic_20.to_pickle(self.save_indir + 'ic_20.pkl')
+        self.table_ic_20.to_csv(self.save_indir + 'ic_all_20.csv')
 
         self.table_ic_60 = self.data_readin_merge(60)
-        self.table_ic_60.to_pickle(self.save_indir + 'ic_60.pkl')
+        self.table_ic_60.to_csv(self.save_indir + 'ic_all_60.csv')
         print('construct 5 tables using time:%10.4fs' % (time.time()-t))
 
     def data_select_merge(self, start, end):
@@ -59,13 +59,13 @@ class IcSum(object):
     def construct_three_table(self):
         t = time.time()
         self.table_ic_2017 = self.data_select_merge(20170101, 20200101)
-        self.table_ic_2017.to_csv(self.save_indir + 'ic_2017.csv')
+        self.table_ic_2017.to_csv(self.save_indir + 'ic_mean_2017.csv')
 
         self.table_ic_2012 = self.data_select_merge(20120101, 20200101)
-        self.table_ic_2012.to_csv(self.save_indir + 'ic_2012.csv')
+        self.table_ic_2012.to_csv(self.save_indir + 'ic_mean_2012.csv')
 
         self.table_ic_2005 = self.data_select_merge(20050101, 20200101)
-        self.table_ic_2005.to_csv(self.save_indir + 'ic_2005.csv')
+        self.table_ic_2005.to_csv(self.save_indir + 'ic_mean_2005.csv')
         print('construct 3 tables using time:%10.4fs' % (time.time() - t))
 
     def runflow(self):

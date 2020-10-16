@@ -15,7 +15,7 @@ class ReturnNeutral(object):
     def filein(self):
         t = time.time()
         # 从dataflow文件夹中读取:市值、行业和收益率数据(每日数据)
-        self.dayindex = pd.read_pickle(self.file_indir + self.file_names1[0])
+        self.all_data = pd.read_pickle(self.file_indir + self.file_names1[0])
         self.bandindu = pd.read_pickle(self.file_indir + self.file_names1[1])
         self.ret = pd.read_pickle(self.file_indir + self.file_name2)
         print('filein running time:%10.4fs' % (time.time() - t))
@@ -28,10 +28,10 @@ class ReturnNeutral(object):
         self.ret_reset = self.ret.reset_index().rename(columns={0: self.ret_name})
 
         # 数据选取
-        self.mv = self.dayindex[['trade_dt', 's_info_windcode', 's_dq_mv']]
+        self.mv = self.all_data[['trade_dt', 's_info_windcode', 's_dq_mv']]
         self.indu = self.bandindu[['trade_dt', 's_info_windcode', 'induname1']]
 
-        # 以市值数据（dayindex数据)的长度为基准，合并市值、行业和收益率数据
+        # 以市值数据的长度为基准，合并市值、行业和收益率数据
         self.data_temp = pd.merge(self.mv, self.indu, how='left')
         self.data = pd.merge(self.data_temp, self.ret_reset, how='left')
         self.data.set_index(['trade_dt', 's_info_windcode'], inplace=True)
@@ -67,7 +67,6 @@ class ReturnNeutral(object):
     def fileout(self):
         t = time.time()
         # 数据对齐
-        self.all_data = pd.read_pickle(self.file_indir + 'all_dayindex.pkl')
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
         # 数据输出
         item = ['trade_dt', 's_info_windcode', self.ret_name + '_neutral']
