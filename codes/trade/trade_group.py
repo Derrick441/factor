@@ -51,7 +51,7 @@ class GroupTen(object):
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
-        print(self.result.mean() * 243)
+        print(self.result.mean())
 
     def runflow(self):
         t = time.time()
@@ -71,55 +71,80 @@ if __name__ == '__main__':
     factor_names = os.listdir(factor_indir)
 
     # 1日收益
+    factor = []
     result = []
     for factor_name in factor_names:
         print(factor_name)
         g10 = GroupTen(file_indir, factor_indir, save_indir, file_names, factor_name)
         g10.runflow()
-        result.append(g10.result.mean() * 243)
-    out = pd.concat(result)
+        factor.append(g10.factor_name)
+        result.append(g10.result.mean() * 243 / 1)
+    # 格式整理
+    out = pd.concat(result, axis=1).T
+    out['trade_dt'] = factor
+    out.rename(columns={'trade_dt': 'factor'}, inplace=True)
     out.to_csv(save_indir + 'change_group_mean1.csv')
 
     # 5日收益
     file_names = ['all_band_adjvwap_hh_price_label5.pkl', 'all_band_indu.pkl']
+    factor = []
     result = []
     for factor_name in factor_names:
         print(factor_name)
         g10 = GroupTen(file_indir, factor_indir, save_indir, file_names, factor_name)
         g10.runflow()
-        result.append(g10.result.mean() * 243)
-    out = pd.concat(result)
+        factor.append(g10.factor_name)
+        result.append(g10.result.mean() * 243 / 5)
+    # 格式整理
+    out = pd.concat(result, axis=1).T
+    out['trade_dt'] = factor
+    out.rename(columns={'trade_dt': 'factor'}, inplace=True)
     out.to_csv(save_indir + 'change_group_mean5.csv')
 
     # 10日收益
     file_names = ['all_band_adjvwap_hh_price_label10.pkl', 'all_band_indu.pkl']
+    factor = []
     result = []
     for factor_name in factor_names:
         print(factor_name)
         g10 = GroupTen(file_indir, factor_indir, save_indir, file_names, factor_name)
         g10.runflow()
-        result.append(g10.result.mean() * 243)
-    out = pd.concat(result)
+        factor.append(g10.factor_name)
+        result.append(g10.result.mean() * 243 / 10)
+    # 格式整理
+    out = pd.concat(result, axis=1).T
+    out['trade_dt'] = factor
+    out.rename(columns={'trade_dt': 'factor'}, inplace=True)
     out.to_csv(save_indir + 'change_group_mean10.csv')
 
     # 20日收益
     file_names = ['all_band_adjvwap_hh_price_label20.pkl', 'all_band_indu.pkl']
+    factor = []
     result = []
     for factor_name in factor_names:
         print(factor_name)
         g10 = GroupTen(file_indir, factor_indir, save_indir, file_names, factor_name)
         g10.runflow()
-        result.append(g10.result.mean() * 243)
-    out = pd.concat(result)
+        factor.append(g10.factor_name)
+        result.append(g10.result.mean() * 243 / 20)
+    # 格式整理
+    out = pd.concat(result, axis=1).T
+    out['trade_dt'] = factor
+    out.rename(columns={'trade_dt': 'factor'}, inplace=True)
     out.to_csv(save_indir + 'change_group_mean20.csv')
 
     # 60日收益
     file_names = ['all_band_adjvwap_hh_price_label60.pkl', 'all_band_indu.pkl']
+    factor = []
     result = []
     for factor_name in factor_names:
         print(factor_name)
         g10 = GroupTen(file_indir, factor_indir, save_indir, file_names, factor_name)
         g10.runflow()
-        result.append(g10.result.mean() * 243)
-    out = pd.concat(result)
+        factor.append(g10.factor_name)
+        result.append(g10.result.mean() * 243 / 60)
+    # 格式整理
+    out = pd.concat(result, axis=1).T
+    out['trade_dt'] = factor
+    out.rename(columns={'trade_dt': 'factor'}, inplace=True)
     out.to_csv(save_indir + 'change_group_mean60.csv')

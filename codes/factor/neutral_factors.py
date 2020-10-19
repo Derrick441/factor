@@ -8,9 +8,9 @@ import os
 # 因子中性化
 class FactorNeutral(object):
 
-    def __init__(self, file_indir1, file_names1, file_indir2, file_name2, save_indir):
+    def __init__(self, file_indir1, file_name1s, file_indir2, file_name2, save_indir):
         self.file_indir1 = file_indir1
-        self.file_names1 = file_names1
+        self.file_name1s = file_name1s
         self.file_indir2 = file_indir2
         self.file_name2 = file_name2
         self.save_indir = save_indir
@@ -19,8 +19,8 @@ class FactorNeutral(object):
     def filein(self):
         t = time.time()
         # 从dataflow文件夹中读取:市值、行业和因子数据(每日数据)
-        self.all_data = pd.read_pickle(self.file_indir1 + self.file_names1[0])
-        self.bandindu = pd.read_pickle(self.file_indir1 + self.file_names1[1])
+        self.all_data = pd.read_pickle(self.file_indir1 + self.file_name1s[0])
+        self.bandindu = pd.read_pickle(self.file_indir1 + self.file_name1s[1])
         self.factor = pd.read_pickle(self.file_indir2 + self.file_name2)
         print('filein running time:%10.4fs' % (time.time() - t))
 
@@ -89,17 +89,22 @@ class FactorNeutral(object):
 
 if __name__ == '__main__':
     file_indir1 = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    file_names1 = ['all_dayindex.pkl', 'all_band_indu.pkl']
     file_indir2 = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    file_names2 = os.listdir(file_indir2)
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
 
-    for i in file_names2:
-        fn = FactorNeutral(file_indir1, file_names1, file_indir2, i, save_indir)
-        fn.runflow()
+    file_name1s = ['all_dayindex.pkl', 'all_band_indu.pkl']
 
-    # # 中性化部分因子
-    # file_names2 = ['factor_hq_arpp1d.pkl', 'factor_hq_arpp5d.pkl', 'factor_hq_arpp20d.pkl']
-    # for i in file_names2:
-    #     fn = FactorNeutral(file_indir1, file_names1, file_indir2, i, save_indir)
-    #     fn.runflow()
+    # # 中性化全部因子
+    # file_name2s = os.listdir(file_indir2)
+
+    # 中性化未中性化的因子
+    set1 = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'))
+    temp = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'))
+    set2 = set([])
+    for filename in temp:
+        set2.add(filename[8:])
+    file_name2s = set1 - set2
+
+    for file_name2 in file_name2s:
+        fn = FactorNeutral(file_indir1, file_name1s, file_indir2, file_name2, save_indir)
+        fn.runflow()

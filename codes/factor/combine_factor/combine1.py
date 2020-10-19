@@ -8,12 +8,11 @@ from sklearn.preprocessing import StandardScaler
 # 将合并因子（中性化因子、IC加权合并），构成新因子
 class FactorCombine(object):
 
-    def __init__(self, file_indir1, file_indir2, save_indir, file_names, ret_perid):
+    def __init__(self, file_indir1, file_indir2, save_indir, file_names):
         self.file_indir1 = file_indir1
         self.file_indir2 = file_indir2
         self.save_indir = save_indir
         self.file_names = file_names
-        self.ret_perid = ret_perid
         self.num = len(self.file_names)
 
     def factor_read(self, file_indir, file_names):
@@ -28,7 +27,7 @@ class FactorCombine(object):
                 temp_0 = pd.merge(temp_0, temp, how='left')
         temp_0.set_index(['trade_dt', 's_info_windcode'], inplace=True)
         temp_0.replace(np.nan, 0, inplace=True)
-        print('factor read in:%10.4fs' % (time.time()-t))
+        print('files read in:%10.4fs' % (time.time() - t))
         return temp_0
 
     def ic_read(self, day):
@@ -42,28 +41,28 @@ class FactorCombine(object):
                 table = pd.merge(table, temp, how='outer')
         table.sort_values(by='trade_dt', inplace=True)
         table.replace(np.nan, 0, inplace=True)
-        print('ic read in:%10.4fs' % (time.time() - t))
+        print('files read in:%10.4fs' % (time.time() - t))
         return table
 
     def filein(self):
-        t = time.time()
         # 读入因子
         self.factor = self.factor_read(self.file_indir1, self.file_names)
         # 读入IC
-        self.table_ic = self.ic_read(self.ret_perid)
-        print('filein running using time:%10.4fs' % (time.time() - t))
+        self.table_ic_1 = self.ic_read(1)
+        self.table_ic_5 = self.ic_read(5)
+        self.table_ic_10 = self.ic_read(10)
+        self.table_ic_20 = self.ic_read(20)
+        self.table_ic_60 = self.ic_read(60)
 
     def datamanage(self):
-        t = time.time()
         # 因子标准化
         scaler = StandardScaler()
         temp = scaler.fit_transform(self.factor)
         # 转dataframe
         self.factor_std = pd.DataFrame(temp, index=self.factor.index, columns=self.factor.columns)
         self.factor_std.reset_index(inplace=True)
-        print('datamanage running using time:%10.4fs' % (time.time() - t))
 
-    def combine_by_ic(self, data_ic, data_fa, flag):
+    def combine_ic(self, data_ic, data_fa, flag):
         t = time.time()
         temp_ic = data_ic.copy()
         temp_fa = data_fa.copy()
@@ -90,16 +89,20 @@ class FactorCombine(object):
         return result[['trade_dt', 's_info_windcode', name]]
 
     def compute(self):
-        t = time.time()
         # 合并因子(以ic为权重）
-        self.combine_factor_ic = self.combine_by_ic(self.table_ic, self.factor_std, '_ic' + str(self.ret_perid))
-        print('compute running using time:%10.4fs' % (time.time() - t))
+        self.combine_factor_ic_1 = self.combine_ic(self.table_ic_1, self.factor_std, '_ic_1')
+        self.combine_factor_ic_5 = self.combine_ic(self.table_ic_5, self.factor_std, '_ic_5')
+        self.combine_factor_ic_10 = self.combine_ic(self.table_ic_10, self.factor_std, '_ic_10')
+        self.combine_factor_ic_20 = self.combine_ic(self.table_ic_20, self.factor_std, '_ic_20')
+        self.combine_factor_ic_60 = self.combine_ic(self.table_ic_60, self.factor_std, '_ic_60')
 
     def fileout(self):
-        t = time.time()
         # 数据输出（因子之前已数据对齐，所以不再数据对齐）
-        self.combine_factor_ic.to_pickle(self.save_indir + 'factor_combine_ic' + str(self.ret_perid) + '.pkl')
-        print('fileout running using time:%10.4fs' % (time.time() - t))
+        self.combine_factor_ic_1.to_pickle(self.save_indir + 'combine_factor_ic_1.pkl')
+        self.combine_factor_ic_5.to_pickle(self.save_indir + 'combine_factor_ic_5.pkl')
+        self.combine_factor_ic_10.to_pickle(self.save_indir + 'combine_factor_ic_10.pkl')
+        self.combine_factor_ic_20.to_pickle(self.save_indir + 'combine_factor_ic_20.pkl')
+        self.combine_factor_ic_60.to_pickle(self.save_indir + 'combine_factor_ic_60.pkl')
 
     def runflow(self):
         print('start')
@@ -116,9 +119,11 @@ if __name__ == '__main__':
     file_indir2 = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_combine\\'
     file_names = os.listdir(file_indir1)
-    ret_perids = [1, 5, 10, 20, 60]
 
-    for ret_perid in ret_perids:
-        print(ret_perid)
-        fc = FactorCombine(file_indir1, file_indir2, save_indir, file_names, ret_perid)
-        fc.runflow()
+    fc = FactorCombine(file_indir1, file_indir2, save_indir, file_names)
+    fc.runflow()
+
+    # # 因子文件名
+    # file_names = ['neutral_factor_hq_apb1d.pkl', 'neutral_factor_price_bi.pkl']
+    # fc = FactorCombine(file_indir1, file_indir2, save_indir, file_names)
+    # fc.runflow()
