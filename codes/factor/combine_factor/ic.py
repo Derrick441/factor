@@ -83,11 +83,16 @@ if __name__ == '__main__':
     file_indir2 = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
 
-    file_names1 = ['factor_combine_ic1.pkl',
-                   'factor_combine_ic5.pkl',
-                   'factor_combine_ic10.pkl',
-                   'factor_combine_ic20.pkl',
-                   'factor_combine_ic60.pkl']
+    # file_names1 = ['factor_combine_ic1.pkl',
+    #                'factor_combine_ic5.pkl',
+    #                'factor_combine_ic10.pkl',
+    #                'factor_combine_ic20.pkl',
+    #                'factor_combine_ic60.pkl']
+    file_names1 = ['factor_combine_rankic1.pkl',
+                   'factor_combine_rankic5.pkl',
+                   'factor_combine_rankic10.pkl',
+                   'factor_combine_rankic20.pkl',
+                   'factor_combine_rankic60.pkl']
     file_names2 = ['ret_1_neutral.pkl',
                    'ret_5_neutral.pkl',
                    'ret_10_neutral.pkl',

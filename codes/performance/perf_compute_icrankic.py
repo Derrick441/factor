@@ -66,10 +66,16 @@ class PerfIc(object):
     def fileout(self):
         t = time.time()
         # 识别是否中性化
-        if self.neutral == 0:
-            self.save = self.factor_name[:-4] + '_ic' + self.ret_name[31:]
+        if self.method == 'IC':
+            if self.neutral == 0:
+                self.save = self.factor_name[:-4] + '_ic' + self.ret_name[31:]
+            else:
+                self.save = self.factor_name[:-4] + '_ic' + self.ret_name[4:-12] + '.pkl'
         else:
-            self.save = self.factor_name[:-4] + '_ic' + self.ret_name[4:-12] + '.pkl'
+            if self.neutral == 0:
+                self.save = self.factor_name[:-4] + '_rankic' + self.ret_name[31:]
+            else:
+                self.save = self.factor_name[:-4] + '_rankic' + self.ret_name[4:-12] + '.pkl'
         # 数据输出
         self.result.to_pickle(self.save_indir + self.save)
         print('fileout running time:%10.4fs' % (time.time() - t))
@@ -85,19 +91,19 @@ class PerfIc(object):
 
 
 if __name__ == '__main__':
-    file_indir1 = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    file_indir2 = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
-
-    file_names1 = os.listdir(file_indir1)
-    file_names2 = ['all_band_adjvwap_hh_price_label1.pkl',
-                   'all_band_adjvwap_hh_price_label5.pkl',
-                   'all_band_adjvwap_hh_price_label10.pkl',
-                   'all_band_adjvwap_hh_price_label20.pkl',
-                   'all_band_adjvwap_hh_price_label60.pkl']
-
-    method = 'IC'
-    neutral = 0
+    # file_indir1 = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+    # file_indir2 = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
+    # save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
+    #
+    # file_names1 = os.listdir(file_indir1)
+    # file_names2 = ['all_band_adjvwap_hh_price_label1.pkl',
+    #                'all_band_adjvwap_hh_price_label5.pkl',
+    #                'all_band_adjvwap_hh_price_label10.pkl',
+    #                'all_band_adjvwap_hh_price_label20.pkl',
+    #                'all_band_adjvwap_hh_price_label60.pkl']
+    #
+    # method = 'IC'
+    # neutral = 0
 
     # # 计算全部因子ic
     # for factor_name in file_names1:
@@ -105,19 +111,19 @@ if __name__ == '__main__':
     #         ic = PerfIc(file_indir1, file_indir2, save_indir, factor_name, ret_name, method, neutral)
     #         ic.runflow()
 
-    # 计算未计算ic因子的ic
-    set1 = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'))
-    temp = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'))
-    temp1 = []
-    for ic_name in temp:
-        temp1.append(ic_name.split('_ic')[0] + '.pkl')
-    set2 = set(temp1)
-    file_names1 = set1 - set2
-
-    for factor_name in file_names1:
-        for ret_name in file_names2:
-            ic = PerfIc(file_indir1, file_indir2, save_indir, factor_name, ret_name, method, neutral)
-            ic.runflow()
+    # # 计算未计算ic因子的ic
+    # set1 = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'))
+    # temp = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'))
+    # temp1 = []
+    # for ic_name in temp:
+    #     temp1.append(ic_name.split('_ic')[0] + '.pkl')
+    # set2 = set(temp1)
+    # file_names1 = set1 - set2
+    #
+    # for factor_name in file_names1:
+    #     for ret_name in file_names2:
+    #         ic = PerfIc(file_indir1, file_indir2, save_indir, factor_name, ret_name, method, neutral)
+    #         ic.runflow()
 
     # # 中性化因子ic--------------------------------------------------------------------------------
     # file_indir1 = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
@@ -133,6 +139,76 @@ if __name__ == '__main__':
     #
     # method = 'IC'
     # neutral = 1
+    #
+    # # # 计算全部因子ic
+    # # for factor_name in file_names1:
+    # #     for ret_name in file_names2:
+    # #         ic = PerfIc(file_indir1, file_indir2, save_indir, factor_name, ret_name, method, neutral)
+    # #         ic.runflow()
+    #
+    # # 计算未计算ic因子的ic
+    # set1 = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'))
+    # temp = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'))
+    # temp1 = []
+    # for ic_name in temp:
+    #     temp1.append(ic_name.split('_ic')[0] + '.pkl')
+    # set2 = set(temp1)
+    # file_names1 = set1 - set2
+    #
+    # # 计算全部因子ic
+    # for factor_name in file_names1:
+    #     for ret_name in file_names2:
+    #         ic = PerfIc(file_indir1, file_indir2, save_indir, factor_name, ret_name, method, neutral)
+    #         ic.runflow()
+
+    file_indir1 = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+    file_indir2 = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
+    save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
+
+    file_names1 = os.listdir(file_indir1)
+    file_names2 = ['all_band_adjvwap_hh_price_label1.pkl',
+                   'all_band_adjvwap_hh_price_label5.pkl',
+                   'all_band_adjvwap_hh_price_label10.pkl',
+                   'all_band_adjvwap_hh_price_label20.pkl',
+                   'all_band_adjvwap_hh_price_label60.pkl']
+
+    method = 'RankIC'
+    neutral = 0
+
+    # 计算全部因子ic
+    for factor_name in file_names1:
+        for ret_name in file_names2:
+            ic = PerfIc(file_indir1, file_indir2, save_indir, factor_name, ret_name, method, neutral)
+            ic.runflow()
+
+    # # 计算未计算rankic因子的rankic
+    # set1 = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'))
+    # temp = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'))
+    # temp1 = []
+    # for ic_name in temp:
+    #     temp1.append(ic_name.split('_rankic')[0] + '.pkl')
+    # set2 = set(temp1)
+    # file_names1 = set1 - set2
+    #
+    # for factor_name in file_names1:
+    #     for ret_name in file_names2:
+    #         ic = PerfIc(file_indir1, file_indir2, save_indir, factor_name, ret_name, method, neutral)
+    #         ic.runflow()
+
+    # # 中性化因子ic--------------------------------------------------------------------------------
+    # file_indir1 = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
+    # file_indir2 = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
+    # save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
+    #
+    # file_names1 = os.listdir(file_indir1)
+    # file_names2 = ['ret_1_neutral.pkl',
+    #                'ret_5_neutral.pkl',
+    #                'ret_10_neutral.pkl',
+    #                'ret_20_neutral.pkl',
+    #                'ret_60_neutral.pkl']
+    #
+    # method = 'RankIC'
+    # neutral = 1
 
     # # 计算全部因子ic
     # for factor_name in file_names1:
@@ -145,7 +221,7 @@ if __name__ == '__main__':
     # temp = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'))
     # temp1 = []
     # for ic_name in temp:
-    #     temp1.append(ic_name.split('_ic')[0] + '.pkl')
+    #     temp1.append(ic_name.split('_rankic')[0] + '.pkl')
     # set2 = set(temp1)
     # file_names1 = set1 - set2
     #

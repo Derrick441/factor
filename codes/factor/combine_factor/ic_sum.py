@@ -4,10 +4,11 @@ import os
 
 
 class IcSum(object):
-    def __init__(self, file_indir, file_names, save_indir):
+    def __init__(self, file_indir, file_names, save_indir, method):
         self.file_indir = file_indir
         self.file_names = file_names
         self.save_indir = save_indir
+        self.method = method
         self.num = len(self.file_names)
 
     def data_readin_merge(self, day):
@@ -26,19 +27,19 @@ class IcSum(object):
     def construct_five_table(self):
         t = time.time()
         self.table_ic_1 = self.data_readin_merge(1)
-        self.table_ic_1.to_csv(self.save_indir + 'combine_ic_all_1.csv')
+        self.table_ic_1.to_csv(self.save_indir + 'combine_' + self.method + '_all_1.csv')
 
         self.table_ic_5 = self.data_readin_merge(5)
-        self.table_ic_5.to_csv(self.save_indir + 'combine_ic_all_5.csv')
+        self.table_ic_5.to_csv(self.save_indir + 'combine_' + self.method + '_all_5.csv')
 
         self.table_ic_10 = self.data_readin_merge(10)
-        self.table_ic_10.to_csv(self.save_indir + 'combine_ic_all_10.csv')
+        self.table_ic_10.to_csv(self.save_indir + 'combine_' + self.method + '_all_10.csv')
 
         self.table_ic_20 = self.data_readin_merge(20)
-        self.table_ic_20.to_csv(self.save_indir + 'combine_ic_all_20.csv')
+        self.table_ic_20.to_csv(self.save_indir + 'combine_' + self.method + '_all_20.csv')
 
         self.table_ic_60 = self.data_readin_merge(60)
-        self.table_ic_60.to_csv(self.save_indir + 'combine_ic_all_60.csv')
+        self.table_ic_60.to_csv(self.save_indir + 'combine_' + self.method + '_all_60.csv')
         print('construct 5 tables using time:%10.4fs' % (time.time()-t))
 
     def compute_ic(self, start, end):
@@ -56,7 +57,8 @@ class IcSum(object):
         data.append(temp_data.mean())
 
         result = pd.concat(data, axis=1)
-        result.columns = ['ic_1', 'ic_5', 'ic_10', 'ic_20', 'ic_60']
+        m = self.method
+        result.columns = [m + '_1', m + '_5', m + '_10', m + '_20', m + '_60']
 
         return result
 
@@ -75,26 +77,27 @@ class IcSum(object):
         data.append(temp_data.mean() / temp_data.std())
 
         result = pd.concat(data, axis=1)
-        result.columns = ['ir_1', 'ir_5', 'ir_10', 'ir_20', 'ir_60']
+        m = self.method
+        result.columns = [m + 'ir_1', m + 'ir_5', m + 'ir_10', m + 'ir_20', m + 'ir_60']
 
         return result
 
     def construct_three_table(self):
         t = time.time()
         self.table_ic_2017 = self.compute_ic(20170101, 20200101)
-        self.table_ic_2017.to_csv(self.save_indir + 'combine_ic_mean_2017.csv')
+        self.table_ic_2017.to_csv(self.save_indir + 'combine_' + self.method + '_mean_2017.csv')
         self.table_ir_2017 = self.compute_ir(20170101, 20200101)
-        self.table_ir_2017.to_csv(self.save_indir + 'combine_ir_2017.csv')
+        self.table_ir_2017.to_csv(self.save_indir + 'ir\\' + 'combine_' + self.method + 'ir_2017.csv')
 
         self.table_ic_2012 = self.compute_ic(20120101, 20200101)
-        self.table_ic_2012.to_csv(self.save_indir + 'combine_ic_mean_2012.csv')
+        self.table_ic_2012.to_csv(self.save_indir + 'combine_' + self.method + '_mean_2012.csv')
         self.table_ir_2012 = self.compute_ir(20120101, 20200101)
-        self.table_ir_2012.to_csv(self.save_indir + 'combine_ir_2012.csv')
+        self.table_ir_2012.to_csv(self.save_indir + 'ir\\' + 'combine_' + self.method + 'ir_2012.csv')
 
         self.table_ic_2005 = self.compute_ic(20050101, 20200101)
-        self.table_ic_2005.to_csv(self.save_indir + 'combine_ic_mean_2005.csv')
+        self.table_ic_2005.to_csv(self.save_indir + 'combine_' + self.method + '_mean_2005.csv')
         self.table_ir_2005 = self.compute_ir(20050101, 20200101)
-        self.table_ir_2005.to_csv(self.save_indir + 'combine_ir_2005.csv')
+        self.table_ir_2005.to_csv(self.save_indir + 'ir\\' + 'combine_' + self.method + 'ir_2005.csv')
         print('construct 3 tables using time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
@@ -107,13 +110,20 @@ class IcSum(object):
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
-    save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic_sum\\'
+    save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic_sum\\combine\\'
 
-    file_names = ['factor_combine_ic1.pkl',
-                  'factor_combine_ic5.pkl',
-                  'factor_combine_ic10.pkl',
-                  'factor_combine_ic20.pkl',
-                  'factor_combine_ic60.pkl']
+    # file_names = ['factor_combine_ic1.pkl',
+    #               'factor_combine_ic5.pkl',
+    #               'factor_combine_ic10.pkl',
+    #               'factor_combine_ic20.pkl',
+    #               'factor_combine_ic60.pkl']
+    # method = 'ic'
+    file_names = ['factor_combine_rankic1.pkl',
+                  'factor_combine_rankic5.pkl',
+                  'factor_combine_rankic10.pkl',
+                  'factor_combine_rankic20.pkl',
+                  'factor_combine_rankic60.pkl']
+    method = 'rankic'
 
-    icsum = IcSum(file_indir, file_names, save_indir)
+    icsum = IcSum(file_indir, file_names, save_indir, method)
     icsum.runflow()

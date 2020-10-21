@@ -69,8 +69,8 @@ class GroupTen(object):
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    # factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
+    # factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+    factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\test\\'
 
     file_names = ['all_band_adjvwap_hh_price_label1.pkl', 'all_band_indu.pkl']
@@ -89,7 +89,7 @@ if __name__ == '__main__':
     out = pd.concat(result, axis=1).T
     out['trade_dt'] = factor
     out.rename(columns={'trade_dt': 'factor'}, inplace=True)
-    out.to_csv(save_indir + 'change_group_mean1.csv')
+    out.to_csv(save_indir + 'change_group_mean1_neutral.csv')
 
     # 5日收益
     file_names = ['all_band_adjvwap_hh_price_label5.pkl', 'all_band_indu.pkl']
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     out = pd.concat(result, axis=1).T
     out['trade_dt'] = factor
     out.rename(columns={'trade_dt': 'factor'}, inplace=True)
-    out.to_csv(save_indir + 'change_group_mean5.csv')
+    out.to_csv(save_indir + 'change_group_mean5_neutral.csv')
 
     # 10日收益
     file_names = ['all_band_adjvwap_hh_price_label10.pkl', 'all_band_indu.pkl']
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     out = pd.concat(result, axis=1).T
     out['trade_dt'] = factor
     out.rename(columns={'trade_dt': 'factor'}, inplace=True)
-    out.to_csv(save_indir + 'change_group_mean10.csv')
+    out.to_csv(save_indir + 'change_group_mean10_neutral.csv')
 
     # 20日收益
     file_names = ['all_band_adjvwap_hh_price_label20.pkl', 'all_band_indu.pkl']
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     out = pd.concat(result, axis=1).T
     out['trade_dt'] = factor
     out.rename(columns={'trade_dt': 'factor'}, inplace=True)
-    out.to_csv(save_indir + 'change_group_mean20.csv')
+    out.to_csv(save_indir + 'change_group_mean20_neutral.csv')
 
     # 60日收益
     file_names = ['all_band_adjvwap_hh_price_label60.pkl', 'all_band_indu.pkl']
@@ -153,4 +153,4 @@ if __name__ == '__main__':
     out = pd.concat(result, axis=1).T
     out['trade_dt'] = factor
     out.rename(columns={'trade_dt': 'factor'}, inplace=True)
-    out.to_csv(save_indir + 'change_group_mean60.csv')
+    out.to_csv(save_indir + 'change_group_mean60_neutral.csv')

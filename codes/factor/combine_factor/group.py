@@ -6,12 +6,13 @@ import os
 
 class GroupTen(object):
 
-    def __init__(self, file_indir, factor_indir, save_indir, file_names, factor_name):
+    def __init__(self, file_indir, factor_indir, save_indir, file_names, factor_name, perid):
         self.file_indir = file_indir
         self.factor_indir = factor_indir
         self.save_indir = save_indir
         self.file_names = file_names
         self.factor_name = factor_name
+        self.perid = perid
 
     def filein(self):
         t = time.time()
@@ -28,7 +29,8 @@ class GroupTen(object):
         # 因子名
         self.factor_name = self.factor.columns[-1]
         # 数据合并
-        self.data_sum = pd.merge(self.all_data, self.all_indu, how='left')
+        temp = self.all_data.reset_index().rename(columns={0: 's_dq_pctchange'})
+        self.data_sum = pd.merge(temp, self.all_indu, how='left')
         self.data_sum = pd.merge(self.data_sum, self.factor, how='left')
         # 去除空值
         item = ['trade_dt', 's_info_windcode', 's_dq_pctchange', 'induname1', self.factor_name]
@@ -50,6 +52,9 @@ class GroupTen(object):
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
+        save_name = self.factor_name + '_group_ret' + str(self.perid) + '.csv'
+        temp = self.result.groupby('trade_dt').mean() / self.perid
+        temp.to_csv(self.save_indir + 'details\\' + save_name)
         print(self.result.mean())
 
     def runflow(self):
@@ -64,9 +69,10 @@ class GroupTen(object):
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+    factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_combine\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\test\\'
-    file_names = ['all_dayindex.pkl', 'all_band_indu.pkl']
+
+    file_names = ['all_band_adjvwap_hh_price_label1.pkl', 'all_band_indu.pkl']
     factor_names = os.listdir(factor_indir)
 
     # 1日收益
@@ -74,7 +80,7 @@ if __name__ == '__main__':
     result = []
     for factor_name in factor_names:
         print(factor_name)
-        g10 = GroupTen(file_indir, factor_indir, save_indir, file_names, factor_name)
+        g10 = GroupTen(file_indir, factor_indir, save_indir, file_names, factor_name, 1)
         g10.runflow()
         factor.append(g10.factor_name)
         result.append(g10.result.mean() * 243 / 1)
@@ -82,4 +88,4 @@ if __name__ == '__main__':
     out = pd.concat(result, axis=1).T
     out['trade_dt'] = factor
     out.rename(columns={'trade_dt': 'factor'}, inplace=True)
-    out.to_csv(save_indir + 'change_group_mean.csv')
+    out.to_csv(save_indir + 'change_group_mean1_combine.csv')
