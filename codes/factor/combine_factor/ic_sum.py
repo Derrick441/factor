@@ -112,18 +112,18 @@ if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic_sum\\combine\\'
 
-    # file_names = ['factor_combine_ic1.pkl',
-    #               'factor_combine_ic5.pkl',
-    #               'factor_combine_ic10.pkl',
-    #               'factor_combine_ic20.pkl',
-    #               'factor_combine_ic60.pkl']
-    # method = 'ic'
-    file_names = ['factor_combine_rankic1.pkl',
-                  'factor_combine_rankic5.pkl',
-                  'factor_combine_rankic10.pkl',
-                  'factor_combine_rankic20.pkl',
-                  'factor_combine_rankic60.pkl']
-    method = 'rankic'
+    file_names = ['factor_combine_ic1.pkl',
+                  'factor_combine_ic5.pkl',
+                  'factor_combine_ic10.pkl',
+                  'factor_combine_ic20.pkl',
+                  'factor_combine_ic60.pkl']
+    method = 'ic'
+    # file_names = ['factor_combine_rankic1.pkl',
+    #               'factor_combine_rankic5.pkl',
+    #               'factor_combine_rankic10.pkl',
+    #               'factor_combine_rankic20.pkl',
+    #               'factor_combine_rankic60.pkl']
+    # method = 'rankic'
 
     icsum = IcSum(file_indir, file_names, save_indir, method)
     icsum.runflow()

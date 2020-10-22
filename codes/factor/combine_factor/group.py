@@ -52,9 +52,9 @@ class GroupTen(object):
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
+        details = self.result.groupby('trade_dt').mean() / self.perid
         save_name = self.factor_name + '_group_ret' + str(self.perid) + '.csv'
-        temp = self.result.groupby('trade_dt').mean() / self.perid
-        temp.to_csv(self.save_indir + 'details\\' + save_name)
+        details.to_csv(self.save_indir + 'details\\' + save_name)
         print(self.result.mean())
 
     def runflow(self):

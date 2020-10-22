@@ -52,9 +52,9 @@ class GroupTen(object):
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
+        details = self.result.groupby('trade_dt').mean() / self.perid
         save_name = self.factor_name + '_group_ret' + str(self.perid) + '.csv'
-        temp = self.result.groupby('trade_dt').mean() / self.perid
-        temp.to_csv(self.save_indir + 'details\\' + save_name)
+        details.to_csv(self.save_indir + 'details\\' + save_name)
         print(self.result.mean())
 
     def runflow(self):
@@ -69,8 +69,8 @@ class GroupTen(object):
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    # factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
+    # factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+    factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\test\\'
 
     file_names = ['all_band_adjvwap_hh_price_label1.pkl', 'all_band_indu.pkl']

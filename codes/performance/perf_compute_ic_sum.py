@@ -114,26 +114,26 @@ class IcSum(object):
 
 
 if __name__ == '__main__':
-    # file_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
-    # save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic_sum\\'
-    # file_names = os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\')
-    # method = 'ic'
-    #
-    # icsum = IcSum(file_indir, file_names, save_indir, method)
-    # icsum.runflow()
+    file_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
+    save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic_sum\\'
+    file_names = os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\')
+    method = 'ic'
+
+    icsum = IcSum(file_indir, file_names, save_indir, method)
+    icsum.runflow()
 
     # # file_names = ['factor_hq_apb1d.pkl']
     # # icsum = IcSum(file_indir, file_names, save_indir, method)
     # # icsum.runflow()
 
-    # # ***********************************************************************************************
-    file_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
-    save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic_sum\\'
-    file_names = os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\')
-    method = 'rankic'
-
-    icsum = IcSum(file_indir, file_names, save_indir, method)
-    icsum.runflow()
+    # #rankic###########################################################################################################
+    # file_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
+    # save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic_sum\\'
+    # file_names = os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\')
+    # method = 'rankic'
+    #
+    # icsum = IcSum(file_indir, file_names, save_indir, method)
+    # icsum.runflow()
 
     # file_names = ['factor_hq_apb1d.pkl']
     # icsum = IcSum(file_indir, file_names, save_indir, method)

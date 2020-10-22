@@ -146,8 +146,8 @@ if __name__ == '__main__':
     file_indir2 = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_combine\\'
     file_names = os.listdir(file_indir1)
-    # method = 'ic'
-    method = 'rankic'
+    method = 'ic'
+    # method = 'rankic'
 
     fc = FactorCombine(file_indir1, file_indir2, save_indir, file_names, method)
     fc.runflow()
