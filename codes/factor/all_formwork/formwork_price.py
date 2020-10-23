@@ -3,7 +3,7 @@ import numpy as np
 import time
 
 
-class X(object):
+class FactorX(object):
 
     def __init__(self, file_indir, save_indir, file_name):
         self.file_indir = file_indir
@@ -19,9 +19,9 @@ class X(object):
     def datamanage(self):
         t = time.time()
         # 数据合并
-        self.data = pd.merge(self.xx, self.xx, how='left')
+        # self.data = pd.merge(self.xx, self.xx, how='left')
         # 去除空值
-        self.data_dropna = self.data.dropna().copy()
+        # self.data_dropna = self.data.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
     def method(self, data, perid):
@@ -42,7 +42,6 @@ class X(object):
     def fileout(self):
         t = time.time()
         # 数据对齐
-        self.all_data = pd.read_pickle(self.file_indir + 'all_dayindex.pkl')
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
         # 输出到factor文件夹的stockfactor中
         item = ['trade_dt', 's_info_windcode', 'x']
@@ -56,7 +55,7 @@ class X(object):
         self.datamanage()
         self.compute()
         self.fileout()
-        print('finish using time:%10.4fs' % (time.time() - t))
+        print('finish running time:%10.4fs' % (time.time() - t))
 
 
 if __name__ == '__main__':
@@ -64,5 +63,5 @@ if __name__ == '__main__':
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
     file_name = 'all_dayindex.pkl'
 
-    x = X(file_indir, save_indir, file_name)
-    x.runflow()
+    fx = FactorX(file_indir, save_indir, file_name)
+    fx.runflow()

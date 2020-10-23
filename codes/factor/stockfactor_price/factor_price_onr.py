@@ -51,7 +51,7 @@ class ReturnTwoIndex1(object):
         self.datamanage()
         self.compute()
         self.fileout()
-        print('finish using time:%10.4fs' % (time.time() - t))
+        print('finish running time:%10.4fs' % (time.time() - t))
 
 
 if __name__ == '__main__':

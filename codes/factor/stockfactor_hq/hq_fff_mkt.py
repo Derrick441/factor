@@ -10,11 +10,12 @@ class Mkt(object):
         self.file_indir = file_indir
         self.save_indir = save_indir
         self.file_name = file_name
+        print(self.file_name)
 
     def filein(self):
         t = time.time()
         self.mkt_data_1min = pd.read_pickle(self.file_indir + self.file_name)
-        print('filein running time:%10.4fs' % (time.time() - t))
+        print('filein using time:%10.4fs' % (time.time() - t))
 
     def compose_five(self, data):
         print(data.iloc[0, 0]+'-'+data.iloc[0, 2])
@@ -53,20 +54,20 @@ class Mkt(object):
         self.mkt_data = self.mkt_data_1min.groupby(['s_info_windcode', 'trade_dt'])\
                                           .apply(self.compose_five)\
                                           .reset_index(drop=True)
-        print('compose running time:%10.4fs' % (time.time() - t))
+        print('datamanage using time:%10.4fs' % (time.time() - t))
 
     def compute(self):
         t = time.time()
         # 每5分钟市场因子
         self.mkt_data['mkt'] = (self.mkt_data.closeprice - self.mkt_data.openprice) / self.mkt_data.openprice * 100
-        print('mkt running time:%10.4fs' % (time.time() - t))
+        print('compute using time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
         # 数据输出
         item = ['trade_dt', 'bargaintime', 'mkt']
         self.mkt_data[item].to_pickle(self.save_indir + 'factor_mkt_5min_' + self.file_name[19:23] + '.pkl')
-        print('fileout running time:%10.4fs' % (time.time() - t))
+        print('fileout using time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
         print('start')
@@ -88,7 +89,5 @@ if __name__ == '__main__':
                   'zz500_store_hqdata_2018.pkl', 'zz500_store_hqdata_2019.pkl']
 
     for file_name in file_names:
-        print(file_name)
-
         mkt = Mkt(file_indir, save_indir, file_name)
         mkt.runflow()

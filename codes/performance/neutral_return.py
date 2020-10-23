@@ -20,7 +20,7 @@ class ReturnNeutral(object):
         self.ret = pd.read_pickle(self.file_indir + self.file_name2)
         print('filein running time:%10.4fs' % (time.time() - t))
 
-    def datamange_prepare(self):
+    def datamange(self):
         t = time.time()
         # 收益名
         temp = self.file_name2[31:]
@@ -42,7 +42,7 @@ class ReturnNeutral(object):
 
         # 去除空值
         self.data_dum.dropna(inplace=True)
-        print('datamanage-prepare running time:%10.4fs' % (time.time() - t))
+        print('datamanage running time:%10.4fs' % (time.time() - t))
 
     # 中性化回归函数
     def neutral(self, data, y_item, x_item):
@@ -52,7 +52,7 @@ class ReturnNeutral(object):
         result = sm.OLS(y, x).fit()
         return result.resid
 
-    def datamanage_neutral(self):
+    def compute(self):
         t = time.time()
         # 中性化回归
         y_item = [self.ret_name]
@@ -62,7 +62,7 @@ class ReturnNeutral(object):
                                         .droplevel(0)\
                                         .reset_index()\
                                         .rename(columns={0: self.ret_name + '_neutral'})
-        print('datamanage-neutral running time:%10.4fs' % (time.time() - t))
+        print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
@@ -82,10 +82,10 @@ class ReturnNeutral(object):
         print('start')
         t = time.time()
         self.filein()
-        self.datamange_prepare()
-        self.datamanage_neutral()
+        self.datamange()
+        self.compute()
         self.fileout()
-        print('finish using time:%10.4fs' % (time.time() - t))
+        print('finish running time:%10.4fs' % (time.time() - t))
 
 
 if __name__ == '__main__':

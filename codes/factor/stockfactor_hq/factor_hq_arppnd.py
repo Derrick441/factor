@@ -13,6 +13,7 @@ class ArppNd(object):
         self.file_indir2 = file_indir2
         self.save_indir = save_indir
         self.file_name = file_name
+        print(self.file_name)
 
     def filein(self):
         t = time.time()
@@ -24,7 +25,7 @@ class ArppNd(object):
         t = time.time()
         # 去除nan
         self.data_dropna = self.data.dropna().copy()
-        print('datamanage running time:%10.4fs' % (time.time() - t))
+        print('datamanage using time:%10.4fs' % (time.time() - t))
 
     def roll_arppnd(self, data, perid):
         temp = data.copy()
@@ -69,7 +70,7 @@ class ArppNd(object):
         self.result5[item].to_pickle(self.save_indir + 'factor_hq_arpp5d.pkl')
         item = ['trade_dt', 's_info_windcode', 'arpp20d']
         self.result20[item].to_pickle(self.save_indir + 'factor_hq_arpp20d.pkl')
-        print('fileout running time:%10.4fs' % (time.time()-t))
+        print('fileout using time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
         t = time.time()

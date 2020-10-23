@@ -18,7 +18,6 @@ class Ivff(object):
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
         # zz500数据
         self.zz500 = pd.read_pickle('D:\\wuyq02\\develop\\python\\data\\developflow\\zz500\\zz500_indexprice.pkl')
-        self.zz500.reset_index(inplace=True)
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def daytrade_factor(self, data, index):
@@ -33,9 +32,11 @@ class Ivff(object):
 
     def datamanage(self):
         t = time.time()
-        temp_data = self.all_data[['trade_dt', 's_info_windcode', 's_dq_pctchange']].copy()
         # 计算每日市场因子
+        self.zz500.reset_index(inplace=True)
         self.zz500['mkt'] = self.zz500['s_dq_change'] / self.zz500['s_dq_preclose'] * 100
+        # 合并
+        temp_data = self.all_data[['trade_dt', 's_info_windcode', 's_dq_pctchange']].copy()
         self.data_sum = pd.merge(temp_data, self.zz500[['trade_dt', 'mkt']], how='left')
         # 计算每日市值因子
         self.all_smb = self.all_data.groupby('trade_dt')\
@@ -91,7 +92,7 @@ class Ivff(object):
         self.datamanage()
         self.compute()
         self.fileout()
-        print('finish using time:%10.4fs' % (time.time() - t))
+        print('finish running time:%10.4fs' % (time.time() - t))
 
 
 if __name__ == '__main__':

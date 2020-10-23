@@ -10,6 +10,7 @@ class ReturnThreeIndexD(object):
         self.file_indir = file_indir
         self.save_indir = save_indir
         self.file_name = file_name
+        print(self.file_name)
 
     def filein(self):
         t = time.time()
@@ -21,7 +22,7 @@ class ReturnThreeIndexD(object):
         t = time.time()
         # 去除nan
         self.data_dropna = self.data.dropna().copy()
-        print('datamanage running time:%10.4fs' % (time.time() - t))
+        print('datamanage using time:%10.4fs' % (time.time() - t))
 
     # 日内收益分解
     def decompose(self, data):
@@ -77,24 +78,23 @@ if __name__ == '__main__':
                   'all_store_hqdata_2018_5_derive.pkl', 'all_store_hqdata_2019_5_derive.pkl']
 
     for file_name in file_names:
-        print(file_name)
-
         rtid = ReturnThreeIndexD(file_indir, save_indir, file_name)
         rtid.runflow()
 
     def merge_data(factor_name, names):
-        # 分开数据读取、合并
-        indir1 = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'
+        readin_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'
+        saveout_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+        # 数据读取合并
         data_sum = []
         for name in names:
-            data_sum.append(pd.read_pickle(indir1 + name))
+            data_sum.append(pd.read_pickle(readin_indir + name))
         temp_result = pd.concat(data_sum)
-        # 合并数据对齐、输出
+        # 数据对齐
         all_data = pd.read_pickle(file_indir + 'all_dayindex.pkl')
         result = pd.merge(all_data[['trade_dt', 's_info_windcode']], temp_result, how='left')
+        # 数据输出
         item = ['trade_dt', 's_info_windcode', factor_name]
-        indir2 = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-        result[item].to_pickle(indir2 + 'factor_hq_' + factor_name + '.pkl')
+        result[item].to_pickle(saveout_indir + 'factor_hq_' + factor_name + '.pkl')
 
     factor_name = 'mild'
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]

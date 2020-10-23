@@ -115,6 +115,7 @@ class TradeModuleAdj(object):
         self.stocks = np.zeros((len(stocklist),))   # 生成初始全0持仓
         self.curstocks = pd.Series(index=stocklist, data=self.stocks)
         startdate = self.weight.index[0]      # 组合第一天作为起始日期
+        # startdate = '20170101'
         datelist = datelist[(datelist >= startdate) & (datelist <= self.enddate)]   # 限制日期范围
         didx = (self.closep.index >= startdate) & (self.closep.index <= self.enddate)
 
@@ -145,7 +146,7 @@ if __name__ == '__main__':
     initmoney = 100000000
     costbuy = 0.0002
     costsell = 0.0012
-    enddate = '20191231'
+    enddate = '202000101'
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
 
     # 价格数据
@@ -154,10 +155,11 @@ if __name__ == '__main__':
     # 成交量数据
     vol = pd.read_pickle(file_indir+'all_vol.pkl')
     volconstrain = 1000000000
-    # 权重数据#########################################################################################################
 
+    # 权重数据
     name = 'all_weight_20_9'
     weight = pd.read_pickle(file_indir+name + '.pkl')
+
     tradem = TradeModuleAdj(closep, openp, vol, weight, enddate, initmoney, costsell, costbuy, volconstrain)
     tradem.tradeflow()
     tradem.tradeinfo.to_csv('D:\\wuyq02\\develop\\python\\data\\performance\\test\\' + name + '.csv')

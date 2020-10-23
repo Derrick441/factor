@@ -16,8 +16,7 @@ class Spreadbias(object):
         t = time.time()
         # 股票日数据
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
-        # self.all_data['trade_dt'] = self.all_data['trade_dt'].apply(lambda x: int(x))
-        # self.all_data = self.all_data[self.all_data['trade_dt'] > 20180801]
+        # self.all_data = self.all_data[self.all_data['trade_dt'] > '20180801']
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
@@ -115,7 +114,7 @@ class Spreadbias(object):
         self.datamanage()
         self.compute()
         self.fileout()
-        print('end running time:%10.4fs' % (time.time() - t))
+        print('finish running time:%10.4fs' % (time.time() - t))
 
 
 if __name__ == '__main__':

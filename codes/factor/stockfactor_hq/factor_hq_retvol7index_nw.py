@@ -12,6 +12,7 @@ class NeweyWestAdj(object):
         self.factor_indir = factor_indir
         self.file_name = file_name
         self.factor = factor
+        print(self.file_name)
 
     def filein(self):
         t = time.time()
@@ -74,7 +75,7 @@ class NeweyWestAdj(object):
                                         .apply(self.rolling_mean, 20)\
                                         .reset_index()
             self.stde['sd'+self.fac_name] = self.stde['sd' + self.fac_name] / self.mean['temp_mean']
-        print('factor compute using time:%10.4fs' % (time.time()-t))
+        print('compute using time:%10.4fs' % (time.time()-t))
 
     def fileout(self):
         t = time.time()
@@ -83,7 +84,7 @@ class NeweyWestAdj(object):
         # 数据输出
         item = ['trade_dt', 's_info_windcode', 'sd' + self.fac_name]
         self.result[item].to_pickle(self.factor_indir + 'factor_hq_sd' + self.fac_name + '.pkl')
-        print(time.time()-t)
+        print('fileout using time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
         t = time.time()
@@ -105,7 +106,5 @@ if __name__ == '__main__':
                'factor_hq_vhhi.pkl']
 
     for factor in factors:
-        print(factor)
-
         nw = NeweyWestAdj(file_indir, factor_indir, file_name, factor)
         nw.runflow()

@@ -21,12 +21,12 @@ class PriceDelay(object):
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
         # zz500数据
         self.zz500 = pd.read_pickle('D:\\wuyq02\\develop\\python\\data\\developflow\\zz500\\zz500_indexprice.pkl')
-        self.zz500.reset_index(inplace=True)
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
         # 计算市场收益率及滞后项
+        self.zz500.reset_index(inplace=True)
         self.zz500['mkt'] = self.zz500['s_dq_change'] / self.zz500['s_dq_preclose'] * 100
         self.zz500['mkt1'] = self.zz500['mkt'].shift(1)
         self.zz500['mkt2'] = self.zz500['mkt'].shift(2)
@@ -35,7 +35,7 @@ class PriceDelay(object):
         self.data_sum = pd.merge(self.all_data[['trade_dt', 's_info_windcode', 's_dq_pctchange']],
                                  self.zz500[['trade_dt', 'mkt', 'mkt1', 'mkt2', 'mkt3']],
                                  how='left')
-        # 0和空值处理
+        # 去除nan
         self.data_dropna = self.data_sum.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
@@ -79,7 +79,7 @@ class PriceDelay(object):
         self.datamanage()
         self.compute()
         self.fileout()
-        print('end running time:%10.4fs' % (time.time() - t))
+        print('finish running time:%10.4fs' % (time.time() - t))
 
 
 if __name__ == '__main__':

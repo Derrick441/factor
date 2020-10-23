@@ -59,13 +59,13 @@ class TradeWeightPre(object):
         self.data['adjclosep'] = self.data['s_dq_close'] * self.data['s_dq_adjfactor']
         item = ['trade_dt', 's_info_windcode', 'adjclosep']
         self.adjclosep = self.data[item].pivot('trade_dt', 's_info_windcode', 'adjclosep').copy()
-        self.adjclosep.ffill(inplace=True)
+        # self.adjclosep.ffill(inplace=True)
         self.adjclosep.replace(np.nan, 0, inplace=True)
         # adjopenp
         self.data['adjopenp'] = self.data['s_dq_open'] * self.data['s_dq_adjfactor']
         item = ['trade_dt', 's_info_windcode', 'adjopenp']
         self.adjopenp = self.data[item].pivot('trade_dt', 's_info_windcode', 'adjopenp').copy()
-        self.adjopenp.ffill(inplace=True)
+        # self.adjopenp.ffill(inplace=True)
         self.adjopenp.replace(np.nan, 0, inplace=True)
         # vol
         item = ['trade_dt', 's_info_windcode', 's_dq_volume']
@@ -82,9 +82,9 @@ class TradeWeightPre(object):
     def fileout(self):
         t = time.time()
         # 数据输出
-        self.adjclosep.to_pickle(self.save_indir + 'all_adjclosep.pkl')
-        self.adjopenp.to_pickle(self.save_indir + 'all_adjopenp.pkl')
-        self.vol.to_pickle(self.save_indir + 'all_vol.pkl')
+        # self.adjclosep.to_pickle(self.save_indir + 'all_adjclosep.pkl')
+        # self.adjopenp.to_pickle(self.save_indir + 'all_adjopenp.pkl')
+        # self.vol.to_pickle(self.save_indir + 'all_vol.pkl')
         self.weight.to_pickle(self.save_indir + self.weight_name)
         print('fileout running time:%10.4fs' % (time.time()-t))
 

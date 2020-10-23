@@ -63,7 +63,7 @@ class Bi(object):
         self.datamanage()
         self.compute()
         self.fileout()
-        print('end running time:%10.4fs' % (time.time()-t))
+        print('finish running time:%10.4fs' % (time.time()-t))
 
 
 if __name__ == '__main__':

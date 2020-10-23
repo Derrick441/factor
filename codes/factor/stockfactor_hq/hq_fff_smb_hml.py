@@ -10,11 +10,12 @@ class TwoFactor(object):
         self.file_indir = file_indir
         self.save_indir = save_indir
         self.file_name = file_name
+        print(self.file_name)
 
     def filein(self):
         t = time.time()
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
-        print('filein running time:%10.4fs' % (time.time() - t))
+        print('filein using time:%10.4fs' % (time.time() - t))
 
     def datamanage(self):
         pass
@@ -40,14 +41,14 @@ class TwoFactor(object):
                                     .apply(self.minute_factor, 'pe')\
                                     .reset_index()\
                                     .rename(columns={0: 'hml'})
-        print('compute running time:%10.4fs' % (time.time() - t))
+        print('compute using time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
         # 数据输出
         self.result1.to_pickle(self.save_indir + 'factor_smb_5min_' + self.file_name[17:21] + '.pkl')
         self.result2.to_pickle(self.save_indir + 'factor_hml_5min_' + self.file_name[17:21] + '.pkl')
-        print('fileout running time:%10.4fs' % (time.time() - t))
+        print('fileout using time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
         print('start')
@@ -69,7 +70,5 @@ if __name__ == '__main__':
                   'all_store_hqdata_2018_5_derive.pkl', 'all_store_hqdata_2019_5_derive.pkl']
 
     for file_name in file_names:
-        print(file_name)
-
         tf = TwoFactor(file_indir, save_indir, file_name)
         tf.runflow()

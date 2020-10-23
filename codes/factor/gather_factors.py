@@ -31,25 +31,27 @@ class FactorAll(object):
                 print(temp.columns[-1])
                 print(len(temp.dropna()))
                 temp_0 = pd.merge(temp_0, temp, how='left')
-        # # set_index
-        # temp_0.set_index(['trade_dt', 's_info_windcode'], inplace=True)
         print('files read in:%10.4fs' % (time.time()-t))
         return temp_0
 
     def filein(self):
+        t = time.time()
         # 读入因子
         self.factor = self.factor_read(self.file_indir, self.file_names)
+        print('filein running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
+        t = time.time()
         # 数据输出（因子之前已数据对齐，所以不再数据对齐）
         self.factor.to_pickle(self.save_indir + self.save_name)
+        print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
         print('start')
         t = time.time()
         self.filein()
         self.fileout()
-        print('finish using time:%10.4fs' % (time.time() - t))
+        print('finish running time:%10.4fs' % (time.time() - t))
 
 
 if __name__ == '__main__':
