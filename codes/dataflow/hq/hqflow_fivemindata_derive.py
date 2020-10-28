@@ -17,17 +17,17 @@ class DaytoFivemin(object):
         self.data_all = pd.read_pickle(self.file_indir + self.file_name1)
         # 5分钟数据
         self.data_five = pd.read_pickle(self.file_indir + self.file_name2)
-        # self.data_five.sort_values(['s_info_windcode', 'trade_dt', 'bargaintime'], inplace=True)
+        self.data_five.sort_values(['s_info_windcode', 'trade_dt', 'bargaintime'], inplace=True)
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def derive(self):
         t = time.time()
-        temp_data = self.data_all[['s_info_windcode', 'trade_dt', 's_dq_mv', 's_val_pb_new', 's_dq_close']].copy()
+        temp_data = self.data_all[['s_info_windcode', 'trade_dt', 's_dq_freemv', 's_val_pb_new', 's_dq_close']].copy()
         # 合并
         self.data_sum = pd.merge(self.data_five, temp_data, how='left')
         self.data_sum['change'] = (self.data_sum.closeprice - self.data_sum.openprice) / self.data_sum.openprice * 100
-        self.data_sum['mv'] = self.data_sum.s_dq_mv/self.data_sum.s_dq_close*self.data_sum.closeprice
-        self.data_sum['pe'] = self.data_sum.s_val_pb_new/self.data_sum.s_dq_close*self.data_sum.closeprice
+        self.data_sum['mv'] = self.data_sum.s_dq_freemv/self.data_sum.s_dq_close*self.data_sum.closeprice
+        self.data_sum['pb'] = self.data_sum.s_val_pb_new/self.data_sum.s_dq_close*self.data_sum.closeprice
         print('derive running time:%10.4fs' % (time.time()-t))
 
     def fileout(self):

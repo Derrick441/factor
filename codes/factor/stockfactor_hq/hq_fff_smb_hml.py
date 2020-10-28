@@ -38,7 +38,7 @@ class TwoFactor(object):
                                     .rename(columns={0: 'smb'})
         # 每5分钟估值因子
         self.result2 = self.all_data.groupby(['trade_dt', 'bargaintime'])\
-                                    .apply(self.minute_factor, 'pe')\
+                                    .apply(self.minute_factor, 'pb')\
                                     .reset_index()\
                                     .rename(columns={0: 'hml'})
         print('compute using time:%10.4fs' % (time.time() - t))

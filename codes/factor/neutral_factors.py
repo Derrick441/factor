@@ -30,17 +30,19 @@ class FactorNeutral(object):
         self.factor_name = self.factor.columns[-1]
 
         # 市值、行业数据选取
-        self.mv = self.all_data[['trade_dt', 's_info_windcode', 's_dq_mv']]
+        self.mv = self.all_data[['trade_dt', 's_info_windcode', 's_dq_freemv']]
         self.indu = self.bandindu[['trade_dt', 's_info_windcode', 'induname1']]
 
         # 以市值数据为基准，合并市值、行业和因子数据
         self.data_temp = pd.merge(self.mv, self.indu, how='left')
         self.data = pd.merge(self.data_temp, self.factor, how='left')
-        self.data.set_index(['trade_dt', 's_info_windcode'], inplace=True)
 
         # 独热处理（行业独热，并去掉‘综合’行业）
+        self.data.set_index(['trade_dt', 's_info_windcode'], inplace=True)
         self.data_dum = pd.get_dummies(self.data)
         self.data_dum.drop('induname1_综合', axis=1, inplace=True)
+        self.data_dum.reset_index(inplace=True)
+        self.induname = [x for x in self.data_dum.columns if 'induname' in x]
 
         # 去除无穷值、空值
         self.data_dum.replace([np.inf, -np.inf], np.nan, inplace=True)
@@ -48,24 +50,23 @@ class FactorNeutral(object):
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
     # 中性化回归函数
-    def neutral(self, data, y_item, x_item):
+    def neutral(self, data, y_item, x_item, name):
         temp = data.copy()
         y = temp[y_item]
         x = temp[x_item]
         x['intercept'] = 1
-        result = sm.OLS(y, x).fit()
-        return result.resid
+        model = sm.OLS(y, x).fit()
+        return pd.DataFrame({'s_info_windcode': temp.s_info_windcode.values, name: model.resid})
 
     def compute(self):
         t = time.time()
         # 中性化回归
         y_item = [self.factor_name]
-        x_item = list(set(self.data_dum.columns)-set(y_item))
-        self.temp_result = self.data_dum.groupby(level=0)\
-                                        .apply(self.neutral, y_item, x_item)\
-                                        .droplevel(0)\
-                                        .reset_index()\
-                                        .rename(columns={0: 'neutral_' + self.factor_name})
+        x_item = ['s_dq_freemv'] + self.induname
+        self.factor_name_n = 'neutral_' + self.factor_name
+        self.temp_result = self.data_dum.groupby('trade_dt')\
+                                        .apply(self.neutral, y_item, x_item, self.factor_name_n)\
+                                        .reset_index()
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
@@ -73,8 +74,8 @@ class FactorNeutral(object):
         # 数据对齐
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
         # 数据输出
-        item = ['trade_dt', 's_info_windcode', 'neutral_' + self.factor_name]
-        self.result[item].to_pickle(self.save_indir + 'neutral_' + self.factor_name)
+        item = ['trade_dt', 's_info_windcode', self.factor_name_n]
+        self.result[item].to_pickle(self.save_indir + self.factor_name_n + '.pkl')
         print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
@@ -94,18 +95,18 @@ if __name__ == '__main__':
 
     file_names = ['all_dayindex.pkl', 'all_band_indu.pkl']
 
-    # # 中性化全部因子
-    # factor_names = os.listdir(factor_indir)
-    # for factor_name in factor_names:
-    #     fn = FactorNeutral(file_indir, factor_indir, save_indir, file_names, factor_name)
-    #     fn.runflow()
-
-    # 中性化未中性化的因子
-    set1 = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'))
-    temp_set = os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\')
-    set2 = set([factorname[8:] for factorname in temp_set])
-    factor_names = set1 - set2
-
+    # 中性化全部因子
+    factor_names = os.listdir(factor_indir)
     for factor_name in factor_names:
         fn = FactorNeutral(file_indir, factor_indir, save_indir, file_names, factor_name)
         fn.runflow()
+
+    # # 中性化未中性化的因子
+    # set1 = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'))
+    # temp_set = os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\')
+    # set2 = set([factorname[8:] for factorname in temp_set])
+    # factor_names = set1 - set2
+    #
+    # for factor_name in factor_names:
+    #     fn = FactorNeutral(file_indir, factor_indir, save_indir, file_names, factor_name)
+    #     fn.runflow()

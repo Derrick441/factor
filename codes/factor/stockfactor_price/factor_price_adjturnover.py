@@ -21,13 +21,13 @@ class AdjTurnover(object):
     def datamanage(self):
         t = time.time()
         # 0值转空值
-        item = ['s_dq_freeturnover', 's_dq_mv']
+        item = ['s_dq_freeturnover', 's_dq_freemv']
         self.all_data[item] = self.all_data[item].replace(0, np.nan)
         # 对数化
         self.all_data['ln_turnover'] = np.log(self.all_data['s_dq_freeturnover'])
-        self.all_data['ln_mv'] = np.log(self.all_data['s_dq_mv'])
+        self.all_data['ln_freemv'] = np.log(self.all_data['s_dq_freemv'])
         # 数据选取
-        self.data = self.all_data[['trade_dt', 's_info_windcode', 'ln_turnover', 'ln_mv']].copy()
+        self.data = self.all_data[['trade_dt', 's_info_windcode', 'ln_turnover', 'ln_freemv']].copy()
         # 去除nan
         self.data_dropna = self.data.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
@@ -38,12 +38,12 @@ class AdjTurnover(object):
         num = len(temp)
         if num > perid:
             temp['intercept'] = 1
-            item = ['intercept', 'ln_mv']
+            item = ['intercept', 'ln_freemv']
             # 滚动回归
             model = regroll.RollingOLS(temp['ln_turnover'], temp[item], window=perid).fit()
             # 根据回归参数计算调整换手率
             coef = model.params
-            temp['adjturnover'] = temp['ln_turnover']-(coef.intercept*1+coef.ln_mv*temp['ln_mv'])
+            temp['adjturnover'] = temp['ln_turnover']-(coef.intercept*1+coef.ln_freemv*temp['ln_freemv'])
             print(time.time() - t)
             return pd.DataFrame({'trade_dt': temp.trade_dt.values, 'adjturnover': temp.adjturnover.values})
         else:

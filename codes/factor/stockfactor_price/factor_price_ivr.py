@@ -40,7 +40,7 @@ class Ivr(object):
         self.data_sum = pd.merge(temp_data, self.zz500[['trade_dt', 'mkt']], how='left')
         # 计算每日市值因子
         self.all_smb = self.all_data.groupby('trade_dt')\
-                                    .apply(self.daytrade_factor, 's_dq_mv')\
+                                    .apply(self.daytrade_factor, 's_dq_freemv')\
                                     .reset_index()\
                                     .rename(columns={0: 'smb'})
         self.data_sum = pd.merge(self.data_sum, self.all_smb[['trade_dt', 'smb']], how='left')

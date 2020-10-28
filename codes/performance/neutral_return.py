@@ -28,40 +28,42 @@ class ReturnNeutral(object):
         self.ret_reset = self.ret.reset_index().rename(columns={0: self.ret_name})
 
         # 数据选取
-        self.mv = self.all_data[['trade_dt', 's_info_windcode', 's_dq_mv']]
+        self.mv = self.all_data[['trade_dt', 's_info_windcode', 's_dq_freemv']]
         self.indu = self.bandindu[['trade_dt', 's_info_windcode', 'induname1']]
 
         # 以市值数据的长度为基准，合并市值、行业和收益率数据
         self.data_temp = pd.merge(self.mv, self.indu, how='left')
         self.data = pd.merge(self.data_temp, self.ret_reset, how='left')
-        self.data.set_index(['trade_dt', 's_info_windcode'], inplace=True)
 
         # 独热处理（行业独热，并去掉‘综合’行业）
+        self.data.set_index(['trade_dt', 's_info_windcode'], inplace=True)
         self.data_dum = pd.get_dummies(self.data)
         self.data_dum.drop('induname1_综合', axis=1, inplace=True)
+        self.data_dum.reset_index(inplace=True)
+        self.induname = [x for x in self.data_dum.columns if 'induname' in x]
 
         # 去除空值
         self.data_dum.dropna(inplace=True)
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
     # 中性化回归函数
-    def neutral(self, data, y_item, x_item):
-        y = data[y_item]
-        x = data[x_item]
+    def neutral(self, data, y_item, x_item, name):
+        temp = data.copy()
+        y = temp[y_item]
+        x = temp[x_item]
         x['intercept'] = 1
-        result = sm.OLS(y, x).fit()
-        return result.resid
+        model = sm.OLS(y, x).fit()
+        return pd.DataFrame({'s_info_windcode': temp.s_info_windcode.values, name: model.resid})
 
     def compute(self):
         t = time.time()
         # 中性化回归
         y_item = [self.ret_name]
-        x_item = list(set(self.data_dum.columns)-set(y_item))
-        self.temp_result = self.data_dum.groupby(level=0)\
-                                        .apply(self.neutral, y_item, x_item)\
-                                        .droplevel(0)\
-                                        .reset_index()\
-                                        .rename(columns={0: self.ret_name + '_neutral'})
+        x_item = ['s_dq_freemv'] + self.induname
+        self.ret_name_n = self.ret_name + '_neutral'
+        self.temp_result = self.data_dum.groupby('trade_dt')\
+                                        .apply(self.neutral, y_item, x_item, self.ret_name_n)\
+                                        .reset_index()
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
@@ -69,13 +71,13 @@ class ReturnNeutral(object):
         # 数据对齐
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
         # 数据输出
-        item = ['trade_dt', 's_info_windcode', self.ret_name + '_neutral']
+        item = ['trade_dt', 's_info_windcode', self.ret_name_n]
 
         # 使中性化收益数据和收益数据的格式保持一致
         self.output = self.result[item].copy()
         self.output.set_index(['trade_dt', 's_info_windcode'], inplace=True)
 
-        self.output.to_pickle(self.file_indir + self.ret_name + '_neutral.pkl')
+        self.output.to_pickle(self.file_indir + self.ret_name_n + '.pkl')
         print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):

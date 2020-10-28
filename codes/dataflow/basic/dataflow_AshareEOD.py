@@ -28,18 +28,18 @@ class DayIndex(object):
                    'where trade_dt>= ' + self.stadate + ' and trade_dt<= ' + self.enddate
         self.data1 = pd.read_sql(sqlquery, conn)
         conn.close()
-        print('sqlin running time: %10.4fs' % (time.time() - t))
+        print('sqlin1 running time: %10.4fs' % (time.time() - t))
 
         t = time.time()
         # 日行情估值指标
         conn = sqlconn.sqlconn()
         sqlquery = 'select trade_dt, s_info_windcode, ' \
-                   's_dq_mv, s_val_pe_ttm, s_val_pb_new, s_dq_freeturnover ' \
+                   's_val_pe_ttm, s_val_pb_new, s_dq_freeturnover, free_shares_today ' \
                    'from wind.AShareEODDerivativeIndicator ' \
                    'where trade_dt>= ' + self.stadate + ' and trade_dt<= ' + self.enddate
         self.data2 = pd.read_sql(sqlquery, conn)
         conn.close()
-        print('sqlin running time: %10.4fs' % (time.time() - t))
+        print('sqlin2 running time: %10.4fs' % (time.time() - t))
 
     def datamanage(self):
         t = time.time()
@@ -51,6 +51,8 @@ class DayIndex(object):
         self.data2.drop_duplicates(subset=['trade_dt', 's_info_windcode'], keep='first', inplace=True)
         # 合并
         self.data_sum = pd.merge(self.data1, self.data2, how='left')
+        # 自由流通市值
+        self.data_sum['s_dq_freemv'] = self.data_sum['s_dq_close'] * self.data_sum['free_shares_today']
         print('datamanage running time: %10.4fs' % (time.time() - t))
 
     def fileout(self):
