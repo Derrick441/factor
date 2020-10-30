@@ -14,9 +14,10 @@ class ReturnNeutral(object):
 
     def filein(self):
         t = time.time()
-        # 从dataflow文件夹中读取:市值、行业和收益率数据(每日数据)
+        # 读入市值、行业数据
         self.all_data = pd.read_pickle(self.file_indir + self.file_names1[0])
         self.bandindu = pd.read_pickle(self.file_indir + self.file_names1[1])
+        # 读入收益数据
         self.ret = pd.read_pickle(self.file_indir + self.file_name2)
         print('filein running time:%10.4fs' % (time.time() - t))
 

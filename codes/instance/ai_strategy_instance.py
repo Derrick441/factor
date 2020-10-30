@@ -27,7 +27,7 @@ debug = False
 factorname = 'feature179TAB_base179B_shift179_shiftbase7_hp-5-0.103-0.06128-12-571-990_63_st12_l1_rand2_adjvwap_hh'
 # factorname = 'feature179TAB_base179B_shift179_shiftbase7_hp-5-0.395-0.056-43-849-1079_63_st12_l1_rand2_adjvwap_hh'
 
-strategy = AiStrategy(INDEX,indir,hedgeindex,outdir,startdate,enddate,factorname,scale,
-                      rollN,dayN,costsell,costbuy,trade_open,topgroup,debug)
+strategy = AiStrategy(INDEX, indir, hedgeindex, outdir, startdate, enddate, factorname, scale,
+                      rollN, dayN, costsell, costbuy, trade_open, topgroup, debug)
 # strategy.debug = True
 strategy.run_flow()

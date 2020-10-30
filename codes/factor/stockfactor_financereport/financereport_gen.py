@@ -113,7 +113,7 @@ class FinanceReportGen(object):
         for year in range(int(startdate[0:4]), int(self.enddate[0:4])+1):
             print('Out table: '+self.ftable+' Out year :'+str(year)+' Out name:'+name)
             yf = factor.loc[factor['trade_year'] == str(year)]
-            save_indir = self.indir+self.INDEX+'/'+self.INDEX+'_' + self.ftable+name+'_'+str(year)+'.pkl'
+            save_indir = self.indir+self.INDEX+'/'+'finance/'+self.INDEX+'_' + self.ftable+name+'_'+str(year)+'.pkl'
             yf.drop(['trade_year'], axis=1).to_pickle(save_indir)
 
     def seasonMapSub(self, setyear, setyearp1, setseason, setname):

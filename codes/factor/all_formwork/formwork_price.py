@@ -34,8 +34,9 @@ class FactorX(object):
     def compute(self):
         t = time.time()
         # 因子计算
+        self.factor_name = ''
         self.temp_result = self.data_dropna.groupby('s_info_windcode') \
-                                           .apply(self.method, 20) \
+                                           .apply(self.method, 20, self.factor_name) \
                                            .reset_index()
         print('compute running time:%10.4fs' % (time.time() - t))
 
@@ -44,8 +45,8 @@ class FactorX(object):
         # 数据对齐
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
         # 输出到factor文件夹的stockfactor中
-        item = ['trade_dt', 's_info_windcode', 'x']
-        self.result[item].to_pickle(self.save_indir + 'factor_price_x.pkl')
+        item = ['trade_dt', 's_info_windcode', self.factor_name]
+        self.result[item].to_pickle(self.save_indir + 'factor_price_' + self.factor_name + '.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):

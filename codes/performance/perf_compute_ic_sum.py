@@ -13,17 +13,17 @@ class IcSum(object):
 
     def ic_readin(self, day):
         for i in range(self.num):
-            read_indir1 = self.file_indir + self.file_names[i][:-4] + '_' + self.method + str(day) + '.pkl'
-            read_indir2 = self.file_indir + 'neutral_' + self.file_names[i][:-4] + '_' + self.method + str(day) + '.pkl'
+            read_indir1 = self.file_indir + self.file_names[i][:-4] + '_' + self.method + str(day) + '.csv'
+            # read_indir2 = self.file_indir + 'neutral_' + self.file_names[i][:-4] + '_' + self.method + str(day) + '.csv'
             if i == 0:
-                table = pd.read_pickle(read_indir1)
-                temp = pd.read_pickle(read_indir2)
-                table = pd.merge(table, temp, how='outer')
+                table = pd.read_csv(read_indir1)
+                # temp = pd.read_csv(read_indir2)
+                # table = pd.merge(table, temp, how='outer')
             else:
-                temp = pd.read_pickle(read_indir1)
+                temp = pd.read_csv(read_indir1)
                 table = pd.merge(table, temp, how='outer')
-                temp = pd.read_pickle(read_indir2)
-                table = pd.merge(table, temp, how='outer')
+                # temp = pd.read_csv(read_indir2)
+                # table = pd.merge(table, temp, how='outer')
         table['trade_dt'] = table['trade_dt'].apply(lambda x: int(x))
         table.set_index('trade_dt', inplace=True)
         table.sort_values('trade_dt', inplace=True)

@@ -31,7 +31,7 @@ class PerfIc(object):
         # 收益率reset_index
         self.ret_reset = self.ret.reset_index().rename(columns={0: 'ret'})
         # 数据合并
-        self.data = pd.merge(self.fac, self.ret_reset, how='left')
+        self.data = pd.merge(self.ret_reset, self.fac, how='left')
         # 排序、设index
         self.data.sort_values(by=['trade_dt', 's_info_windcode'], inplace=True)
         self.data.set_index(['trade_dt', 's_info_windcode'], inplace=True)
@@ -39,15 +39,16 @@ class PerfIc(object):
         self.data.dropna(inplace=True)
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
-    def perf_single_ic(self, data, method):
+    def perf_single_ic(self, data, m):
+        temp = data.copy()
         # IC
-        if method == 'IC':
-            ic = data.corr(method='pearson')
+        if m == 'IC':
+            result = temp.corr(method='pearson')
         # rank IC
         else:
-            ic = data.corr(method='spearman')
+            result = temp.corr(method='spearman')
         # 返回未来收益与因子的相关系数
-        return ic.values[0, 1]
+        return result.values[0, 1]
 
     def compute(self):
         t = time.time()
@@ -56,7 +57,7 @@ class PerfIc(object):
         self.ic_name = self.fac_name + '_' + self.method
         # 计算每期因子的ic或rank ic值
         self.result = self.data.groupby(level=0)\
-                               .apply(self.perf_single_ic, method=self.method)\
+                               .apply(self.perf_single_ic, self.method)\
                                .reset_index()\
                                .rename(columns={0: self.ic_name})
         self.result.sort_values('trade_dt', inplace=True)
@@ -67,16 +68,16 @@ class PerfIc(object):
         # 识别
         if self.method == 'IC':
             if self.neutral == 0:
-                self.save = self.factor_name[:-4] + '_ic' + self.file_name[31:]
+                self.save = self.factor_name[:-4] + '_ic' + self.file_name[31:-4] + '.csv'
             else:
-                self.save = self.factor_name[:-4] + '_ic' + self.file_name[4:-12] + '.pkl'
+                self.save = self.factor_name[:-4] + '_ic' + self.file_name[4:-12] + '.csv'
         else:
             if self.neutral == 0:
-                self.save = self.factor_name[:-4] + '_rankic' + self.file_name[31:]
+                self.save = self.factor_name[:-4] + '_rankic' + self.file_name[31:-4] + '.csv'
             else:
-                self.save = self.factor_name[:-4] + '_rankic' + self.file_name[4:-12] + '.pkl'
+                self.save = self.factor_name[:-4] + '_rankic' + self.file_name[4:-12] + '.csv'
         # 数据输出
-        self.result.to_pickle(self.save_indir + self.save)
+        self.result.to_csv(self.save_indir + self.save)
         print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
@@ -99,12 +100,8 @@ if __name__ == '__main__':
                   'all_band_adjvwap_hh_price_label10.pkl',
                   'all_band_adjvwap_hh_price_label20.pkl',
                   'all_band_adjvwap_hh_price_label60.pkl']
-    # file_names = ['ret_1_neutral.pkl',
-    #               'ret_5_neutral.pkl',
-    #               'ret_10_neutral.pkl',
-    #               'ret_20_neutral.pkl',
-    #               'ret_60_neutral.pkl']
-    factor_names = os.listdir(factor_indir)
+    # factor_names = os.listdir(factor_indir)
+    factor_names = ['factor_price_fr0.pkl']
 
     method = 'IC'
     neutral = 0
@@ -125,3 +122,9 @@ if __name__ == '__main__':
     #     for file_name in file_names:
     #         ic = PerfIc(file_indir, factor_indir, save_indir, file_name, factor_name, method, neutral)
     #         ic.runflow()
+
+    # file_names = ['ret_1_neutral.pkl',
+    #               'ret_5_neutral.pkl',
+    #               'ret_10_neutral.pkl',
+    #               'ret_20_neutral.pkl',
+    #               'ret_60_neutral.pkl']
