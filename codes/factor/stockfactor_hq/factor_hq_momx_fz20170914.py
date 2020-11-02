@@ -4,7 +4,7 @@ import time
 
 
 # 因子：
-class FactorX(object):
+class FactorMomx(object):
 
     def __init__(self, file_indir, save_indir, file_name):
         self.file_indir = file_indir
@@ -14,40 +14,38 @@ class FactorX(object):
 
     def filein(self):
         t = time.time()
-        # 股票5分钟数据
+        # 股票1小时数据
         self.data = pd.read_pickle(self.file_indir + self.file_name)
         print('filein using time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
+        # 排序
+        self.data.sort_values(by=['s_info_windcode', 'trade_dt', 'bargaintime'], inplace=True)
         # 去除nan
         self.data_dropna = self.data.dropna().copy()
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
-    def method(self, data):
-        temp = data.copy()
-        # 因子算法
-
-        result = np.nan
-        result1 = np.nan
-        return result, result1
-
     def compute(self):
         t = time.time()
-        self.result = self.data.groupby(['s_info_windcode', 'trade_dt'])\
-                               .apply(self.method)\
-                               .apply(pd.Series)\
-                               .reset_index()\
-                               .rename(columns={0: 'x1', 1: 'x2'})
+        self.data_mom = self.data_dropna[0::4].copy()
+        self.data_mom['mom1'] = (self.data_mom.closeprice / self.data_mom.openprice - 1) * 100
+        self.data_mom['mom2'] = (self.data_dropna[1::4].closeprice / self.data_dropna[1::4].openprice - 1).values * 100
+        self.data_mom['mom3'] = (self.data_dropna[2::4].closeprice / self.data_dropna[2::4].openprice - 1).values * 100
+        self.data_mom['mom4'] = (self.data_dropna[3::4].closeprice / self.data_dropna[3::4].openprice - 1).values * 100
         print('compute using time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
         # 数据输出
-        item1 = ['trade_dt', 's_info_windcode', 'x1']
-        self.result[item1].to_pickle(self.save_indir + 'factor_hq_x1_' + self.file_name[17:21] + '.pkl')
-        item2 = ['trade_dt', 's_info_windcode', 'x2']
-        self.result[item2].to_pickle(self.save_indir + 'factor_hq_x2_' + self.file_name[17:21] + '.pkl')
+        item = ['trade_dt', 's_info_windcode', 'mom1']
+        self.data_mom[item].to_pickle(self.save_indir + 'factor_hq_mom1_' + self.file_name[17:21] + '.pkl')
+        item = ['trade_dt', 's_info_windcode', 'mom2']
+        self.data_mom[item].to_pickle(self.save_indir + 'factor_hq_mom2_' + self.file_name[17:21] + '.pkl')
+        item = ['trade_dt', 's_info_windcode', 'mom3']
+        self.data_mom[item].to_pickle(self.save_indir + 'factor_hq_mom3_' + self.file_name[17:21] + '.pkl')
+        item = ['trade_dt', 's_info_windcode', 'mom4']
+        self.data_mom[item].to_pickle(self.save_indir + 'factor_hq_mom4_' + self.file_name[17:21] + '.pkl')
         print('fileout using time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
@@ -63,14 +61,14 @@ class FactorX(object):
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'
-    file_names = ['all_store_hqdata_2012_5_derive.pkl', 'all_store_hqdata_2013_5_derive.pkl',
-                  'all_store_hqdata_2014_5_derive.pkl', 'all_store_hqdata_2015_5_derive.pkl',
-                  'all_store_hqdata_2016_5_derive.pkl', 'all_store_hqdata_2017_5_derive.pkl',
-                  'all_store_hqdata_2018_5_derive.pkl', 'all_store_hqdata_2019_5_derive.pkl']
+    file_names = ['all_store_hqdata_2012_5_1h.pkl', 'all_store_hqdata_2013_5_1h.pkl',
+                  'all_store_hqdata_2014_5_1h.pkl', 'all_store_hqdata_2015_5_1h.pkl',
+                  'all_store_hqdata_2016_5_1h.pkl', 'all_store_hqdata_2017_5_1h.pkl',
+                  'all_store_hqdata_2018_5_1h.pkl', 'all_store_hqdata_2019_5_1h.pkl']
 
     for file_name in file_names:
-        fx = FactorX(file_indir, save_indir, file_name)
-        fx.runflow()
+        momx = FactorMomx(file_indir, save_indir, file_name)
+        momx.runflow()
 
     def merge_data(factor_name, names):
         readin_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'
@@ -87,10 +85,18 @@ if __name__ == '__main__':
         item = ['trade_dt', 's_info_windcode', factor_name]
         result[item].to_pickle(saveout_indir + 'factor_hq_' + factor_name + '.pkl')
 
-    factor_name = 'x1'
+    factor_name = 'mom1'
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)
 
-    factor_name = 'x2'
+    factor_name = 'mom2'
+    names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
+    merge_data(factor_name, names)
+
+    factor_name = 'mom3'
+    names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
+    merge_data(factor_name, names)
+
+    factor_name = 'mom4'
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)

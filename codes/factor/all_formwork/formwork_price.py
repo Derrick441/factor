@@ -35,8 +35,8 @@ class FactorX(object):
         t = time.time()
         # 因子计算
         self.factor_name = ''
-        self.temp_result = self.data_dropna.groupby('s_info_windcode') \
-                                           .apply(self.method, 20, self.factor_name) \
+        self.temp_result = self.data_dropna.groupby('s_info_windcode')\
+                                           .apply(self.method, 20, self.factor_name)\
                                            .reset_index()
         print('compute running time:%10.4fs' % (time.time() - t))
 

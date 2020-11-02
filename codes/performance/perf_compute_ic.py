@@ -101,7 +101,7 @@ if __name__ == '__main__':
                   'all_band_adjvwap_hh_price_label20.pkl',
                   'all_band_adjvwap_hh_price_label60.pkl']
     # factor_names = os.listdir(factor_indir)
-    factor_names = ['factor_price_fr0.pkl']
+    factor_names = ['factor_hq_mom2.pkl', 'factor_hq_mom3.pkl', 'factor_hq_mom4.pkl']
 
     method = 'IC'
     neutral = 0

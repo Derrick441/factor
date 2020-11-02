@@ -39,7 +39,7 @@ class PerfIc(object):
         self.data.dropna(inplace=True)
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
-    def perf_single_ic(self, data, m):
+    def perf_ic(self, data, m):
         temp = data.copy()
         # IC
         if m == 'IC':
@@ -54,7 +54,7 @@ class PerfIc(object):
         t = time.time()
         # 计算每期因子的ic或rank ic值
         self.result = self.data.groupby(level=0)\
-                               .apply(self.perf_single_ic, self.method)\
+                               .apply(self.perf_ic, self.method)\
                                .apply(pd.Series)\
                                .reset_index()
         self.result.sort_values('trade_dt', inplace=True)
