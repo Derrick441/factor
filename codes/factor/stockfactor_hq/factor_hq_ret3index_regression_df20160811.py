@@ -16,9 +16,7 @@ class ReturnThreeIndexR(object):
 
     def filein(self):
         t = time.time()
-        # 5分钟股票数据
         self.data_5min = pd.read_pickle(self.file_indir + self.file_name)
-        # 5分钟因子数据
         self.mkt_5min = pd.read_pickle(self.factor_indir + 'factor_mkt_5min_' + self.file_name[17:21] + '.pkl')
         self.smb_5min = pd.read_pickle(self.factor_indir + 'factor_smb_5min_' + self.file_name[17:21] + '.pkl')
         self.hml_5min = pd.read_pickle(self.factor_indir + 'factor_hml_5min_' + self.file_name[17:21] + '.pkl')
@@ -26,15 +24,13 @@ class ReturnThreeIndexR(object):
 
     def datamanage(self):
         t = time.time()
-        # 数据合并
         self.data = pd.merge(self.data_5min, self.mkt_5min, how='left')
         self.data = pd.merge(self.data, self.smb_5min, how='left')
         self.data = pd.merge(self.data, self.hml_5min, how='left')
-        # 去除nan
         self.data_dropna = self.data.dropna().copy()
         print('datamanage using time:%10.4fs' % (time.time() - t))
 
-    def regress(self, data, y, x):
+    def method(self, data, y, x):
         Y = data[y]
         X = data[x]
         X['intercept'] = 1
@@ -45,7 +41,7 @@ class ReturnThreeIndexR(object):
     def compute(self):
         t = time.time()
         self.result = self.data_dropna.groupby(['s_info_windcode', 'trade_dt']) \
-                                      .apply(self.regress, 'change', ['mkt', 'smb', 'hml'])\
+                                      .apply(self.method, 'change', ['mkt', 'smb', 'hml'])\
                                       .apply(pd.Series)\
                                       .reset_index()\
                                       .rename(columns={0: 'Dvol', 1: 'Dskew', 2: 'Dkurt'})
@@ -53,11 +49,12 @@ class ReturnThreeIndexR(object):
 
     def fileout(self):
         t = time.time()
-        # 数据输出
         item1 = ['trade_dt', 's_info_windcode', 'Dvol']
         self.result[item1].to_pickle(self.save_indir + 'factor_hq_Dvol_' + self.file_name[17:21] + '.pkl')
+
         item2 = ['trade_dt', 's_info_windcode', 'Dskew']
         self.result[item2].to_pickle(self.save_indir + 'factor_hq_Dskew_' + self.file_name[17:21] + '.pkl')
+
         item3 = ['trade_dt', 's_info_windcode', 'Dkurt']
         self.result[item3].to_pickle(self.save_indir + 'factor_hq_Dkurt_' + self.file_name[17:21] + '.pkl')
         print('fileout using time:%10.4fs' % (time.time() - t))

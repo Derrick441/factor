@@ -14,20 +14,16 @@ class FactorX(object):
 
     def filein(self):
         t = time.time()
-        # 股票5分钟数据
         self.data = pd.read_pickle(self.file_indir + self.file_name)
         print('filein using time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
-        # 去除nan
         self.data_dropna = self.data.dropna().copy()
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
     def method(self, data):
         temp = data.copy()
-        # 因子算法
-
         result = np.nan
         result1 = np.nan
         return result, result1
@@ -43,9 +39,9 @@ class FactorX(object):
 
     def fileout(self):
         t = time.time()
-        # 数据输出
         item1 = ['trade_dt', 's_info_windcode', 'x1']
         self.result[item1].to_pickle(self.save_indir + 'factor_hq_x1_' + self.file_name[17:21] + '.pkl')
+
         item2 = ['trade_dt', 's_info_windcode', 'x2']
         self.result[item2].to_pickle(self.save_indir + 'factor_hq_x2_' + self.file_name[17:21] + '.pkl')
         print('fileout using time:%10.4fs' % (time.time() - t))

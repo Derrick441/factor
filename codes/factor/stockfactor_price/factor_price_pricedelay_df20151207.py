@@ -17,29 +17,24 @@ class PriceDelay(object):
 
     def filein(self):
         t = time.time()
-        # 股票日数据
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
-        # zz500数据
         self.zz500 = pd.read_pickle('D:\\wuyq02\\develop\\python\\data\\developflow\\zz500\\zz500_indexprice.pkl')
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
-        # 计算市场收益率及滞后项
         self.zz500.reset_index(inplace=True)
         self.zz500['mkt'] = self.zz500['s_dq_change'] / self.zz500['s_dq_preclose'] * 100
         self.zz500['mkt1'] = self.zz500['mkt'].shift(1)
         self.zz500['mkt2'] = self.zz500['mkt'].shift(2)
         self.zz500['mkt3'] = self.zz500['mkt'].shift(3)
-        # 合并
         self.data_sum = pd.merge(self.all_data[['trade_dt', 's_info_windcode', 's_dq_pctchange']],
                                  self.zz500[['trade_dt', 'mkt', 'mkt1', 'mkt2', 'mkt3']],
                                  how='left')
-        # 去除nan
         self.data_dropna = self.data_sum.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
-    def roll_regress(self, data, perid):
+    def method(self, data, perid):
         t = time.time()
         temp = data.copy()
         num = len(data)
@@ -57,17 +52,14 @@ class PriceDelay(object):
 
     def compute(self):
         t = time.time()
-        # 每股滚动回归计算价格时滞
         self.temp_result = self.data_dropna.groupby(['s_info_windcode'])\
-                                           .apply(self.roll_regress, 20)\
+                                           .apply(self.method, 20)\
                                            .reset_index()
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
-        # 数据对齐
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
-        # 输出到factor文件夹的stockfactor中
         item = ['trade_dt', 's_info_windcode', 'pricedelay']
         self.result[item].to_pickle(self.save_indir + 'factor_price_pricedelay.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))

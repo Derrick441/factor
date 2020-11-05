@@ -12,22 +12,15 @@ class FactorX(object):
 
     def filein(self):
         t = time.time()
-        # 股票日数据
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
-        # 数据合并
-        # self.data = pd.merge(self.xx, self.xx, how='left')
-        # 去除空值
-        # self.data_dropna = self.data.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
     def method(self, data, perid):
         temp = data.copy()
-        # 因子算法
-
         result = np.nan
         return result
 
@@ -42,9 +35,7 @@ class FactorX(object):
 
     def fileout(self):
         t = time.time()
-        # 数据对齐
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
-        # 输出到factor文件夹的stockfactor中
         item = ['trade_dt', 's_info_windcode', self.factor_name]
         self.result[item].to_pickle(self.save_indir + 'factor_price_' + self.factor_name + '.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))

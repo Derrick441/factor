@@ -20,22 +20,16 @@ class PerfIc(object):
 
     def filein(self):
         t = time.time()
-        # 从dataflow中取收益数据
         self.ret = pd.read_pickle(self.file_indir + self.file_name)
-        # 从factor中取因子数据
         self.fac = pd.read_pickle(self.factor_indir + self.factor_name)
         print('filein running time:%10.4fs' % (time.time() - t))
 
     def datamanage(self):
         t = time.time()
-        # 收益率reset_index
         self.ret_reset = self.ret.reset_index().rename(columns={0: 'ret'})
-        # 数据合并
         self.data = pd.merge(self.ret_reset, self.fac, how='left')
-        # 排序、设index
         self.data.sort_values(by=['trade_dt', 's_info_windcode'], inplace=True)
         self.data.set_index(['trade_dt', 's_info_windcode'], inplace=True)
-        # 去除nan
         self.data.dropna(inplace=True)
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
@@ -52,10 +46,8 @@ class PerfIc(object):
 
     def compute(self):
         t = time.time()
-        # ic名
         self.fac_name = self.fac.columns[-1]
         self.ic_name = self.fac_name + '_' + self.method
-        # 计算每期因子的ic或rank ic值
         self.result = self.data.groupby(level=0)\
                                .apply(self.perf_single_ic, self.method)\
                                .reset_index()\
@@ -101,7 +93,7 @@ if __name__ == '__main__':
                   'all_band_adjvwap_hh_price_label20.pkl',
                   'all_band_adjvwap_hh_price_label60.pkl']
     # factor_names = os.listdir(factor_indir)
-    factor_names = ['factor_hq_mom2.pkl', 'factor_hq_mom3.pkl', 'factor_hq_mom4.pkl']
+    factor_names = ['factor_price_momo.pkl', 'factor_price_nmom.pkl']
 
     method = 'IC'
     neutral = 0

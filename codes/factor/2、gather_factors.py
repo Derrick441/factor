@@ -36,13 +36,11 @@ class FactorAll(object):
 
     def filein(self):
         t = time.time()
-        # 读入因子
         self.factor = self.factor_read(self.file_indir, self.file_names)
         print('filein running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
-        # 数据输出（因子之前已数据对齐，所以不再数据对齐）
         self.factor.to_pickle(self.save_indir + self.save_name)
         print('fileout running time:%10.4fs' % (time.time() - t))
 

@@ -15,18 +15,14 @@ class Spreadbias1(object):
 
     def filein(self):
         t = time.time()
-        # 股票日数据
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
-        # self.all_data = self.all_data[self.all_data['trade_dt'] > '20180801']
         print('filein running time:%10.4fs' % (time.time() - t))
 
     def datamanage(self):
         t = time.time()
-        # 股价、涨幅数据
         self.all_data['s_dq_close'] = self.all_data['s_dq_close'] * self.all_data['s_dq_adjfactor']
         self.price = self.all_data[['trade_dt', 's_info_windcode', 's_dq_close']].copy()
         self.change = self.all_data[['trade_dt', 's_info_windcode', 's_dq_pctchange']].copy()
-        # 数据pivot
         self.price_pivot = self.price.pivot('trade_dt', 's_info_windcode', 's_dq_close')
         self.change_pivot = self.change.pivot('trade_dt', 's_info_windcode', 's_dq_pctchange')
         print('datamanage running time:%10.4fs' % (time.time() - t))
@@ -67,11 +63,9 @@ class Spreadbias1(object):
 
     def compute(self):
         t = time.time()
-        # 全部交易日
         dates = self.change_pivot.index
         dates_num = len(dates)
         self.refprice = []
-        # 逐日计算每股参考价格
         for i in range(250, dates_num):
             # 当前交易日
             print(dates[i - 1])
@@ -87,24 +81,22 @@ class Spreadbias1(object):
         # 参考价格数据合并
         self.refprice = pd.concat(self.refprice)
         # 数据unstack
-        self.refprice_unstack = self.refprice.unstack() \
-            .reset_index() \
-            .rename(columns={'level_1': 'trade_dt', 0: 'refprice'})
+        self.refprice_unstack = self.refprice.unstack()\
+                                             .reset_index()\
+                                             .rename(columns={'level_1': 'trade_dt', 0: 'refprice'})
         # merge参考价格、股价
         self.data_sum = pd.merge(self.refprice_unstack, self.price, how='left')
         # 计算对数价差
         self.data_sum['pricespread'] = np.log(self.data_sum['s_dq_close']) - np.log(self.data_sum['refprice'])
         # 计算价差偏离度
-        self.temp_result = self.data_sum.groupby('s_info_windcode') \
-            .apply(self.roll_t, 'pricespread', 60) \
-            .reset_index()
+        self.temp_result = self.data_sum.groupby('s_info_windcode')\
+                                        .apply(self.roll_t, 'pricespread', 60)\
+                                        .reset_index()
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
-        # 数据对齐
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
-        # 输出到factor文件夹的stockfactor中
         item = ['trade_dt', 's_info_windcode', 'spreadbias1']
         self.result[item].to_pickle(self.save_indir + 'factor_price_spreadbias1.pkl')
         print('fileout running time:%10.4fs' % (time.time() - t))

@@ -15,17 +15,15 @@ class DayinSevenIndex(object):
 
     def filein(self):
         t = time.time()
-        # 输入数据
         self.data = pd.read_pickle(self.file_indir + self.file_name)
         print('filein using time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
-        # 去除nan
         self.data_dropna = self.data.dropna().copy()
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
-    def sevenindex(self, data):
+    def method(self, data):
         rvol = np.std(data['change'], ddof=1)
         rskew = data['change'].skew()
         rkurt = data['change'].kurt()
@@ -39,7 +37,7 @@ class DayinSevenIndex(object):
     def compute(self):
         t = time.time()
         self.result = self.data.groupby(['s_info_windcode', 'trade_dt']) \
-                               .apply(self.sevenindex)\
+                               .apply(self.method)\
                                .apply(pd.Series)\
                                .reset_index()\
                                .rename(columns={0: 'rvol', 1: 'rskew', 2: 'rkurt',
@@ -49,7 +47,6 @@ class DayinSevenIndex(object):
 
     def fileout(self):
         t = time.time()
-        # 数据输出
         item1 = ['trade_dt', 's_info_windcode', 'rvol']
         self.result[item1].to_pickle(self.save_indir + 'factor_hq_rvol_' + self.file_name[17:21] + '.pkl')
         item2 = ['trade_dt', 's_info_windcode', 'rskew']

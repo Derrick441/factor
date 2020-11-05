@@ -12,34 +12,22 @@ class ReturnTwoIndex1(object):
 
     def filein(self):
         t = time.time()
-        # 股票日数据
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
-        # 去除nan
         self.data_dropna = self.all_data.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
-    def overnight_return(self, data):
-        temp = data.copy()
-        temp['onr'] = (temp['s_dq_open'] - temp['s_dq_preclose']) / temp['s_dq_preclose'] * 100
-        return pd.DataFrame({'trade_dt': temp.trade_dt.values, 'onr': temp['onr'].values})
-
     def compute(self):
         t = time.time()
-        # 隔夜收益计算
-        self.temp_result = self.all_data.groupby('s_info_windcode') \
-                                        .apply(self.overnight_return) \
-                                        .reset_index()
+        self.all_data['onr'] = self.all_data['s_dq_open'] / self.all_data['s_dq_preclose'] - 1
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
-        # 数据对齐
-        self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
-        # 输出到factor文件夹的stockfactor中
+        self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.all_data, how='left')
         item = ['trade_dt', 's_info_windcode', 'onr']
         self.result[item].to_pickle(self.save_indir + 'factor_price_onr.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))

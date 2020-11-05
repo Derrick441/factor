@@ -14,34 +14,27 @@ class AdjTurnover(object):
 
     def filein(self):
         t = time.time()
-        # 股票日数据
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
-        # 0值转空值
         item = ['s_dq_freeturnover', 's_dq_freemv']
         self.all_data[item] = self.all_data[item].replace(0, np.nan)
-        # 对数化
         self.all_data['ln_turnover'] = np.log(self.all_data['s_dq_freeturnover'])
         self.all_data['ln_freemv'] = np.log(self.all_data['s_dq_freemv'])
-        # 数据选取
         self.data = self.all_data[['trade_dt', 's_info_windcode', 'ln_turnover', 'ln_freemv']].copy()
-        # 去除nan
         self.data_dropna = self.data.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
-    def roll_regress(self, data, perid):
+    def method(self, data, perid):
         t = time.time()
         temp = data.copy()
         num = len(temp)
-        if num > perid:
+        if num >= perid:
             temp['intercept'] = 1
             item = ['intercept', 'ln_freemv']
-            # 滚动回归
             model = regroll.RollingOLS(temp['ln_turnover'], temp[item], window=perid).fit()
-            # 根据回归参数计算调整换手率
             coef = model.params
             temp['adjturnover'] = temp['ln_turnover']-(coef.intercept*1+coef.ln_freemv*temp['ln_freemv'])
             print(time.time() - t)
@@ -51,17 +44,14 @@ class AdjTurnover(object):
 
     def compute(self):
         t = time.time()
-        # 滚动回归计算残差作为调整换手率
         self.temp_result = self.data_dropna.groupby('s_info_windcode')\
-                                           .apply(self.roll_regress, 20)\
+                                           .apply(self.method, 20)\
                                            .reset_index()
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
-        # 数据对齐
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
-        # 数据输出
         item = ['trade_dt', 's_info_windcode', 'adjturnover']
         self.result[item].to_pickle(self.save_indir + 'factor_price_adjturnover.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))

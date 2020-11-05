@@ -14,18 +14,15 @@ class ReturnThreeIndexD(object):
 
     def filein(self):
         t = time.time()
-        # 输入股价和成交量数据
         self.data = pd.read_pickle(self.file_indir + self.file_name)
         print('filein using time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
-        # 去除nan
         self.data_dropna = self.data.dropna().copy()
         print('datamanage using time:%10.4fs' % (time.time() - t))
 
-    # 日内收益分解
-    def decompose(self, data):
+    def method(self, data):
         temp = data.copy()
 
         median = np.median(temp['change'])
@@ -42,9 +39,8 @@ class ReturnThreeIndexD(object):
 
     def compute(self):
         t = time.time()
-        # 计算arpp
         self.result = self.data_dropna.groupby(['s_info_windcode', 'trade_dt'])\
-                                      .apply(self.decompose)\
+                                      .apply(self.method)\
                                       .apply(pd.Series)\
                                       .reset_index()\
                                       .rename(columns={0: 'mild', 1: 'rrev'})
@@ -52,9 +48,9 @@ class ReturnThreeIndexD(object):
 
     def fileout(self):
         t = time.time()
-        # 数据输出
         item1 = ['trade_dt', 's_info_windcode', 'mild']
         self.result[item1].to_pickle(self.save_indir + 'factor_hq_mild_' + self.file_name[17:21] + '.pkl')
+
         item2 = ['trade_dt', 's_info_windcode', 'rrev']
         self.result[item2].to_pickle(self.save_indir + 'factor_hq_rrev_' + self.file_name[17:21] + '.pkl')
         print('fileout using time:%10.4fs' % (time.time() - t))

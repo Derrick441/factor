@@ -16,32 +16,27 @@ class NeweyWestAdj(object):
 
     def filein(self):
         t = time.time()
-        # 股票日数据
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
-        # 7因子数据
         self.fac = pd.read_pickle(self.factor_indir + self.factor)
         print('filein using time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
-        # 因子名保留、数据因子名调整
         self.fac_name = self.fac.columns[-1]
         print(self.fac_name)
         self.fac = self.fac.rename(columns={self.fac_name: 'factor'})
 
-        # 因子和收益率合并
         item = ['trade_dt', 's_info_windcode', 's_dq_pctchange']
         self.data_sum = pd.merge(self.fac, self.all_data[item], how='left')
-        # 去除nan
         self.data_dropna = self.data_sum.dropna().copy()
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
-    def neweywest_stde(self, data, perid, factor_name):
+    def method(self, data, perid, factor_name):
         t = time.time()
         temp = data.copy()
         name = 'sd' + factor_name
         num = len(temp)
-        if num > perid:
+        if num >= perid:
             result = [None for i in range(perid)]
             temp['intercept'] = 1
             item = ['intercept', 'factor']
@@ -68,7 +63,7 @@ class NeweyWestAdj(object):
     def compute(self):
         t = time.time()
         self.stde = self.data_dropna.groupby('s_info_windcode')\
-                                    .apply(self.neweywest_stde, 20, self.fac_name)\
+                                    .apply(self.method, 20, self.fac_name)\
                                     .reset_index()
         if self.fac_name in ['rvol', 'vvol']:
             self.mean = self.data_dropna.groupby('s_info_windcode')\
@@ -79,9 +74,7 @@ class NeweyWestAdj(object):
 
     def fileout(self):
         t = time.time()
-        # 数据对齐
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.stde, how='left')
-        # 数据输出
         item = ['trade_dt', 's_info_windcode', 'sd' + self.fac_name]
         self.result[item].to_pickle(self.factor_indir + 'factor_hq_sd' + self.fac_name + '.pkl')
         print('fileout using time:%10.4fs' % (time.time()-t))

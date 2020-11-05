@@ -22,11 +22,8 @@ class TwoFactor(object):
 
     def minute_factor(self, data, index):
         num = int(len(data) / 3)
-        # 取流通市值/估值最小1/3股票的收益率均值
         low = data.sort_values(by=index).iloc[:num, :].change.mean()
-        # 取流通市值/估值最大1/3股票的收益率均值
         high = data.sort_values(by=index).iloc[-num:, :].change.mean()
-        # 市值因子
         return low - high
 
     def compute(self):
@@ -45,7 +42,6 @@ class TwoFactor(object):
 
     def fileout(self):
         t = time.time()
-        # 数据输出
         self.result1.to_pickle(self.save_indir + 'factor_smb_5min_' + self.file_name[17:21] + '.pkl')
         self.result2.to_pickle(self.save_indir + 'factor_hml_5min_' + self.file_name[17:21] + '.pkl')
         print('fileout using time:%10.4fs' % (time.time() - t))

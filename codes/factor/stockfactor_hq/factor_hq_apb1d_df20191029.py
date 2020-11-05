@@ -14,17 +14,15 @@ class Apb1d(object):
 
     def filein(self):
         t = time.time()
-        # 股票5分钟数据
         self.data = pd.read_pickle(self.file_indir + self.file_name)
         print('filein using time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
-        # 去除nan
         self.data_dropna = self.data.dropna().copy()
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
-    def oneday_apb(self, data, index):
+    def method(self, data, index):
         temp = data.copy()
         # 平均价
         mean = temp[index].mean()
@@ -40,18 +38,16 @@ class Apb1d(object):
 
     def compute(self):
         t = time.time()
-        # 5分钟成交量加权平均价
         self.data_dropna['vwap'] = self.data_dropna['amount'] / self.data_dropna['volume']*10
         # 计算apb
         self.result = self.data_dropna.groupby(['s_info_windcode', 'trade_dt'])\
-                                      .apply(self.oneday_apb, 'vwap')\
+                                      .apply(self.method, 'vwap')\
                                       .reset_index()\
                                       .rename(columns={0: 'apb1d'})
         print('compute using time:%10.4fs' % (time.time()-t))
 
     def fileout(self):
         t = time.time()
-        # 数据输出
         item = ['trade_dt', 's_info_windcode', 'apb1d']
         self.result[item].to_pickle(self.save_indir + 'factor_hq_apb1d_' + self.file_name[17:21] + '.pkl')
         print('fileout using time:%10.4fs' % (time.time()-t))

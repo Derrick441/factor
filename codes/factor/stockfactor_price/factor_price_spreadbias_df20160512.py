@@ -14,17 +14,13 @@ class Spreadbias(object):
 
     def filein(self):
         t = time.time()
-        # 股票日数据
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
-        # self.all_data = self.all_data[self.all_data['trade_dt'] > '20180801']
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
-        # 股价、涨幅数据
         self.price = self.all_data[['trade_dt', 's_info_windcode', 's_dq_close']].copy()
         self.change = self.all_data[['trade_dt', 's_info_windcode', 's_dq_pctchange']].copy()
-        # 数据pivot
         self.price_pivot = self.price.pivot('trade_dt', 's_info_windcode', 's_dq_close')
         self.change_pivot = self.change.pivot('trade_dt', 's_info_windcode', 's_dq_pctchange')
         print('datamanage running time:%10.4fs' % (time.time() - t))
@@ -65,7 +61,6 @@ class Spreadbias(object):
 
     def compute(self):
         t = time.time()
-        # 全部交易日
         dates = self.change_pivot.index
         dates_num = len(dates)
         self.refprice = []
@@ -100,9 +95,7 @@ class Spreadbias(object):
 
     def fileout(self):
         t = time.time()
-        # 数据对齐
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
-        # 输出到factor文件夹的stockfactor中
         item = ['trade_dt', 's_info_windcode', 'spreadbias']
         self.result[item].to_pickle(self.save_indir + 'factor_price_spreadbias.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))

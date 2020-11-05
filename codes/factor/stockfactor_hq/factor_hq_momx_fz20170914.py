@@ -14,15 +14,12 @@ class FactorMomx(object):
 
     def filein(self):
         t = time.time()
-        # 股票1小时数据
         self.data = pd.read_pickle(self.file_indir + self.file_name)
         print('filein using time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
-        # 排序
         self.data.sort_values(by=['s_info_windcode', 'trade_dt', 'bargaintime'], inplace=True)
-        # 去除nan
         self.data_dropna = self.data.dropna().copy()
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
@@ -37,13 +34,15 @@ class FactorMomx(object):
 
     def fileout(self):
         t = time.time()
-        # 数据输出
         item = ['trade_dt', 's_info_windcode', 'mom1']
         self.data_mom[item].to_pickle(self.save_indir + 'factor_hq_mom1_' + self.file_name[17:21] + '.pkl')
+
         item = ['trade_dt', 's_info_windcode', 'mom2']
         self.data_mom[item].to_pickle(self.save_indir + 'factor_hq_mom2_' + self.file_name[17:21] + '.pkl')
+
         item = ['trade_dt', 's_info_windcode', 'mom3']
         self.data_mom[item].to_pickle(self.save_indir + 'factor_hq_mom3_' + self.file_name[17:21] + '.pkl')
+
         item = ['trade_dt', 's_info_windcode', 'mom4']
         self.data_mom[item].to_pickle(self.save_indir + 'factor_hq_mom4_' + self.file_name[17:21] + '.pkl')
         print('fileout using time:%10.4fs' % (time.time() - t))

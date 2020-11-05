@@ -14,44 +14,35 @@ class Bi(object):
 
     def filein(self):
         t = time.time()
-        # 股票日数据
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
-        # 读入ivr、adjturnover数据
         self.ivr = pd.read_pickle(self.factor_indir + self.factor_names[0])
         self.adt = pd.read_pickle(self.factor_indir + self.factor_names[1])
         print('filein running time:%10.4fs' % (time.time()-t))
 
     def datamanage(self):
         t = time.time()
-        # 数据合并
         self.data = pd.merge(self.ivr, self.adt, how='left')
-        # 去除空值
         self.data_dropna = self.data.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
-    def quantiles_mean(self, data, factor1, factor2):
+    def method(self, data, factor1, factor2):
         temp = data.copy()
         num = len(temp)
-
         q_ivr = temp[factor1].rank()/num
         q_adt = temp[factor2].rank()/num
-
         result = pd.DataFrame({'s_info_windcode': temp.s_info_windcode, 'bi': (q_ivr + q_adt)/2})
         return result
 
     def compute(self):
         t = time.time()
-        # 计算bi
         self.temp_result = self.data_dropna.groupby('trade_dt')\
-                                           .apply(self.quantiles_mean, 'ivr', 'adjturnover')\
+                                           .apply(self.method, 'ivr', 'adjturnover')\
                                            .reset_index()
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
-        # 数据对齐
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
-        # 输出到factor文件夹的stockfactor中
         item = ['trade_dt', 's_info_windcode', 'bi']
         self.result[item].to_pickle(self.save_indir + 'factor_price_bi.pkl')
         print('fileout running time:%10.4fs' % (time.time() - t))
