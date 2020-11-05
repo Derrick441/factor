@@ -3,7 +3,7 @@ import numpy as np
 import time
 
 
-# 因子：
+# 因子：聪明钱因子基于5分钟数据
 class FactorSmartMoney5(object):
 
     def __init__(self, file_indir, save_indir, file_name):
