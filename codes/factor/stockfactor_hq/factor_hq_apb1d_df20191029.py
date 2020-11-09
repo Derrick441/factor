@@ -4,7 +4,7 @@ import time
 
 
 # 日均价偏差apb: 5分钟成交量加权平均价的平均价/成交量加权的5分钟成交量加权平均价的平均价
-class Apb1d(object):
+class Apb(object):
 
     def __init__(self, file_indir, save_indir, file_name):
         self.file_indir = file_indir
@@ -71,8 +71,8 @@ if __name__ == '__main__':
                   'all_store_hqdata_2018_5_derive.pkl', 'all_store_hqdata_2019_5_derive.pkl']
 
     for file_name in file_names:
-        apb1 = Apb1d(file_indir, save_indir, file_name)
-        apb1.runflow()
+        apb = Apb(file_indir, save_indir, file_name)
+        apb.runflow()
 
     def merge_data(factor_name, names):
         readin_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'

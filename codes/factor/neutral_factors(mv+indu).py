@@ -2,10 +2,11 @@ import pandas as pd
 import numpy as np
 import time
 import statsmodels.api as sm
+import os
 
 
 # 因子中性化
-class FactorFR0(object):
+class FactorNeutral(object):
 
     def __init__(self, file_indir, factor_indir, save_indir, file_names, factor_name):
         self.file_indir = file_indir
@@ -22,19 +23,14 @@ class FactorFR0(object):
         self.factor = pd.read_pickle(self.factor_indir + self.factor_name)
         print('filein running time:%10.4fs' % (time.time() - t))
 
-    def mom20(self, data):
-        temp = data.copy()
-        result = 1
-        for i in temp:
-            result = result * (1+i/100)
-        return (result-1)*100
-
     def datamanage(self):
         t = time.time()
-        item = ['trade_dt', 's_info_windcode', 's_dq_freemv', 's_dq_pctchange', 's_dq_freeturnover']
-        self.data_need = self.all_data[item]
+        self.fac_name = self.factor.columns[-1]
+
+        self.mv = self.all_data[['trade_dt', 's_info_windcode', 's_dq_freemv']]
         self.indu = self.bandindu[['trade_dt', 's_info_windcode', 'induname1']]
-        self.data_temp = pd.merge(self.data_need, self.indu, how='left')
+
+        self.data_temp = pd.merge(self.mv, self.indu, how='left')
         self.data = pd.merge(self.data_temp, self.factor, how='left')
 
         self.data.set_index(['trade_dt', 's_info_windcode'], inplace=True)
@@ -43,24 +39,11 @@ class FactorFR0(object):
         self.data_dum.reset_index(inplace=True)
         self.induname = [x for x in self.data_dum.columns if 'induname' in x]
 
-        self.data_dum['ln_freemv'] = np.log(self.data_dum['s_dq_freemv'])
-        self.data_dum['mom20'] = self.data_dum.groupby('s_info_windcode')['s_dq_pctchange'] \
-                                              .rolling(20) \
-                                              .apply(self.mom20) \
-                                              .values
-        self.data_dum['std60'] = self.data_dum.groupby('s_info_windcode')['s_dq_pctchange'] \
-                                              .rolling(60) \
-                                              .std() \
-                                              .values
-
         self.data_dum.replace([np.inf, -np.inf], np.nan, inplace=True)
         self.data_dum.dropna(inplace=True)
-        item = ['trade_dt', 's_info_windcode', 'fr',
-                'ln_freemv', 'mom20', 's_dq_freeturnover', 'std60'] + self.induname
-        self.data_dropna = self.data_dum[item]
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
-    def method(self, data, y_item, x_item, name):
+    def neutral(self, data, y_item, x_item, name):
         temp = data.copy()
         y = temp[y_item]
         x = temp[x_item]
@@ -70,18 +53,19 @@ class FactorFR0(object):
 
     def compute(self):
         t = time.time()
-        y_item = ['fr']
-        x_item = ['ln_freemv', 'mom20', 's_dq_freeturnover', 'std60'] + self.induname
-        self.temp_result = self.data_dropna.groupby('trade_dt')\
-                                           .apply(self.method, y_item, x_item, 'fr0')\
-                                           .reset_index()
+        y_item = [self.fac_name]
+        x_item = ['s_dq_freemv'] + self.induname
+        self.fac_name_n = 'neutral_' + self.fac_name
+        self.temp_result = self.data_dum.groupby('trade_dt')\
+                                        .apply(self.neutral, y_item, x_item, self.fac_name_n)\
+                                        .reset_index()
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
-        item = ['trade_dt', 's_info_windcode', 'fr0']
-        self.result[item].to_pickle(self.save_indir + 'factor_price_fr0.pkl')
+        item = ['trade_dt', 's_info_windcode', self.fac_name_n]
+        self.result[item].to_pickle(self.save_indir + 'neutral_' + self.factor_name)
         print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
@@ -97,9 +81,28 @@ class FactorFR0(object):
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
     factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    file_names = ['all_dayindex.pkl', 'all_band_indu.pkl']
-    factor_name = 'factor_price_fr.pkl'
+    save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
 
-    fr0 = FactorFR0(file_indir, factor_indir, save_indir, file_names, factor_name)
-    fr0.runflow()
+    file_names = ['all_dayindex.pkl', 'all_band_indu.pkl']
+
+    # # 中性化全部因子
+    # factor_names = os.listdir(factor_indir)
+    # for factor_name in factor_names:
+    #     fn = FactorNeutral(file_indir, factor_indir, save_indir, file_names, factor_name)
+    #     fn.runflow()
+
+    # # 中性化未中性化的因子
+    # set1 = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'))
+    # temp_set = os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\')
+    # set2 = set([factorname[8:] for factorname in temp_set])
+    # factor_names = set1 - set2
+    #
+    # for factor_name in factor_names:
+    #     fn = FactorNeutral(file_indir, factor_indir, save_indir, file_names, factor_name)
+    #     fn.runflow()
+
+    # 中性化一个因子
+    factor_names = ['factor_price_fr.pkl']
+    for factor_name in factor_names:
+        fn = FactorNeutral(file_indir, factor_indir, save_indir, file_names, factor_name)
+        fn.runflow()

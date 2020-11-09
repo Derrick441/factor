@@ -26,7 +26,6 @@ class FactorMomf(object):
     def datamanage(self):
         t = time.time()
         self.ret = self.ret.reset_index().rename(columns={0: 'ret'})
-        self.data_mom0.rename(columns={'onr': 'mom0'}, inplace=True)
         self.data = pd.merge(self.ret, self.data_mom0, how='left')
         self.data = pd.merge(self.data, self.data_mom1, how='left')
         self.data = pd.merge(self.data, self.data_mom2, how='left')
@@ -81,7 +80,7 @@ if __name__ == '__main__':
     factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
     file_name = 'all_band_adjvwap_hh_price_label20.pkl'
-    factor_names = ['factor_price_onr.pkl',
+    factor_names = ['factor_price_mom0.pkl',
                     'factor_hq_mom1.pkl',
                     'factor_hq_mom2.pkl',
                     'factor_hq_mom3.pkl',

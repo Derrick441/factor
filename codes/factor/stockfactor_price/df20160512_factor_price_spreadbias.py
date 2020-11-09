@@ -20,8 +20,8 @@ class Spreadbias(object):
     def datamanage(self):
         t = time.time()
         self.price = self.all_data[['trade_dt', 's_info_windcode', 's_dq_close']].copy()
-        self.change = self.all_data[['trade_dt', 's_info_windcode', 's_dq_pctchange']].copy()
         self.price_pivot = self.price.pivot('trade_dt', 's_info_windcode', 's_dq_close')
+        self.change = self.all_data[['trade_dt', 's_info_windcode', 's_dq_pctchange']].copy()
         self.change_pivot = self.change.pivot('trade_dt', 's_info_windcode', 's_dq_pctchange')
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
@@ -80,8 +80,8 @@ class Spreadbias(object):
         # 参考价格数据合并
         self.refprice = pd.concat(self.refprice)
         # 数据unstack
-        self.refprice_unstack = self.refprice.unstack() \
-                                             .reset_index() \
+        self.refprice_unstack = self.refprice.unstack()\
+                                             .reset_index()\
                                              .rename(columns={'level_1': 'trade_dt', 0: 'refprice'})
         # merge参考价格、股价
         self.data_sum = pd.merge(self.refprice_unstack, self.price, how='left')

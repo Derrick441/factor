@@ -3,7 +3,7 @@ import numpy as np
 import time
 
 
-# 因子：高频量价相关性因子（均值、标准差、综合）
+# 因子：高频量价相关性因子（均值、标准差）
 class FactorPV(object):
 
     def __init__(self, file_indir, save_indir, file_name):

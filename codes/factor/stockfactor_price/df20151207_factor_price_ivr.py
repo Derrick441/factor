@@ -20,7 +20,7 @@ class Ivr(object):
 
     def daytrade_factor(self, data, index):
         temp = data.copy()
-        num = int(len(temp) / 3)
+        num = int(len(temp)/3)
         low = temp.sort_values(by=index).iloc[:num, :].s_dq_pctchange.mean()
         high = temp.sort_values(by=index).iloc[-num:, :].s_dq_pctchange.mean()
         return low - high

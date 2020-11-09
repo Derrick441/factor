@@ -4,7 +4,7 @@ import time
 
 
 # 5日均价偏差apb: 5日的成交量加权平均价的平均价/5日的成交量加权的成交量加权平均价的平均价
-class ApbNd(object):
+class ApbN(object):
 
     def __init__(self, file_indir, save_indir, file_name):
         self.file_indir = file_indir
@@ -23,9 +23,8 @@ class ApbNd(object):
         self.data_dropna['vwap'] = self.data_dropna['s_dq_amount'] / self.data_dropna['s_dq_volume'] * 10
         print('datamanage running time:%10.4fs' % (time.time()-t))
 
-    def method(self, data, index, weight, perid):
+    def method(self, data, index, weight, perid, name):
         temp = data.copy()
-        name = 'apb' + str(perid) + 'd'
         num = len(temp)
         if num >= perid:
             temp['mean'] = temp[index].rolling(perid).mean()
@@ -44,23 +43,16 @@ class ApbNd(object):
 
     def compute(self):
         t = time.time()
-        self.temp_result_5 = self.data_dropna.groupby('s_info_windcode')\
-                                             .apply(self.method, 'vwap', 's_dq_volume', 5)\
-                                             .reset_index()
-        self.temp_result_20 = self.data_dropna.groupby('s_info_windcode')\
-                                              .apply(self.method, 'vwap', 's_dq_volume', 20)\
-                                              .reset_index()
+        self.temp_result = self.data_dropna.groupby('s_info_windcode')\
+                                           .apply(self.method, 'vwap', 's_dq_volume', 5, 'apb5d')\
+                                           .reset_index()
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
-        self.result_5 = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result_5, how='left')
+        self.result_5 = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
         item = ['trade_dt', 's_info_windcode', 'apb5d']
         self.result_5[item].to_pickle(self.save_indir + 'factor_price_apb5d.pkl')
-
-        self.result_20 = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result_20, how='left')
-        item = ['trade_dt', 's_info_windcode', 'apb20d']
-        self.result_20[item].to_pickle(self.save_indir + 'factor_price_apb20d.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
@@ -78,5 +70,5 @@ if __name__ == '__main__':
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
     file_name = 'all_dayindex.pkl'
 
-    apbn = ApbNd(file_indir, save_indir, file_name)
+    apbn = ApbN(file_indir, save_indir, file_name)
     apbn.runflow()

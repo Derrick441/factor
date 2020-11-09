@@ -17,7 +17,7 @@ class FactorMomo(object):
 
     def datamanage(self):
         t = time.time()
-        self.all_data['onr'] = self.all_data['s_dq_open'] / self.all_data['s_dq_preclose'] - 1
+        self.all_data['mom0'] = self.all_data['s_dq_open'] / self.all_data['s_dq_preclose'] - 1
         self.all_data['s_dq_freeturnover_y'] = self.all_data.groupby('s_info_windcode')['s_dq_freeturnover'].shift(1)
         self.data_dropna = self.all_data.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
@@ -49,7 +49,7 @@ class FactorMomo(object):
 
     def compute(self):
         t = time.time()
-        item = ['s_dq_freeturnover_y', 'onr']
+        item = ['s_dq_freeturnover_y', 'mom0']
         self.intarday_data = self.data_dropna.groupby('s_info_windcode')\
                                              .apply(self.method, 20, item[0], item[1])\
                                              .reset_index()

@@ -28,9 +28,9 @@ class PriceDelay(object):
         self.zz500['mkt1'] = self.zz500['mkt'].shift(1)
         self.zz500['mkt2'] = self.zz500['mkt'].shift(2)
         self.zz500['mkt3'] = self.zz500['mkt'].shift(3)
-        self.data_sum = pd.merge(self.all_data[['trade_dt', 's_info_windcode', 's_dq_pctchange']],
-                                 self.zz500[['trade_dt', 'mkt', 'mkt1', 'mkt2', 'mkt3']],
-                                 how='left')
+        item1 = ['trade_dt', 's_info_windcode', 's_dq_pctchange']
+        item2 = ['trade_dt', 'mkt', 'mkt1', 'mkt2', 'mkt3']
+        self.data_sum = pd.merge(self.all_data[item1], self.zz500[item2], how='left')
         self.data_dropna = self.data_sum.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
@@ -41,8 +41,8 @@ class PriceDelay(object):
         if num > perid:
             temp['intercept'] = 1
             item1 = ['intercept', 'mkt']
-            item2 = ['intercept', 'mkt', 'mkt1', 'mkt2', 'mkt3']
             model1 = regroll.RollingOLS(temp['s_dq_pctchange'], temp[item1], window=perid).fit()
+            item2 = ['intercept', 'mkt', 'mkt1', 'mkt2', 'mkt3']
             model2 = regroll.RollingOLS(temp['s_dq_pctchange'], temp[item2], window=perid).fit()
             temp_result = 1-(model1.rsquared / model2.rsquared)
             print(time.time() - t)
