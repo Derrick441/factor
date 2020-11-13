@@ -3,15 +3,16 @@ import numpy as np
 import time
 
 
+# 根据历史ic矩阵
 class FactorMomf(object):
 
-    def __init__(self, file_indir, factor_indir, save_indir, file_name, factor_names, method):
+    def __init__(self, file_indir, factor_indir, save_indir, file_name, factor_names, m):
         self.file_indir = file_indir
         self.factor_indir = factor_indir
         self.save_indir = save_indir
         self.file_name = file_name
         self.factor_names = factor_names
-        self.method = method
+        self.m = m
 
     def filein(self):
         t = time.time()
@@ -25,7 +26,9 @@ class FactorMomf(object):
 
     def datamanage(self):
         t = time.time()
-        self.ret = self.ret.reset_index().rename(columns={0: 'ret'})
+        self.ret = self.ret.reset_index().rename(columns={0: 'ret_5'})
+        self.data_mom0.sort_values(by=['s_info_windcode', 'trade_dt'], inplace=True)
+        self.data_mom0['mom0_5'] = self.data_mom0.groupby('s_info_windcode')['mom0'].rolling(5).sum().values
         self.data = pd.merge(self.ret, self.data_mom0, how='left')
         self.data = pd.merge(self.data, self.data_mom1, how='left')
         self.data = pd.merge(self.data, self.data_mom2, how='left')
@@ -47,15 +50,16 @@ class FactorMomf(object):
 
     def compute(self):
         t = time.time()
-        item = ['ret', 'mom0', 'mom1', 'mom2', 'mom3', 'mom4']
+        item = ['ret_5', 'mom0_5', 'mom1_5', 'mom2_5', 'mom3_5', 'mom4_5']
         self.IC = self.data_dropna.groupby('trade_dt')\
-                                  .apply(self.method, item, self.method)\
+                                  .apply(self.method, item, self.m)\
                                   .apply(pd.Series)\
                                   .reset_index()
-        self.IC_mean = self.IC[['mom0', 'mom1', 'mom2', 'mom3', 'mom4']].mean()
-        self.IC_cov_inv = np.linalg.inv(np.cov(self.IC[['mom0', 'mom1', 'mom2', 'mom3', 'mom4']].dropna().T))
+        item = ['mom0_5', 'mom1_5', 'mom2_5', 'mom3_5', 'mom4_5']
+        self.IC_mean = self.IC[item].mean()
+        self.IC_cov_inv = np.linalg.inv(np.cov(self.IC[item].dropna().T))
         self.weight = np.dot(self.IC_cov_inv, self.IC_mean)
-        self.data_dropna['momf'] = np.dot(self.data_dropna[['mom0', 'mom1', 'mom2', 'mom3', 'mom4']], self.weight)
+        self.data_dropna['momf'] = np.dot(self.data_dropna[item], self.weight)
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
@@ -79,12 +83,12 @@ if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
     factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    file_name = 'all_band_adjvwap_hh_price_label20.pkl'
+    file_name = 'all_band_adjvwap_hh_price_label5.pkl'
     factor_names = ['factor_price_mom0.pkl',
-                    'factor_hq_mom1.pkl',
-                    'factor_hq_mom2.pkl',
-                    'factor_hq_mom3.pkl',
-                    'factor_hq_mom4.pkl']
+                    'factor_hq_mom1_5.pkl',
+                    'factor_hq_mom2_5.pkl',
+                    'factor_hq_mom3_5.pkl',
+                    'factor_hq_mom4_5.pkl']
     method = 'IC'
 
     momf = FactorMomf(file_indir, factor_indir, save_indir, file_name, factor_names, method)

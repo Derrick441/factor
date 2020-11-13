@@ -3,7 +3,7 @@ import numpy as np
 import time
 
 
-class FactorMomi(object):
+class Factormomo5(object):
 
     def __init__(self, file_indir, save_indir, file_name):
         self.file_indir = file_indir
@@ -17,7 +17,8 @@ class FactorMomi(object):
 
     def datamanage(self):
         t = time.time()
-        self.all_data['tdr'] = self.all_data['s_dq_close'] / self.all_data['s_dq_open'] - 1
+        self.all_data['mom0'] = self.all_data['s_dq_open'] / self.all_data['s_dq_preclose'] - 1
+        self.all_data['s_dq_freeturnover_y'] = self.all_data.groupby('s_info_windcode')['s_dq_freeturnover'].shift(1)
         self.data_dropna = self.all_data.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
@@ -27,12 +28,13 @@ class FactorMomi(object):
         num = len(temp)
         if num >= perid:
             temp.sort_values(by='trade_dt', inplace=True)
-            part1 = [np.nan] * perid
-            part5 = [np.nan] * perid
-            for i in range(perid, num):
+            part1 = [np.nan] * (perid-1)
+            part5 = [np.nan] * (perid-1)
+            for i in range(perid, num+1):
                 temp_data = temp.iloc[i-perid:i, :].sort_values(by=index1)
-                part1.append(np.mean(temp_data[index2][:4]))
-                part5.append(np.mean(temp_data[index2][-4:]))
+                n = int(perid / 5)
+                part1.append(np.mean(temp_data[index2][:n]))
+                part5.append(np.mean(temp_data[index2][-n:]))
             print(time.time() - t)
             return pd.DataFrame({'trade_dt': temp.trade_dt.values,
                                  'part1': part1,
@@ -48,31 +50,31 @@ class FactorMomi(object):
 
     def compute(self):
         t = time.time()
-        item = ['s_dq_freeturnover', 'tdr']
-        self.intarday_data = self.data_dropna.groupby('s_info_windcode')\
-                                             .apply(self.method, 20, item[0], item[1])\
-                                             .reset_index()
+        item = ['s_dq_freeturnover_y', 'mom0']
+        self.overnight_data = self.data_dropna.groupby('s_info_windcode')\
+                                              .apply(self.method, 5, item[0], item[1])\
+                                              .reset_index()
         # 横截面均值、标准差
         item = ['part1', 'part5']
-        self.intarday_meanstd = self.intarday_data.groupby('trade_dt')\
-                                                  .apply(self.mom_meanstd, item[0], item[1])\
-                                                  .apply(pd.Series)\
-                                                  .reset_index()\
-                                                  .rename(columns={0: 'part1_mean', 1: 'part1_std',
-                                                                   2: 'part5_mean', 3: 'part5_std'})
+        self.overnight_meanstd = self.overnight_data.groupby('trade_dt')\
+                                                    .apply(self.mom_meanstd, item[0], item[1])\
+                                                    .apply(pd.Series)\
+                                                    .reset_index()\
+                                                    .rename(columns={0: 'part1_mean', 1: 'part1_std',
+                                                                     2: 'part5_mean', 3: 'part5_std'})
         # merge
-        self.temp_result = pd.merge(self.intarday_data, self.intarday_meanstd, how='left')
+        self.temp_result = pd.merge(self.overnight_data, self.overnight_meanstd, how='left')
         # t值
         self.temp_result['t1'] = ((self.temp_result.part1 - self.temp_result.part1_mean) / self.temp_result.part1_std)
         self.temp_result['t5'] = ((self.temp_result.part5 - self.temp_result.part5_mean) / self.temp_result.part5_std)
-        self.temp_result['momi'] = self.temp_result['t5'] - self.temp_result['t1']
+        self.temp_result['momo5'] = self.temp_result['t1'] - self.temp_result['t5']
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
-        item = ['trade_dt', 's_info_windcode', 'momi']
-        self.result[item].to_pickle(self.save_indir + 'factor_price_momi.pkl')
+        item = ['trade_dt', 's_info_windcode', 'momo5']
+        self.result[item].to_pickle(self.save_indir + 'factor_price_momo5.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):
@@ -90,5 +92,5 @@ if __name__ == '__main__':
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
     file_name = 'all_dayindex.pkl'
 
-    momi = FactorMomi(file_indir, save_indir, file_name)
-    momi.runflow()
+    momo5 = Factormomo5(file_indir, save_indir, file_name)
+    momo5.runflow()

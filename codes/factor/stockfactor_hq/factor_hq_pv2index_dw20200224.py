@@ -28,21 +28,45 @@ class FactorPV(object):
                                       .apply(lambda x: x[['closeprice', 'volume']].corr().iloc[0, -1])\
                                       .reset_index()\
                                       .rename(columns={0: 'pvcorr'})
-        self.result['pvcorravg'] = self.result.groupby(['s_info_windcode'])\
-                                              .apply(lambda x: x['pvcorr'].rolling(20).mean())\
-                                              .values
-        self.result['pvcorrstd'] = self.result.groupby(['s_info_windcode'])\
-                                              .apply(lambda x: x['pvcorr'].rolling(20).std())\
-                                              .values
+        self.result['pvcorravg20'] = self.result.groupby(['s_info_windcode'])\
+                                                .apply(lambda x: x['pvcorr'].rolling(20).mean())\
+                                                .values
+        self.result['pvcorrstd20'] = self.result.groupby(['s_info_windcode'])\
+                                                .apply(lambda x: x['pvcorr'].rolling(20).std())\
+                                                .values
+        self.result['pvcorravg10'] = self.result.groupby(['s_info_windcode'])\
+                                                .apply(lambda x: x['pvcorr'].rolling(10).mean())\
+                                                .values
+        self.result['pvcorrstd10'] = self.result.groupby(['s_info_windcode'])\
+                                                .apply(lambda x: x['pvcorr'].rolling(10).std())\
+                                                .values
+        self.result['pvcorravg5'] = self.result.groupby(['s_info_windcode'])\
+                                               .apply(lambda x: x['pvcorr'].rolling(5).mean())\
+                                               .values
+        self.result['pvcorrstd5'] = self.result.groupby(['s_info_windcode'])\
+                                               .apply(lambda x: x['pvcorr'].rolling(5).std())\
+                                               .values
         print('compute using time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
-        item1 = ['trade_dt', 's_info_windcode', 'pvcorravg']
-        self.result[item1].to_pickle(self.save_indir + 'factor_hq_pvcorravg_' + self.file_name[17:21] + '.pkl')
+        item1 = ['trade_dt', 's_info_windcode', 'pvcorravg20']
+        self.result[item1].to_pickle(self.save_indir + 'factor_hq_pvcorravg20_' + self.file_name[17:21] + '.pkl')
 
-        item2 = ['trade_dt', 's_info_windcode', 'pvcorrstd']
-        self.result[item2].to_pickle(self.save_indir + 'factor_hq_pvcorrstd_' + self.file_name[17:21] + '.pkl')
+        item2 = ['trade_dt', 's_info_windcode', 'pvcorrstd20']
+        self.result[item2].to_pickle(self.save_indir + 'factor_hq_pvcorrstd20_' + self.file_name[17:21] + '.pkl')
+
+        item1 = ['trade_dt', 's_info_windcode', 'pvcorravg10']
+        self.result[item1].to_pickle(self.save_indir + 'factor_hq_pvcorravg10_' + self.file_name[17:21] + '.pkl')
+
+        item2 = ['trade_dt', 's_info_windcode', 'pvcorrstd10']
+        self.result[item2].to_pickle(self.save_indir + 'factor_hq_pvcorrstd10_' + self.file_name[17:21] + '.pkl')
+
+        item1 = ['trade_dt', 's_info_windcode', 'pvcorravg5']
+        self.result[item1].to_pickle(self.save_indir + 'factor_hq_pvcorravg5_' + self.file_name[17:21] + '.pkl')
+
+        item2 = ['trade_dt', 's_info_windcode', 'pvcorrstd5']
+        self.result[item2].to_pickle(self.save_indir + 'factor_hq_pvcorrstd5_' + self.file_name[17:21] + '.pkl')
         print('fileout using time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
@@ -82,10 +106,26 @@ if __name__ == '__main__':
         item = ['trade_dt', 's_info_windcode', factor_name]
         result[item].to_pickle(saveout_indir + 'factor_hq_' + factor_name + '.pkl')
 
-    factor_name = 'pvcorravg'
+    factor_name = 'pvcorravg20'
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)
 
-    factor_name = 'pvcorrstd'
+    factor_name = 'pvcorrstd20'
+    names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
+    merge_data(factor_name, names)
+
+    factor_name = 'pvcorravg10'
+    names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
+    merge_data(factor_name, names)
+
+    factor_name = 'pvcorrstd10'
+    names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
+    merge_data(factor_name, names)
+
+    factor_name = 'pvcorravg5'
+    names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
+    merge_data(factor_name, names)
+
+    factor_name = 'pvcorrstd5'
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)

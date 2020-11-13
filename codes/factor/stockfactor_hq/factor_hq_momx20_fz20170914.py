@@ -3,7 +3,7 @@ import numpy as np
 import time
 
 
-# 因子：
+# 因子：一日收益拆分5部分,20累加动量
 class FactorMomx(object):
 
     def __init__(self, file_indir, save_indir, file_name):
@@ -26,25 +26,30 @@ class FactorMomx(object):
     def compute(self):
         t = time.time()
         self.data_mom = self.data_dropna[0::4].copy()
-        self.data_mom['mom1'] = (self.data_mom.closeprice / self.data_mom.openprice - 1) * 100
-        self.data_mom['mom2'] = (self.data_dropna[1::4].closeprice / self.data_dropna[1::4].openprice - 1).values * 100
-        self.data_mom['mom3'] = (self.data_dropna[2::4].closeprice / self.data_dropna[2::4].openprice - 1).values * 100
-        self.data_mom['mom4'] = (self.data_dropna[3::4].closeprice / self.data_dropna[3::4].openprice - 1).values * 100
+        self.data_mom['mom1_temp'] = (self.data_mom.closeprice/self.data_mom.openprice - 1)*100
+        self.data_mom['mom2_temp'] = (self.data_dropna[1::4].closeprice/self.data_dropna[1::4].openprice - 1).values*100
+        self.data_mom['mom3_temp'] = (self.data_dropna[2::4].closeprice/self.data_dropna[2::4].openprice - 1).values*100
+        self.data_mom['mom4_temp'] = (self.data_dropna[3::4].closeprice/self.data_dropna[3::4].openprice - 1).values*100
+        # 滚动累加
+        self.data_mom['mom1_20'] = self.data_mom.groupby('s_info_windcode')['mom1_temp'].rolling(20).sum().values
+        self.data_mom['mom2_20'] = self.data_mom.groupby('s_info_windcode')['mom2_temp'].rolling(20).sum().values
+        self.data_mom['mom3_20'] = self.data_mom.groupby('s_info_windcode')['mom3_temp'].rolling(20).sum().values
+        self.data_mom['mom4_20'] = self.data_mom.groupby('s_info_windcode')['mom4_temp'].rolling(20).sum().values
         print('compute using time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
-        item = ['trade_dt', 's_info_windcode', 'mom1']
-        self.data_mom[item].to_pickle(self.save_indir + 'factor_hq_mom1_' + self.file_name[17:21] + '.pkl')
+        item = ['trade_dt', 's_info_windcode', 'mom1_20']
+        self.data_mom[item].to_pickle(self.save_indir + 'factor_hq_mom1_20_' + self.file_name[17:21] + '.pkl')
 
-        item = ['trade_dt', 's_info_windcode', 'mom2']
-        self.data_mom[item].to_pickle(self.save_indir + 'factor_hq_mom2_' + self.file_name[17:21] + '.pkl')
+        item = ['trade_dt', 's_info_windcode', 'mom2_20']
+        self.data_mom[item].to_pickle(self.save_indir + 'factor_hq_mom2_20_' + self.file_name[17:21] + '.pkl')
 
-        item = ['trade_dt', 's_info_windcode', 'mom3']
-        self.data_mom[item].to_pickle(self.save_indir + 'factor_hq_mom3_' + self.file_name[17:21] + '.pkl')
+        item = ['trade_dt', 's_info_windcode', 'mom3_20']
+        self.data_mom[item].to_pickle(self.save_indir + 'factor_hq_mom3_20_' + self.file_name[17:21] + '.pkl')
 
-        item = ['trade_dt', 's_info_windcode', 'mom4']
-        self.data_mom[item].to_pickle(self.save_indir + 'factor_hq_mom4_' + self.file_name[17:21] + '.pkl')
+        item = ['trade_dt', 's_info_windcode', 'mom4_20']
+        self.data_mom[item].to_pickle(self.save_indir + 'factor_hq_mom4_20_' + self.file_name[17:21] + '.pkl')
         print('fileout using time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
@@ -84,18 +89,18 @@ if __name__ == '__main__':
         item = ['trade_dt', 's_info_windcode', factor_name]
         result[item].to_pickle(saveout_indir + 'factor_hq_' + factor_name + '.pkl')
 
-    factor_name = 'mom1'
+    factor_name = 'mom1_20'
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)
 
-    factor_name = 'mom2'
+    factor_name = 'mom2_20'
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)
 
-    factor_name = 'mom3'
+    factor_name = 'mom3_20'
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)
 
-    factor_name = 'mom4'
+    factor_name = 'mom4_20'
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)

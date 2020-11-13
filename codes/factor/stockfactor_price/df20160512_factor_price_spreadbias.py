@@ -42,30 +42,26 @@ class Spreadbias(object):
         price_now = temp_price.iloc[-1, :]
         # 计算股票参考价格
         refprice = (np.dot(price_now.values, near) - price_now.values) / (near.sum(axis=0) - 1)
-        # 转Dataframe
-        result = pd.DataFrame(refprice, index=price_now.index, columns={price_now.name}).T
-        return result
+        return pd.DataFrame(refprice, index=price_now.index, columns={price_now.name}).T
 
     def roll_t(self, data, index, perid):
         temp = data.copy()
         num = len(data)
-        if num > perid:
+        if num >= perid:
             temp_mea = temp[index].rolling(perid).mean()
             temp_std = temp[index].rolling(perid).std()
             t = (temp[index]-temp_mea)/temp_std
-            result = pd.DataFrame({'trade_dt': temp.trade_dt.values, 'spreadbias': t.values})
-            return result
+            return pd.DataFrame({'trade_dt': temp.trade_dt.values, 'spreadbias': t.values})
         else:
-            result = pd.DataFrame({'trade_dt': temp.trade_dt.values, 'spreadbias': [None for i in range(num)]})
-            return result
+            return pd.DataFrame({'trade_dt': temp.trade_dt.values, 'spreadbias': [None for i in range(num)]})
 
     def compute(self):
         t = time.time()
         dates = self.change_pivot.index
-        dates_num = len(dates)
+        num = len(dates)
         self.refprice = []
         # 逐日计算每股参考价格
-        for i in range(250, dates_num):
+        for i in range(250, num):
             # 当前交易日
             print(dates[i - 1])
             # 取250日股价、涨幅数据
@@ -84,13 +80,13 @@ class Spreadbias(object):
                                              .reset_index()\
                                              .rename(columns={'level_1': 'trade_dt', 0: 'refprice'})
         # merge参考价格、股价
-        self.data_sum = pd.merge(self.refprice_unstack, self.price, how='left')
+        self.data = pd.merge(self.refprice_unstack, self.price, how='left')
         # 计算对数价差
-        self.data_sum['pricespread'] = np.log(self.data_sum['s_dq_close']) - np.log(self.data_sum['refprice'])
+        self.data['pricespread'] = np.log(self.data['s_dq_close']) - np.log(self.data['refprice'])
         # 计算价差偏离度
-        self.temp_result = self.data_sum.groupby('s_info_windcode')\
-                                        .apply(self.roll_t, 'pricespread', 60)\
-                                        .reset_index()
+        self.temp_result = self.data.groupby('s_info_windcode')\
+                                    .apply(self.roll_t, 'pricespread', 60)\
+                                    .reset_index()
         print('compute running time:%10.4fs' % (time.time()-t))
 
     def fileout(self):

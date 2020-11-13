@@ -16,9 +16,10 @@ class Ivr(object):
         t = time.time()
         self.all_data = pd.read_pickle(self.file_indir + self.file_name)
         self.zz500 = pd.read_pickle('D:\\wuyq02\\develop\\python\\data\\developflow\\zz500\\zz500_indexprice.pkl')
+        self.zz500.reset_index(inplace=True)
         print('filein running time:%10.4fs' % (time.time()-t))
 
-    def daytrade_factor(self, data, index):
+    def market_style_factor(self, data, index):
         temp = data.copy()
         num = int(len(temp)/3)
         low = temp.sort_values(by=index).iloc[:num, :].s_dq_pctchange.mean()
@@ -27,24 +28,23 @@ class Ivr(object):
 
     def datamanage(self):
         t = time.time()
-        temp_data = self.all_data[['trade_dt', 's_info_windcode', 's_dq_pctchange']].copy()
         # 计算每日市场因子
-        self.zz500.reset_index(inplace=True)
         self.zz500['mkt'] = self.zz500['s_dq_change'] / self.zz500['s_dq_preclose'] * 100
-        self.data_sum = pd.merge(temp_data, self.zz500[['trade_dt', 'mkt']], how='left')
+        item = ['trade_dt', 's_info_windcode', 's_dq_pctchange']
+        self.data = pd.merge(self.all_data[item], self.zz500[['trade_dt', 'mkt']], how='left')
         # 计算每日市值因子
         self.all_smb = self.all_data.groupby('trade_dt')\
-                                    .apply(self.daytrade_factor, 's_dq_freemv')\
+                                    .apply(self.market_style_factor, 's_dq_freemv')\
                                     .reset_index()\
                                     .rename(columns={0: 'smb'})
-        self.data_sum = pd.merge(self.data_sum, self.all_smb[['trade_dt', 'smb']], how='left')
+        self.data = pd.merge(self.data, self.all_smb[['trade_dt', 'smb']], how='left')
         # 计算每日估值因子
         self.all_hml = self.all_data.groupby('trade_dt')\
-                                    .apply(self.daytrade_factor, 's_val_pb_new')\
+                                    .apply(self.market_style_factor, 's_val_pb_new')\
                                     .reset_index()\
                                     .rename(columns={0: 'hml'})
-        self.data_sum = pd.merge(self.data_sum, self.all_hml[['trade_dt', 'hml']], how='left')
-        self.data_dropna = self.data_sum.dropna().copy()
+        self.data = pd.merge(self.data, self.all_hml[['trade_dt', 'hml']], how='left')
+        self.data_dropna = self.data.dropna().copy()
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
     def method(self, data, perid):

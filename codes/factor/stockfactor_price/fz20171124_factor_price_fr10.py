@@ -26,20 +26,20 @@ class FactorFR(object):
     def method(self, data, perid):
         temp = data.copy()
         factor = temp[['s_dq_pctchange', 's_dq_freeturnover_y']].rolling(perid).corr().reset_index().iloc[::2, -1]
-        return pd.DataFrame({'trade_dt': temp.trade_dt, 'fr': factor.values})
+        return pd.DataFrame({'trade_dt': temp.trade_dt, 'fr10': factor.values})
 
     def compute(self):
         t = time.time()
         self.temp_result = self.data_dropna.groupby('s_info_windcode') \
-                                           .apply(self.method, 20) \
+                                           .apply(self.method, 10) \
                                            .reset_index()
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
-        item = ['trade_dt', 's_info_windcode', 'fr']
-        self.result[item].to_pickle(self.save_indir + 'factor_price_fr.pkl')
+        item = ['trade_dt', 's_info_windcode', 'fr10']
+        self.result[item].to_pickle(self.save_indir + 'factor_price_fr10.pkl')
         print('fileout running time:%10.4fs' % (time.time()-t))
 
     def runflow(self):

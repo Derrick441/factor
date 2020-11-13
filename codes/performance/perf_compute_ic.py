@@ -46,13 +46,13 @@ class PerfIc(object):
 
     def compute(self):
         t = time.time()
-        self.fac_name = self.fac.columns[-1]
-        self.ic_name = self.fac_name + '_' + self.method
+        self.ic_name = self.fac.columns[-1] + '_' + self.method
         self.result = self.data.groupby(level=0)\
                                .apply(self.perf_single_ic, self.method)\
                                .reset_index()\
                                .rename(columns={0: self.ic_name})
         self.result.sort_values('trade_dt', inplace=True)
+        self.result['accu'] = self.result[self.ic_name].cumsum()
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
@@ -86,30 +86,34 @@ if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
     factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
-
     file_names = ['all_band_adjvwap_hh_price_label1.pkl',
                   'all_band_adjvwap_hh_price_label5.pkl',
                   'all_band_adjvwap_hh_price_label10.pkl',
                   'all_band_adjvwap_hh_price_label20.pkl',
                   'all_band_adjvwap_hh_price_label60.pkl']
-    # factor_names = os.listdir(factor_indir)
-    factor_names = ['factor_price_momo.pkl', 'factor_price_nmom.pkl']
-
     method = 'IC'
     neutral = 0
 
-    # 计算全部因子ic
+    # factor_names = os.listdir(factor_indir)
+    # # 计算全部因子ic
+    # for factor_name in factor_names:
+    #     for file_name in file_names:
+    #         ic = PerfIc(file_indir, factor_indir, save_indir, file_name, factor_name, method, neutral)
+    #         ic.runflow()
+
+    # 计算未计算ic因子的ic
+    set1 = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'))
+    temp_set = os.listdir('D:\\wuyq02\\develop\\python\\data\\performance\\ic\\')
+    set2 = set([ic_name.split('_ic')[0] + '.pkl' for ic_name in temp_set])
+    factor_names = set1 - set2
+
     for factor_name in factor_names:
         for file_name in file_names:
             ic = PerfIc(file_indir, factor_indir, save_indir, file_name, factor_name, method, neutral)
             ic.runflow()
 
-    # # 计算未计算ic因子的ic
-    # set1 = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'))
-    # temp_set = os.listdir('D:\\wuyq02\\develop\\python\\data\\performance\\ic\\')
-    # set2 = set([ic_name.split('_ic')[0] + '.pkl' for ic_name in temp_set])
-    # factor_names = set1 - set2
-    #
+    # factor_names = ['factor_price_adjfton.pkl']
+    # # 计算少数几个因子ic
     # for factor_name in factor_names:
     #     for file_name in file_names:
     #         ic = PerfIc(file_indir, factor_indir, save_indir, file_name, factor_name, method, neutral)

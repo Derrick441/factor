@@ -2,17 +2,17 @@ import pandas as pd
 import numpy as np
 import time
 import statsmodels.api as sm
-import os
 
 
 # 因子中性化
 class FactorNeutral(object):
 
-    def __init__(self, file_indir, factor_indir, save_indir, file_names, factor_name):
+    def __init__(self, file_indir, factor_indir, save_indir, file_names, factor_names, factor_name):
         self.file_indir = file_indir
         self.factor_indir = factor_indir
         self.save_indir = save_indir
         self.file_names = file_names
+        self.factor_names = factor_names
         self.factor_name = factor_name
         print(self.factor_name)
 
@@ -20,6 +20,8 @@ class FactorNeutral(object):
         t = time.time()
         self.all_data = pd.read_pickle(self.file_indir + self.file_names[0])
         self.bandindu = pd.read_pickle(self.file_indir + self.file_names[1])
+        self.mom20 = pd.read_pickle(self.factor_indir + self.factor_names[0])
+        self.std60 = pd.read_pickle(self.factor_indir + self.factor_names[1])
         self.factor = pd.read_pickle(self.factor_indir + self.factor_name)
         print('filein running time:%10.4fs' % (time.time() - t))
 
@@ -27,7 +29,7 @@ class FactorNeutral(object):
         t = time.time()
         self.fac_name = self.factor.columns[-1]
 
-        self.mv = self.all_data[['trade_dt', 's_info_windcode', 's_dq_freemv']]
+        self.mv = self.all_data[['trade_dt', 's_info_windcode', 's_dq_freemv', 's_dq_freeturnover']]
         self.indu = self.bandindu[['trade_dt', 's_info_windcode', 'induname1']]
 
         self.data_temp = pd.merge(self.mv, self.indu, how='left')
@@ -40,7 +42,10 @@ class FactorNeutral(object):
         self.induname = [x for x in self.data_dum.columns if 'induname' in x]
 
         self.data_dum.replace([np.inf, -np.inf], np.nan, inplace=True)
-        self.data_dum.dropna(inplace=True)
+        self.data_merge = pd.merge(self.data_dum, self.mom20, how='left')
+        self.data_merge = pd.merge(self.data_merge, self.std60, how='left')
+
+        self.data_dropna = self.data_merge.dropna()
         print('datamanage running time:%10.4fs' % (time.time() - t))
 
     def neutral(self, data, y_item, x_item, name):
@@ -54,18 +59,18 @@ class FactorNeutral(object):
     def compute(self):
         t = time.time()
         y_item = [self.fac_name]
-        x_item = ['s_dq_freemv'] + self.induname
-        self.fac_name_n = 'neutral_' + self.fac_name
-        self.temp_result = self.data_dum.groupby('trade_dt')\
-                                        .apply(self.neutral, y_item, x_item, self.fac_name_n)\
-                                        .reset_index()
+        x_item = ['s_dq_freemv', 's_dq_freeturnover', 'mom20', 'std60'] + self.induname
+        self.fac_name_n = self.fac_name + 'n'
+        self.temp_result = self.data_dropna.groupby('trade_dt')\
+                                           .apply(self.neutral, y_item, x_item, self.fac_name_n)\
+                                           .reset_index()
         print('compute running time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
         self.result = pd.merge(self.all_data[['trade_dt', 's_info_windcode']], self.temp_result, how='left')
         item = ['trade_dt', 's_info_windcode', self.fac_name_n]
-        self.result[item].to_pickle(self.save_indir + 'neutral_' + self.factor_name)
+        self.result[item].to_pickle(self.save_indir + self.factor_name[:-4] + 'n.pkl')
         print('fileout running time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
@@ -81,28 +86,19 @@ class FactorNeutral(object):
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
     factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
+    save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
 
     file_names = ['all_dayindex.pkl', 'all_band_indu.pkl']
+    factor_names = ['factor_price_mom20.pkl', 'factor_price_std60.pkl']
 
-    # # 中性化全部因子
-    # factor_names = os.listdir(factor_indir)
-    # for factor_name in factor_names:
-    #     fn = FactorNeutral(file_indir, factor_indir, save_indir, file_names, factor_name)
-    #     fn.runflow()
+    factor_name = 'factor_price_fr5.pkl'
+    fn = FactorNeutral(file_indir, factor_indir, save_indir, file_names, factor_names, factor_name)
+    fn.runflow()
 
-    # # 中性化未中性化的因子
-    # set1 = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'))
-    # temp_set = os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\')
-    # set2 = set([factorname[8:] for factorname in temp_set])
-    # factor_names = set1 - set2
-    #
-    # for factor_name in factor_names:
-    #     fn = FactorNeutral(file_indir, factor_indir, save_indir, file_names, factor_name)
-    #     fn.runflow()
+    factor_name = 'factor_price_fr10.pkl'
+    fn = FactorNeutral(file_indir, factor_indir, save_indir, file_names, factor_names, factor_name)
+    fn.runflow()
 
-    # 中性化一个因子
-    factor_names = ['factor_price_fr5.pkl']
-    for factor_name in factor_names:
-        fn = FactorNeutral(file_indir, factor_indir, save_indir, file_names, factor_name)
-        fn.runflow()
+    factor_name = 'factor_price_fr20.pkl'
+    fn = FactorNeutral(file_indir, factor_indir, save_indir, file_names, factor_names, factor_name)
+    fn.runflow()

@@ -3,7 +3,7 @@ import numpy as np
 import time
 
 
-# arpp: 时间加权的平均相对价格位置（p-l)/(h-l)在时间上的积分
+# 输出每日TWAP、H、L
 class Arpp(object):
 
     def __init__(self, file_indir, save_indir, file_name):
