@@ -103,10 +103,10 @@ if __name__ == '__main__':
     # 收益率动量因子：温和收益率+隔夜收益
     # 读入
     factor1 = pd.read_pickle('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\' + 'factor_hq_mild.pkl')
-    factor2 = pd.read_pickle('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\' + 'factor_price_onr.pkl')
+    factor2 = pd.read_pickle('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\' + 'factor_price_mom0.pkl')
     # 计算rmom
     data = pd.merge(factor1, factor2, how='left')
-    data['rmom'] = data['mild'] + data['onr']
+    data['rmom'] = data['mild'] + data['mom0']
     # 输出
     item = ['trade_dt', 's_info_windcode', 'rmom']
     data[item].to_pickle(save_indir + 'factor_hq_rmom.pkl')

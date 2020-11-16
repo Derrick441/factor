@@ -3,8 +3,8 @@ import numpy as np
 import time
 
 
-# 因子：聪明钱因子基于5分钟数据
-class FactorSmartMoney5(object):
+# 因子：聪明钱因子基于5分钟数据,10天,对数
+class FactorSmartMoneyln510(object):
 
     def __init__(self, file_indir, save_indir, file_name):
         self.file_indir = file_indir
@@ -21,54 +21,44 @@ class FactorSmartMoney5(object):
         t = time.time()
         self.data['ret'] = (self.data['closeprice'] / self.data['openprice'] - 1) * 100
         self.data_drop = self.data[self.data.volume >= 100].copy()
-        self.data_drop['v1'] = self.data_drop['volume']**0.1
         self.data_drop['lnv'] = np.log(self.data_drop['volume'])
-        self.data_drop['S1'] = self.data_drop['ret'] / self.data_drop['v1']
         self.data_drop['Sln'] = self.data_drop['ret'] / self.data_drop['lnv']
         print('datamanage using time:%10.4fs' % (time.time()-t))
 
-    def method(self, data):
+    def method(self, data, perid):
         t = time.time()
         temp = data.copy()
-
-        temp_data = temp.sort_values(by='S1', ascending=False).copy()
-        temp_data['cumsum'] = temp_data['volume'].cumsum() / np.sum(temp_data['volume'])
-        smartmoney = temp_data[temp_data['cumsum'] <= 0.2].copy()
-        VWAPsmart = np.sum(smartmoney.volume / np.sum(smartmoney.volume) * smartmoney.closeprice)
-        VWAPall = np.sum(temp_data.volume / np.sum(temp_data.volume) * temp_data.closeprice)
-        Q1 = VWAPsmart / VWAPall
-
-        temp_data = temp.sort_values(by='Sln', ascending=False).copy()
-        temp_data['cumsum'] = temp_data['volume'].cumsum() / np.sum(temp_data['volume'])
-        smartmoney = temp_data[temp_data['cumsum'] <= 0.2].copy()
-        VWAPsmart = np.sum(smartmoney.volume / np.sum(smartmoney.volume) * smartmoney.closeprice)
-        VWAPall = np.sum(temp_data.volume / np.sum(temp_data.volume) * temp_data.closeprice)
-        Qln = VWAPsmart / VWAPall
-
-        return Q1, Qln
+        date = temp.trade_dt.drop_duplicates()
+        num = len(date)
+        if num >= perid:
+            x = perid-1
+            Q1 = [np.nan] * x
+            for i in range(x, num):
+                temp_part = temp[(temp.trade_dt >= date.iloc[i-x]) & (temp.trade_dt <= date.iloc[i])]
+                temp_data = temp_part.sort_values(by='Sln', ascending=False).copy()
+                temp_data['cumsum'] = temp_data['volume'].cumsum() / np.sum(temp_data['volume'])
+                smartmoney = temp_data[temp_data['cumsum'] <= 0.2].copy()
+                VWAPsmart = np.sum(smartmoney.volume / np.sum(smartmoney.volume) * smartmoney.closeprice)
+                VWAPall = np.sum(temp_data.volume / np.sum(temp_data.volume) * temp_data.closeprice)
+                Q1.append(VWAPsmart / VWAPall)
+            print(time.time() - t)
+            return pd.DataFrame({'trade_dt': date,
+                                 'smartmln510': Q1})
+        else:
+            return pd.DataFrame({'trade_dt': date,
+                                 'smartmln510': [None for i in range(num)]})
 
     def compute(self):
         t = time.time()
-        self.result = self.data_drop.groupby(['s_info_windcode', 'trade_dt'])\
-                                    .apply(self.method)\
-                                    .apply(pd.Series)\
-                                    .reset_index()\
-                                    .rename(columns={0: 'smartm5', 1: 'smartmln5'})
-        self.result['smartm5_mean'] = self.result.groupby(['s_info_windcode'])\
-                                                 .apply(lambda x: x['smartm5'].rolling(10).mean())\
-                                                 .values
-        self.result['smartmln5_mean'] = self.result.groupby(['s_info_windcode'])\
-                                                   .apply(lambda x: x['smartmln5'].rolling(10).mean())\
-                                                   .values
+        self.result = self.data_drop.groupby(['s_info_windcode'])\
+                                    .apply(self.method, 10)\
+                                    .reset_index()
         print('compute using time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
-        item1 = ['trade_dt', 's_info_windcode', 'smartm5_mean']
-        self.result[item1].to_pickle(self.save_indir + 'factor_hq_smartm5_mean_' + self.file_name[17:21] + '.pkl')
-
-        item2 = ['trade_dt', 's_info_windcode', 'smartmln5_mean']
-        self.result[item2].to_pickle(self.save_indir + 'factor_hq_smartmln5_mean_' + self.file_name[17:21] + '.pkl')
+        item1 = ['trade_dt', 's_info_windcode', 'smartmln510']
+        self.result[item1].to_pickle(self.save_indir + 'factor_hq_smartmln510_' + self.file_name[17:21] + '.pkl')
         print('fileout using time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
@@ -90,7 +80,7 @@ if __name__ == '__main__':
                   'all_store_hqdata_2018_5.pkl', 'all_store_hqdata_2019_5.pkl']
 
     for file_name in file_names:
-        fsm5 = FactorSmartMoney5(file_indir, save_indir, file_name)
+        fsm5 = FactorSmartMoneyln510(file_indir, save_indir, file_name)
         fsm5.runflow()
 
     def merge_data(factor_name, names):
@@ -108,10 +98,6 @@ if __name__ == '__main__':
         item = ['trade_dt', 's_info_windcode', factor_name]
         result[item].to_pickle(saveout_indir + 'factor_hq_' + factor_name + '.pkl')
 
-    factor_name = 'smartm5_mean'
-    names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
-    merge_data(factor_name, names)
-
-    factor_name = 'smartmln5_mean'
+    factor_name = 'smartmln510'
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)

@@ -37,11 +37,11 @@ class NeweyWestAdj(object):
         name = 'sd' + factor_name
         num = len(temp)
         if num >= perid:
-            result = [None for i in range(perid)]
+            result = [None for i in range(perid-1)]
             temp['intercept'] = 1
             item = ['intercept', 'factor']
-            # 第21个开始，计算回归的newey-west调整标准误
-            for i in range(perid, num):
+            # 第20个开始，计算回归的newey-west调整标准误
+            for i in range(perid, num+1):
                 temp1 = temp.iloc[(i-perid):i, :]
                 model = sm.OLS(temp1['s_dq_pctchange'], temp1[item]).fit(cov_type='HAC', cov_kwds={'maxlags': 3})
                 stde = model.params / model.tvalues

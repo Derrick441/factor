@@ -35,8 +35,7 @@ class ReturnThreeIndexR(object):
         X = data[x]
         X['intercept'] = 1
         result = sm.OLS(Y, X).fit()
-        # 注：研报中日内特质波动率用的是ssr的开方，而非之前的std
-        return np.sqrt(result.ssr), result.resid.skew(), result.resid.kurt()
+        return result.resid.std(), result.resid.skew(), result.resid.kurt()
 
     def compute(self):
         t = time.time()

@@ -3,8 +3,8 @@ import numpy as np
 import time
 
 
-# 输出每日TWAP、H、L
-class Arpp(object):
+# 因子：聪明钱因子基于5分钟数据
+class FactorSmartMoney5(object):
 
     def __init__(self, file_indir, save_indir, file_name):
         self.file_indir = file_indir
@@ -19,32 +19,36 @@ class Arpp(object):
 
     def datamanage(self):
         t = time.time()
-        self.data_dropna = self.data.dropna().copy()
-        print('datamanage using time:%10.4fs' % (time.time() - t))
+        self.data['ret'] = (self.data['closeprice'] / self.data['openprice'] - 1) * 100
+        self.data_drop = self.data[self.data.volume >= 100].copy()
+        self.data_drop['v'] = self.data_drop['volume']**0.1
+        self.data_drop['S'] = self.data_drop['ret'] / self.data_drop['v']
+        print('datamanage using time:%10.4fs' % (time.time()-t))
 
     def method(self, data):
-        temp = data.copy()
-        # 最高最低价
-        L = np.min(temp['lowprice'])
-        H = np.max(temp['highprice'])
-        # twap
-        item = ['openprice', 'highprice', 'lowprice', 'closeprice']
-        twap = np.mean(np.mean(temp[item]))
-        return twap, L, H
+        t = time.time()
+
+        temp = data.sort_values(by='S', ascending=False).copy()
+        temp['cumsum'] = temp['volume'].cumsum() / np.sum(temp['volume'])
+        smartmoney = temp[temp['cumsum'] <= 0.2].copy()
+        VWAPsmart = np.sum(smartmoney.volume / np.sum(smartmoney.volume) * smartmoney.closeprice)
+        VWAPall = np.sum(temp.volume / np.sum(temp.volume) * temp.closeprice)
+
+        return VWAPsmart / VWAPall
 
     def compute(self):
         t = time.time()
-        self.result = self.data.groupby(['s_info_windcode', 'trade_dt'])\
-                               .apply(self.method)\
-                               .apply(pd.Series)\
-                               .reset_index()\
-                               .rename(columns={0: 'twap', 1: 'L', 2: 'H'})
-        print('factor_compute using time:%10.4fs' % (time.time()-t))
+        self.result = self.data_drop.groupby(['s_info_windcode', 'trade_dt'])\
+                                    .apply(self.method)\
+                                    .apply(pd.Series)\
+                                    .reset_index()\
+                                    .rename(columns={0: 'smartm5'})
+        print('compute using time:%10.4fs' % (time.time() - t))
 
     def fileout(self):
         t = time.time()
-        item1 = ['trade_dt', 's_info_windcode', 'twap', 'L', 'H']
-        self.result[item1].to_pickle(self.save_indir + 'factor_hq_arpp_' + self.file_name[17:21] + '.pkl')
+        item1 = ['trade_dt', 's_info_windcode', 'smartm5']
+        self.result[item1].to_pickle(self.save_indir + 'factor_hq_smartm5_' + self.file_name[17:21] + '.pkl')
         print('fileout using time:%10.4fs' % (time.time() - t))
 
     def runflow(self):
@@ -60,14 +64,14 @@ class Arpp(object):
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'
-    file_names = ['all_store_hqdata_2012_5_derive.pkl', 'all_store_hqdata_2013_5_derive.pkl',
-                  'all_store_hqdata_2014_5_derive.pkl', 'all_store_hqdata_2015_5_derive.pkl',
-                  'all_store_hqdata_2016_5_derive.pkl', 'all_store_hqdata_2017_5_derive.pkl',
-                  'all_store_hqdata_2018_5_derive.pkl', 'all_store_hqdata_2019_5_derive.pkl']
+    file_names = ['all_store_hqdata_2012_5.pkl', 'all_store_hqdata_2013_5.pkl',
+                  'all_store_hqdata_2014_5.pkl', 'all_store_hqdata_2015_5.pkl',
+                  'all_store_hqdata_2016_5.pkl', 'all_store_hqdata_2017_5.pkl',
+                  'all_store_hqdata_2018_5.pkl', 'all_store_hqdata_2019_5.pkl']
 
     for file_name in file_names:
-        arpp = Arpp(file_indir, save_indir, file_name)
-        arpp.runflow()
+        fsm5 = FactorSmartMoney5(file_indir, save_indir, file_name)
+        fsm5.runflow()
 
     def merge_data(factor_name, names):
         readin_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\annual_factor\\'
@@ -84,6 +88,6 @@ if __name__ == '__main__':
         item = ['trade_dt', 's_info_windcode', factor_name]
         result[item].to_pickle(saveout_indir + 'factor_hq_' + factor_name + '.pkl')
 
-    factor_name = 'arpp'
+    factor_name = 'smartm5'
     names = ['factor_hq_' + factor_name + '_' + str(i) + '.pkl' for i in range(2012, 2020)]
     merge_data(factor_name, names)
