@@ -84,8 +84,8 @@ class PerfIc(object):
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
+    factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_combine\\'
+    save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\combine\\'
     file_names = ['all_band_adjvwap_hh_price_label1.pkl',
                   'all_band_adjvwap_hh_price_label5.pkl',
                   'all_band_adjvwap_hh_price_label10.pkl',
@@ -94,52 +94,15 @@ if __name__ == '__main__':
     method = 'IC'
     neutral = 0
 
-    # factor_names = os.listdir(factor_indir)
-    # # 计算全部因子ic
-    # for factor_name in factor_names:
-    #     for file_name in file_names:
-    #         ic = PerfIc(file_indir, factor_indir, save_indir, file_name, factor_name, method, neutral)
-    #         ic.runflow()
+    # factor_names = ['combine_factor_ic1.pkl', 'combine_factor_ic5.pkl',
+    #                 'combine_factor_ic10.pkl', 'combine_factor_ic20.pkl', 'combine_factor_ic60.pkl']
+    # factor_names = ['combine_select1_ic1.pkl', 'combine_select1_ic5.pkl',
+    #                 'combine_select1_ic10.pkl', 'combine_select1_ic20.pkl', 'combine_select1_ic60.pkl']
+    factor_names = ['combine_select2_ic1.pkl', 'combine_select2_ic5.pkl',
+                    'combine_select2_ic10.pkl', 'combine_select2_ic20.pkl', 'combine_select2_ic60.pkl']
 
-    # 计算未计算ic因子的ic
-    set1 = set(os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'))
-    temp_set = os.listdir('D:\\wuyq02\\develop\\python\\data\\performance\\ic\\')
-    set2 = set([ic_name.split('_ic')[0] + '.pkl' for ic_name in temp_set])
-    factor_names = set1 - set2
-
+    # 计算少数几个因子ic
     for factor_name in factor_names:
         for file_name in file_names:
             ic = PerfIc(file_indir, factor_indir, save_indir, file_name, factor_name, method, neutral)
             ic.runflow()
-
-    # factor_names = ['factor_price_adjfton.pkl']
-    # # 计算少数几个因子ic
-    # for factor_name in factor_names:
-    #     for file_name in file_names:
-    #         ic = PerfIc(file_indir, factor_indir, save_indir, file_name, factor_name, method, neutral)
-    #         ic.runflow()
-
-    # file_names = ['ret_1_neutral.pkl',
-    #               'ret_5_neutral.pkl',
-    #               'ret_10_neutral.pkl',
-    #               'ret_20_neutral.pkl',
-    #               'ret_60_neutral.pkl']
-
-    # file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    # factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_combine\\'
-    # save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
-    # file_names = ['all_band_adjvwap_hh_price_label1.pkl',
-    #               'all_band_adjvwap_hh_price_label5.pkl',
-    #               'all_band_adjvwap_hh_price_label10.pkl',
-    #               'all_band_adjvwap_hh_price_label20.pkl',
-    #               'all_band_adjvwap_hh_price_label60.pkl']
-    # method = 'IC'
-    # neutral = 0
-    #
-    # factor_names = ['combine_factor_ic1.pkl', 'combine_factor_ic5.pkl',
-    #                 'combine_factor_ic10.pkl','combine_factor_ic20.pkl', 'combine_factor_ic60.pkl']
-    # # 计算少数几个因子ic
-    # for factor_name in factor_names:
-    #     for file_name in file_names:
-    #         ic = PerfIc(file_indir, factor_indir, save_indir, file_name, factor_name, method, neutral)
-    #         ic.runflow()

@@ -49,11 +49,20 @@ class FactorAll(object):
 
 
 if __name__ == '__main__':
-    file_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+    # file_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
+    # save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\'
+    # file_names = os.listdir(file_indir)
+    # file_names = sorted(file_names, reverse=True)
+    # save_name = 'factor_all.pkl'
+    #
+    # fa = FactorAll(file_indir, save_indir, file_names, save_name)
+    # fa.runflow()
+
+    file_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\select2\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\'
     file_names = os.listdir(file_indir)
     file_names = sorted(file_names, reverse=True)
-    save_name = 'factor_all.pkl'
+    save_name = 'select2.pkl'
 
     fa = FactorAll(file_indir, save_indir, file_names, save_name)
     fa.runflow()
