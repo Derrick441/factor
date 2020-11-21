@@ -4,7 +4,7 @@ import time
 import statsmodels.api as sm
 
 
-# 基础量价因子：当日自由流通市值(对数)、当日换手率(基于自由流通市值）、当日20日收益率、当日60日收益率波动率、
+# 基础量价因子：当日自由流通市值(对数)、当日换手率(基于自由流通市值）、当日x日收益率动量、当日x日收益率波动率
 class FactorBasic(object):
 
     def __init__(self, file_indir, save_indir, file_name):

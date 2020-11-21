@@ -94,12 +94,12 @@ if __name__ == '__main__':
     method = 'IC'
     neutral = 0
 
-    # factor_names = ['combine_factor_ic1.pkl', 'combine_factor_ic5.pkl',
-    #                 'combine_factor_ic10.pkl', 'combine_factor_ic20.pkl', 'combine_factor_ic60.pkl']
+    factor_names = ['combine_factor_ic1.pkl', 'combine_factor_ic5.pkl',
+                    'combine_factor_ic10.pkl', 'combine_factor_ic20.pkl', 'combine_factor_ic60.pkl']
     # factor_names = ['combine_select1_ic1.pkl', 'combine_select1_ic5.pkl',
     #                 'combine_select1_ic10.pkl', 'combine_select1_ic20.pkl', 'combine_select1_ic60.pkl']
-    factor_names = ['combine_select2_ic1.pkl', 'combine_select2_ic5.pkl',
-                    'combine_select2_ic10.pkl', 'combine_select2_ic20.pkl', 'combine_select2_ic60.pkl']
+    # factor_names = ['combine_select2_ic1.pkl', 'combine_select2_ic5.pkl',
+    #                 'combine_select2_ic10.pkl', 'combine_select2_ic20.pkl', 'combine_select2_ic60.pkl']
 
     # 计算少数几个因子ic
     for factor_name in factor_names:
