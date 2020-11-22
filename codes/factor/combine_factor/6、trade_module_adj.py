@@ -125,14 +125,8 @@ class TradeModuleAdj(object):
 
         self.weight = self.weight[self.weight.index <= self.enddate].values
 
-        self.tradeinfo = pd.DataFrame(data=None,
-                                      index=datelist,
-                                      columns=['cash',
-                                               'stockvalue',
-                                               'sellmoney',
-                                               'buymoney',
-                                               'total',
-                                               'stocknum'])  # 交易信息
+        item = ['cash', 'stockvalue', 'sellmoney', 'buymoney', 'total', 'stocknum']
+        self.tradeinfo = pd.DataFrame(data=None, index=datelist, columns=item)  # 交易信息
 
         self.holdinfo = pd.DataFrame(data=None, index=datelist, columns=stocklist)  # 持仓信息
 
@@ -143,47 +137,19 @@ class TradeModuleAdj(object):
 
 
 if __name__ == '__main__':
-    initmoney = 100000000
-    costbuy = 0.0002
-    costsell = 0.0012
-    enddate = '202000101'
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-
-    # 价格数据
     closep = pd.read_pickle(file_indir+'all_adjclosep.pkl')
     openp = pd.read_pickle(file_indir+'all_adjopenp.pkl')
-    # 成交量数据
     vol = pd.read_pickle(file_indir+'all_vol.pkl')
-    volconstrain = 1000000000
-
-    # 权重数据
     name = 'all_weight_20_9'
-    weight = pd.read_pickle(file_indir+name + '.pkl')
+    weight = pd.read_pickle(file_indir+name+'.pkl')
+
+    initmoney = 100000000
+    costbuy = 0.001
+    costsell = 0.003
+    enddate = '202000101'
+    volconstrain = 1000000000
 
     tradem = TradeModuleAdj(closep, openp, vol, weight, enddate, initmoney, costsell, costbuy, volconstrain)
     tradem.tradeflow()
-    tradem.tradeinfo.to_csv('D:\\wuyq02\\develop\\python\\data\\performance\\test\\' + name + '.csv')
-
-    # name = 'all_weight_1_8'
-    # weight = pd.read_pickle(file_indir+name + '.pkl')
-    # tradem = TradeModuleAdj(closep, openp, vol, weight, enddate, initmoney, costsell, costbuy, volconstrain)
-    # tradem.tradeflow()
-    # tradem.tradeinfo.to_csv('D:\\wuyq02\\develop\\python\\data\\performance\\test\\' + name + '.csv')
-    #
-    # name = 'all_weight_1_7'
-    # weight = pd.read_pickle(file_indir+name + '.pkl')
-    # tradem = TradeModuleAdj(closep, openp, vol, weight, enddate, initmoney, costsell, costbuy, volconstrain)
-    # tradem.tradeflow()
-    # tradem.tradeinfo.to_csv('D:\\wuyq02\\develop\\python\\data\\performance\\test\\' + name + '.csv')
-    #
-    # name = 'all_weight_1_6'
-    # weight = pd.read_pickle(file_indir+name + '.pkl')
-    # tradem = TradeModuleAdj(closep, openp, vol, weight, enddate, initmoney, costsell, costbuy, volconstrain)
-    # tradem.tradeflow()
-    # tradem.tradeinfo.to_csv('D:\\wuyq02\\develop\\python\\data\\performance\\test\\' + name + '.csv')
-    #
-    # name = 'all_weight_1_5'
-    # weight = pd.read_pickle(file_indir+name + '.pkl')
-    # tradem = TradeModuleAdj(closep, openp, vol, weight, enddate, initmoney, costsell, costbuy, volconstrain)
-    # tradem.tradeflow()
-    # tradem.tradeinfo.to_csv('D:\\wuyq02\\develop\\python\\data\\performance\\test\\' + name + '.csv')
+    tradem.tradeinfo.to_csv('D:\\wuyq02\\develop\\python\\data\\performance\\test\\'+name+'.csv')

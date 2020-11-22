@@ -102,6 +102,7 @@ if __name__ == '__main__':
     zz500_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\zz500\\'
     factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_combine\\'
     save_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
+
     file_name = ['all_dayindex.pkl', 'all_band_indu.pkl']
     zz500_name = 'zz500_freeweight.pkl'
     set1 = ['factor_combine_rankic20.pkl', 9, 'all_weight_rankic20_9.pkl']
