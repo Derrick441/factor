@@ -14,8 +14,8 @@ class FinanceReportGen(object):
         self.indir = indir
         self.ftable = ftable
         self.keep_report = keep_report   # drop duplicated report data, keep 'first' or 'last'
-        self.longtimeago = longtimeago
         self.enddate = enddate
+        self.longtimeago = longtimeago
         self.QuarterNum = QuarterNum
 
     def fileIn(self):
