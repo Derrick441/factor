@@ -6,7 +6,7 @@ from sklearn.preprocessing import StandardScaler
 
 class Combine(object):
 
-    def __init__(self, factor_indir, ic_indir, save_indir, factor_name, ic_name, save_name):
+    def __init__(self, factor_indir, ic_indir, save_indir, factor_name, ic_name, save_name, num):
         self.factor_indir = factor_indir
         self.ic_indir = ic_indir
         self.save_indir = save_indir
@@ -14,6 +14,7 @@ class Combine(object):
         self.factor_name = factor_name
         self.ic_name = ic_name
         self.save_name = save_name
+        self.num = num
         print(self.ic_name)
 
     def filein(self):
@@ -42,7 +43,7 @@ class Combine(object):
         self.ic['trade_dt'] = self.ic['trade_dt'].apply(lambda x: str(x))
         self.ic.set_index('trade_dt', inplace=True)
         # 移动平均
-        self.ic_roll = self.ic.shift(1).rolling(20).mean()
+        self.ic_roll = self.ic.shift(self.num).rolling(20).mean()
         self.ic_roll.reset_index(inplace=True)
 
         # 数据对齐
@@ -81,25 +82,30 @@ if __name__ == '__main__':
 
     ic_name = 'ic1_all.csv'
     save_name = 'combine_factor_ic1.pkl'
-    co = Combine(factor_indir, ic_indir, save_indir, factor_name, ic_name, save_name)
+    num = 1
+    co = Combine(factor_indir, ic_indir, save_indir, factor_name, ic_name, save_name, num)
     co.runflow()
 
     ic_name = 'ic5_all.csv'
     save_name = 'combine_factor_ic5.pkl'
-    co = Combine(factor_indir, ic_indir, save_indir, factor_name, ic_name, save_name)
+    num = 5
+    co = Combine(factor_indir, ic_indir, save_indir, factor_name, ic_name, save_name, num)
     co.runflow()
 
     ic_name = 'ic10_all.csv'
     save_name = 'combine_factor_ic10.pkl'
-    co = Combine(factor_indir, ic_indir, save_indir, factor_name, ic_name, save_name)
+    num = 10
+    co = Combine(factor_indir, ic_indir, save_indir, factor_name, ic_name, save_name, num)
     co.runflow()
 
     ic_name = 'ic20_all.csv'
     save_name = 'combine_factor_ic20.pkl'
-    co = Combine(factor_indir, ic_indir, save_indir, factor_name, ic_name, save_name)
+    num = 20
+    co = Combine(factor_indir, ic_indir, save_indir, factor_name, ic_name, save_name, num)
     co.runflow()
 
     ic_name = 'ic60_all.csv'
     save_name = 'combine_factor_ic60.pkl'
-    co = Combine(factor_indir, ic_indir, save_indir, factor_name, ic_name, save_name)
+    num = 60
+    co = Combine(factor_indir, ic_indir, save_indir, factor_name, ic_name, save_name, num)
     co.runflow()
