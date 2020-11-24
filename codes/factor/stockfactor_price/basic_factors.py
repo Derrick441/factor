@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import time
-import statsmodels.api as sm
 
 
 # 基础量价因子：当日自由流通市值(对数)、当日换手率(基于自由流通市值）、当日x日收益率动量、当日x日收益率波动率

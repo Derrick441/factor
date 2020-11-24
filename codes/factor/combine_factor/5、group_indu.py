@@ -47,7 +47,7 @@ class GroupTen(object):
 
     def compute(self):
         t = time.time()
-        self.result = self.data_dropna.groupby(['trade_dt'])\
+        self.result = self.data_dropna.groupby(['trade_dt', 'induname1'])\
                                       .apply(self.groupten, self.fac_name)\
                                       .apply(pd.Series)\
                                       .reset_index()
@@ -55,7 +55,7 @@ class GroupTen(object):
 
     def fileout(self):
         dayret = self.result.groupby('trade_dt').mean() / self.perid
-        save_name = self.fac_name + '_group_ret' + str(self.perid) + '.csv'
+        save_name = self.fac_name + '_group_indu_ret' + str(self.perid) + '.csv'
         dayret.to_csv(self.save_indir + 'dayret\\' + save_name)
         print(self.result.mean() * 240 / 1)
 
@@ -98,22 +98,22 @@ if __name__ == '__main__':
     out = pd.concat(result, axis=1).T
     out.rename(columns={'trade_dt': 'factor'}, inplace=True)
     out['factor'] = factor
-    out.to_csv(save_indir + 'change_group_mean1_combine.csv')
+    out.to_csv(save_indir + 'change_group_mean1_combine_indu.csv')
 
     # 格式整理
     out_1 = pd.concat(result_1, axis=1).T
     out_1.rename(columns={'trade_dt': 'factor'}, inplace=True)
     out_1['factor'] = factor
-    out_1.to_csv(save_indir + 'change_group_mean1_combine_1.csv')
+    out_1.to_csv(save_indir + 'change_group_mean1_combine_1_indu.csv')
 
     # 格式整理
     out_3 = pd.concat(result_3, axis=1).T
     out_3.rename(columns={'trade_dt': 'factor'}, inplace=True)
     out_3['factor'] = factor
-    out_3.to_csv(save_indir + 'change_group_mean1_combine_3.csv')
+    out_3.to_csv(save_indir + 'change_group_mean1_combine_3_indu.csv')
 
     # 格式整理
     out_5 = pd.concat(result_5, axis=1).T
     out_5.rename(columns={'trade_dt': 'factor'}, inplace=True)
     out_5['factor'] = factor
-    out_5.to_csv(save_indir + 'change_group_mean1_combine_5.csv')
+    out_5.to_csv(save_indir + 'change_group_mean1_combine_5_indu.csv')
