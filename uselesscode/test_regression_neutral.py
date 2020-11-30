@@ -87,8 +87,8 @@ class TestRegression(object):
 
 if __name__ == '__main__':
     file_indir = 'D:\\wuyq02\\develop\\python\\data\\developflow\\all\\'
-    factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\'
-    save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\t\\'
+    factor_indir = 'D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\'
+    save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\t_neutral\\'
 
     perid_list = [1, 5, 10, 20, 60]
     ret_names = ['all_band_adjvwap_hh_price_label1.pkl',

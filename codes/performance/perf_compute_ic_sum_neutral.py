@@ -103,9 +103,9 @@ class IcSum(object):
 
 
 if __name__ == '__main__':
-    file_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic\\'
-    save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic_sum\\'
-    temp = os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor\\')
+    file_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic_neutral\\'
+    save_indir = 'D:\\wuyq02\\develop\\python\\data\\performance\\ic_sum_neutral\\'
+    temp = os.listdir('D:\\wuyq02\\develop\\python\\data\\factor\\stockfactor_neutral\\')
     file_names = [name for name in temp if 'pkl' in name]
     method = 'ic'
 
